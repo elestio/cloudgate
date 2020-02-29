@@ -1,0 +1,19 @@
+{
+  "name": "uftl",
+  "version": "1.0.0",
+  "description": "µFTL is a fast web application server for Node.js",
+  "main": "index.js",
+  "dependencies": {
+    "bull": "^3.12.1",
+    "cheerio": "^1.0.0-rc.3",
+    "ioredis": "^4.14.1",
+    "mime": "^2.4.4",
+    "mysql": "^2.18.1",
+    "shortid": "^2.2.15"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": ""
+}

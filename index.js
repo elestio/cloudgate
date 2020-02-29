@@ -1,4 +1,5 @@
 
+var version = "1.0.0";
 
 var port = 8081;
 var SSLPort = 4443;
@@ -32,7 +33,7 @@ const db = null;
 
 
 //Without SSL
-var app = require('./bin/uftl.js').App();
+var app = require('./bin/cloudgate.js').App();
 
 //With SSL
 /*
@@ -52,6 +53,7 @@ require('./lib/API')(app, connection, db,rootFolder);
 app.listen(port, (listenSocket) => {
     if (listenSocket) {
         //console.log('Listening to port ' + port + " - ProcessID: " + process.pid + " - ThreadID: " + threadID);
+        console.log("CloudGate V" + version + " started");
         console.log('Listening to port ' + port + " - ProcessID: " + process.pid );
     }
 });

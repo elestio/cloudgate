@@ -1,1 +1,1 @@
-wrk -t6 -c32 http://localhost:8080/debug --latency
+wrk -t4 -c128 http://localhost:8081/debug --latency

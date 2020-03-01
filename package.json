@@ -2,5 +2,9 @@
   "name": "cloudgate",
   "version": "1.0.0",
   "description": "CloudGate is a fast web application server for Node.js",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "chokidar": "^3.3.1",
+    "mime": "^2.4.4"
+  }
 }

@@ -60,8 +60,8 @@ app.any('/debugFull', async (res, req) => {
 })
 
 //Handle static files serving
-require('../lib/StaticFiles')(app, rootFolder);
-
+var isCaching = true;
+require('../lib/StaticFiles')(app, rootFolder, isCaching);
 
 //WEBSOCKET
 //require('../lib/Websocket')(app, rootFolder);

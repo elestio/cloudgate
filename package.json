@@ -1,10 +1,13 @@
 {
   "name": "cloudgate",
+  "bin": "./index.js",
   "version": "1.0.0",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "index.js",
   "dependencies": {
     "chokidar": "^3.3.1",
-    "mime": "^2.4.4"
+    "ioredis": "^4.16.0",
+    "mime": "^2.4.4",
+    "mysql": "^2.18.1"
   }
 }

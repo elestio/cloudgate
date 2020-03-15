@@ -25,13 +25,13 @@
   "apiRuntime": "nodejs12",
   "apiEndpoints":[
       {
-          "vpath": "/MyFolder/func1",
-          "handler": "/root/cloudgate/apps/sample1/API/TEST1/sub1.js",
+          "vpath": "/MyFolder/simple",
+          "handler": "/root/cloudgate/apps/sample1/API/TEST1/simple.js",
           "timeout": 15, "memory": 256, "cpu": 2
       },
       {
-          "vpath": "/MyFolder/func5",
-          "handler": "/root/cloudgate/apps/sample1/API/TEST1/sub1.js"
+          "vpath": "/MyFolder/full",
+          "handler": "/root/cloudgate/apps/sample1/API/TEST1/full.js"
       }
   ]
 }

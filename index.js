@@ -2,7 +2,7 @@ const tools = require('./lib/Tools.js');
 
 var version = "1.0.0";
 var port = 3000;
-var rootFolder = "./public";
+var rootFolder = "./apps/sample1/public/";
 
 //Without SSL
 var app = require('./bin/cloudgate.js').App();

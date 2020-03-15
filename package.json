@@ -1,6 +1,6 @@
 {
   "name": "cloudgate",
-  "bin": "./index.js",
+  "bin": "./bin/cloudgate.js",
   "version": "1.0.0",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "index.js",

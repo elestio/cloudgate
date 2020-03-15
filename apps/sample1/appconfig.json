@@ -1,0 +1,37 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Sample App 1",
+  "description": "This is a sample api server",
+  "domains": ["*", "example.com"], 
+  "publicFolder": "./public/",
+  "db": {
+      "MYSQL": {
+        "dbName": "MyApp1",
+        "dbUser": "myDBUserNameHere",
+        "dbPassword": "mysqlSecretPasswordHere",
+        "loadFrom": "./DB/MYSQL/dump.sql",
+        "backupTo": "./DB/MYSQL/backup.sql"
+      },
+      "REDIS": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "redisDB": 0,
+        "password": "myRedisSecretPasswordHere",
+        "loadFrom": "./DB/REDIS/dump.redis",
+        "backupTo": "./DB/REDIS/backup.redis"
+      }
+  },
+  "apiRuntime": "nodejs12",
+  "apiEndpoints":[
+      {
+          "vpath": "/MyFolder/func1",
+          "handler": "/root/cloudgate/apps/sample1/API/TEST1/sub1.js",
+          "timeout": 15, "memory": 256, "cpu": 2
+      },
+      {
+          "vpath": "/MyFolder/func5",
+          "handler": "/root/cloudgate/apps/sample1/API/TEST1/sub1.js"
+      }
+  ]
+}

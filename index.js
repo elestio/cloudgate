@@ -41,6 +41,8 @@ require('./lib/DBApi')(app, rootFolder, connection, API_Token);
 
 require('./lib/RedisApi')(app, "127.0.0.1", 6379, API_Token);
 
+require('./lib/APILoader')(app, "./apps/sample1/appconfig.json", API_Token);
+
 
 //WEBSOCKET
 //require('../lib/Websocket')(app, rootFolder);

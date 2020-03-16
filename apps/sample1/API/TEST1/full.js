@@ -5,7 +5,7 @@ module.exports = async (app, curFunctionFolder, API_Token, res, req) => {
     nbExecs = 0;
 }
 
-module.exports.process = (res, req, tools) => {
+module.exports.process = async (res, req, tools) => {
 
     nbExecs += 1;
 
@@ -18,7 +18,7 @@ module.exports.process = (res, req, tools) => {
     content += "Headers: " + JSON.stringify(tools.getHeaders(req)) + "<br/>\r\n";
     content += "Remote IP: " + tools.getIP(req, res) + "<br/>\r\n";
     content += "Query: " + req.getQuery() + "<br/>\r\n";
-    content += "Body: " + tools.getBody(req) + "<br/>\r\n";
+    content += "Body: " + await tools.getBody(req, res) + "<br/>\r\n";
     content += "endpoint request counter: " + nbExecs + "<br/>\r\n";
 
     res.writeStatus("200");

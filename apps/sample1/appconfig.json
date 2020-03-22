@@ -26,12 +26,12 @@
   "apiEndpoints":[
       {
           "vpath": "/MyFolder/simple",
-          "handler": "/root/cloudgate/apps/sample1/API/TEST1/simple.js",
+          "handler": "./API/TEST1/simple.js",
           "timeout": 15, "memory": 256, "cpu": 2
       },
       {
           "vpath": "/MyFolder/full",
-          "handler": "/root/cloudgate/apps/sample1/API/TEST1/full.js"
+          "handler": "./API/TEST1/full.js"
       }
   ]
 }

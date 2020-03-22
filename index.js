@@ -38,6 +38,11 @@ var API_Token = tools.GetRandomId(); //this is a token to protect access to the 
 
 console.log("API Token: " + API_Token);
 
+//var Letsencrypt = require('./lib/Letsencrypt');
+//Letsencrypt(app, "apps/sample1/CERTS/", "./apps/sample1/public/");
+//Letsencrypt.getCertificates("vms2.terasp.net", "z51biz@gmail.com", false, false, console);
+
+
 require('./lib/DBApi')(app, rootFolder, connection, API_Token);
 
 require('./lib/RedisApi')(app, "127.0.0.1", 6379, API_Token);
@@ -68,3 +73,22 @@ app.ws("/ws", {
         /* The library guarantees proper unsubscription at close */
     }
 })
+
+
+//Exit handler, save in-memory states & DB to disk before exit
+var isExited = false;
+[`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach((eventType) => {
+        process.on(eventType, cleanUpServer.bind(null, eventType));
+})
+function cleanUpServer(test, event){
+        if ( isExited ) {
+            return;
+        }
+        else{
+            isExited = true;
+            
+            console.log(event);
+            console.log("TODO: cleanount process / Save states & DB ...");
+            process.exit();
+        }
+}

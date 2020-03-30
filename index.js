@@ -3,13 +3,14 @@ const tools = require('./lib/Tools.js');
 
 var version = "1.0.0";
 var port = 3000;
+var interface = "*"; //or "127.0.0.1" or any private/public ip address on your server
 var rootFolder = "./apps/sample1/public/";
 
 //Without SSL
 var app = require('./bin/cloudgate.js').App();
 
 //Start listening
-app.listen(port, (listenSocket) => {
+app.listen(interface, port, (listenSocket) => {
     if (listenSocket) {
         console.log("CloudGate V" + version + " started");
         console.log('Listening to port ' + port + " - ProcessID: " + process.pid );
@@ -18,7 +19,8 @@ app.listen(port, (listenSocket) => {
 
 
 //Static files handler
-require('./lib/StaticFiles')(app, rootFolder);
+var isCaching = false;
+require('./lib/StaticFiles')(app, rootFolder, isCaching);
 
 //REST API sample / test
 require('./lib/debug')(app, rootFolder);

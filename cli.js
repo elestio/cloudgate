@@ -168,7 +168,8 @@ function listen(port) {
         console.log("\nApp detected in " + fullAppPath + "\n");
         //load the app
         require('./lib/APILoader')(app, fullAppPath, API_Token);
-        publicFolder = options.root + "public/";
+        var apiDefinition = JSON.parse(fs.readFileSync(fullAppPath));
+        publicFolder = path.join(options.root, apiDefinition.publicFolder);
     }
     else
     {
@@ -176,10 +177,10 @@ function listen(port) {
         publicFolder = options.root;
     }
     
-    console.log(publicFolder);
+    //console.log(publicFolder);
 
     //Static files handler
-    var isCaching = false;
+    var isCaching = true;
     console.log("\npublic root folder: " + publicFolder);
     require('./lib/StaticFiles')(app, publicFolder, isCaching);
 

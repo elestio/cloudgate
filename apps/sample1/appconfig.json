@@ -2,7 +2,7 @@
   "env": "PROD",
   "version": "1.0.0",
   "title": "Sample App 1",
-  "description": "This is a sample api server",
+  "description": "This is a sample app",
   "domains": ["*", "example.com"], 
   "publicFolder": "./public/",
   "db": {
@@ -25,13 +25,13 @@
   "apiRuntime": "nodejs12",
   "apiEndpoints":[
       {
-          "vpath": "/MyFolder/simple",
-          "handler": "./API/TEST1/simple.js",
-          "timeout": 15, "memory": 256, "cpu": 2
+          "vpath": "/tests/simple",
+          "handler": "./API/tests/simple.js",
+          "timeout": 15, "memory": 256, "cpu": 2, "apiRuntime": "nodejs12"
       },
       {
-          "vpath": "/MyFolder/full",
-          "handler": "./API/TEST1/full.js"
+          "vpath": "/tests/full",
+          "handler": "./API/tests/full.js"
       }
   ]
 }

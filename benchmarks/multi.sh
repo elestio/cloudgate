@@ -1,0 +1,1 @@
+wrk -t6 -c128 http://localhost:3000/debug --latency

@@ -2,9 +2,10 @@
 const tools = require('./lib/Tools.js');
 
 var version = "1.0.0";
-var port = 3000;
+var port = 80;
 var interface = "*"; //or "127.0.0.1" or any private/public ip address on your server
-var rootFolder = "./apps/sample1/public/";
+var appPath = "./apps/sample1/";
+var publicFolder = appPath + "public/";
 
 //Without SSL
 var app = require('./bin/cloudgate.js').App();
@@ -20,10 +21,10 @@ app.listen(interface, port, (listenSocket) => {
 
 //Static files handler
 var isCaching = false;
-require('./lib/StaticFiles')(app, rootFolder, isCaching);
+require('./lib/StaticFiles')(app, publicFolder, isCaching);
 
 //REST API sample / test
-require('./lib/debug')(app, rootFolder);
+require('./lib/debug')(app, publicFolder);
 
 //REST API for DB
 var mysql      = require('mysql');
@@ -44,8 +45,14 @@ console.log("API Token: " + API_Token);
 //Letsencrypt(app, "apps/sample1/CERTS/", "./apps/sample1/public/");
 //Letsencrypt.getCertificates("vms2.terasp.net", "z51biz@gmail.com", false, false, console);
 
+var Letsencrypt = require('./lib/Letsencrypt');
+var certPath = appPath + "CERTS/";
+var isProd = false;
+Letsencrypt(app, certPath, publicFolder);
+Letsencrypt.GenerateCert(isProd, "vms2.terasp.net", "z51biz@gmail.com", certPath, publicFolder);
 
-require('./lib/DBApi')(app, rootFolder, connection, API_Token);
+
+require('./lib/DBApi')(app, publicFolder, connection, API_Token);
 
 require('./lib/RedisApi')(app, "127.0.0.1", 6379, API_Token);
 
@@ -53,7 +60,7 @@ require('./lib/APILoader')(app, "./apps/sample1/appconfig.json", API_Token);
 
 
 //WEBSOCKET
-//require('../lib/Websocket')(app, rootFolder);
+//require('../lib/Websocket')(app, publicFolder);
 app.ws("/ws", {
 
     /* Options */

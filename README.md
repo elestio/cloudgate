@@ -23,3 +23,24 @@ Run benchmark in single core:
 
 Run benchmark in multi core:
 `./benchmarks/multi.sh`
+
+
+TODO:
+
+1) Add a rate limiter
+https://github.com/animir/node-rate-limiter-flexible/blob/master/README.md
+
+2) Install as a service
+https://github.com/coreybutler/node-linux
+https://github.com/coreybutler/node-windows
+https://github.com/coreybutler/node-mac
+
+3) Handle letsencrypt
+https://git.coolaj86.com/coolaj86/acme.js
+
+4) handle reverse proxy
+https://github.com/OptimalBits/redbird
+
+5) Handle MySQL Galera cluster loading/saving
+
+6) Handle Redis Cluster loading/saving

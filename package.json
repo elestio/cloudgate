@@ -6,6 +6,12 @@
   "main": "index.js",
   "dependencies": {
     "@greenlock/manager": "^3.1.0",
+    "@root/csr": "^0.8.1",
+    "@root/encoding": "^1.0.1",
+    "@root/keypairs": "^0.9.0",
+    "@root/pem": "^1.0.4",
+    "acme": "^3.0.3",
+    "acme-http-01-webroot": "^3.0.0",
     "chokidar": "^3.3.1",
     "colors": "^1.4.0",
     "ioredis": "^4.16.0",

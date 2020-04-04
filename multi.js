@@ -13,7 +13,9 @@ else
     const main = require('./index.js');
 }
 
-
+//disabled because: will do the save action and crash with a core dump
+//maybe this should be inside index.js
+/*
 if (isMainThread) {
     //Exit handler, save states & DB to disk before exit
     var isExited = false;
@@ -33,3 +35,4 @@ if (isMainThread) {
             }
     }
 }
+*/

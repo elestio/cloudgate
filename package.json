@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "index.js",
+  "scripts": {
+    "test": "node examples/http.js",
+    "serve": "node cli.js ./apps/sample1/"
+  },
   "dependencies": {
     "@greenlock/manager": "^3.1.0",
     "@root/csr": "^0.8.1",

@@ -9,6 +9,9 @@ var colors = require('colors/safe'),
     .boolean('cors')
     .boolean('log-ip')
     .argv;
+
+const router = require('./modules/router');
+const appLoader = require('./loaders/app-loader.js');
 var ifaces = os.networkInterfaces();
 
 process.title = 'cloudgate';
@@ -102,7 +105,7 @@ if (!port) {
 
 function listen(port) {
     var options = {
-        root: argv._[0],
+        root: argv._,
         cache: argv.c,
         timeout: argv.t,
         showDir: argv.d,
@@ -114,7 +117,7 @@ function listen(port) {
     };
 
     if ( options.root == null ){
-        options.root = ".";
+        options.root = ["."];
     }
 
     if (argv.cors) {
@@ -143,46 +146,29 @@ function listen(port) {
         }
     }
 
-    const tools = require('./lib/Tools.js');
+    const tools = require('./lib/tools.js');
     var app = require('./bin/cloudgate.js').App();
 
 
     //REST API sample / test
-    require('./lib/debug')(app, options.root);
+    //require('./lib/debug')(app, options.root);
 
     var API_Token = tools.GetRandomId(); //this is a token to protect access to the DB REST API
     //TODO: check if overriden by a config file or env variable
 
-    var fullAppPath = "";
-    if ( fullAppPath.endsWith("appconfig.json") ){
-        fullAppPath = options.root;
-    }
-    else{
-        if (fs.existsSync(options.root + "appconfig.json")) {
-            fullAppPath = options.root + "appconfig.json";
-        }
-    }
+    options.root.forEach(function (configPath) {
+        appLoader.load(configPath);
+    });
+    
+
     
     var publicFolder = "";
-    if (fs.existsSync(fullAppPath)) {
-        console.log("\nApp detected in " + fullAppPath + "\n");
-        //load the app
-        require('./lib/APILoader')(app, fullAppPath, API_Token);
-        var apiDefinition = JSON.parse(fs.readFileSync(fullAppPath));
-        publicFolder = path.join(options.root, apiDefinition.publicFolder);
-    }
-    else
-    {
-        console.log("\nNo app detected in " + fullAppPath);
-        publicFolder = options.root;
-    }
     
-    //console.log(publicFolder);
 
     //Static files handler
     var isCaching = true;
     console.log("\npublic root folder: " + publicFolder);
-    require('./lib/StaticFiles')(app, publicFolder, isCaching);
+    router.start(app);
 
 
     //Start listening

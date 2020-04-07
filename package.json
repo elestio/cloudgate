@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "test": "node examples/http.js",
-    "serve": "node cli.js ./apps/sample1/"
+    "example": "node cli.js ./apps/sample1/",
+    "example-multi": "node cli.js ./apps/sample1 ./apps/sample2",
+    "serve": "node cli.js"
   },
   "dependencies": {
     "@greenlock/manager": "^3.1.0",

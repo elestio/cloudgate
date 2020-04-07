@@ -1,39 +1,42 @@
 var fs = require('fs');
 var path = require('path');
 const mime = require('mime');
-const tools = require('../lib/Tools.js');
+const tools = require('../lib/tools.js');
 
 //In-memory cache
 var cache = {};
-module.exports = (app, rootFolder, isCaching) => {
-
-    if ( isCaching ){
-        //invalidate cache for changed files while the server is running
-        console.log("Listening to file changes on: " + rootFolder);
-        const chokidar = require('chokidar');
-        chokidar.watch(rootFolder, {
-            ignored: /(^|[\/\\])\../, // ignore dotfiles
-            persistent: true
-        }).on('all', (event, path) => {
-            //console.log(event, path);
-            //invalidate whole cache, todo: invalidate only the correct cache entries
-            cache = {};
-        });
-    }
-    
-
-    app.any('/*', async (res, req) => {
-
-        //Ensure this request is notified on aborted
-        res.onAborted(() => {
-            res.aborted = true;
-        });
-
-        try {
+module.exports = {
+    process : (appConfig, req) => {
+        return new Promise(function (resolve, reject) {
             
-            var curURL = req.getUrl();
+            var result = {
+                processed : true,
+                status: 200,
+                error: '',
+                content: '',
+                headers: {},
+            };
+            var rootFolder = path.join(appConfig.root, appConfig.publicFolder).replace(/\\/g, "/");
 
-           {
+
+            var isCaching = false;
+            if ( isCaching ){
+                //invalidate cache for changed files while the server is running
+                console.log("Listening to file changes on: " + rootFolder);
+                const chokidar = require('chokidar');
+                chokidar.watch(rootFolder, {
+                    ignored: /(^|[\/\\])\../, // ignore dotfiles
+                    persistent: true
+                }).on('all', (event, path) => {
+                    //console.log(event, path);
+                    //invalidate whole cache, todo: invalidate only the correct cache entries
+                    cache = {};
+                });
+            }
+            
+            try {
+                var curURL = req.getUrl();
+
                 //serve the public folder
                 var finalPath = curURL;
                 if (finalPath == "/") {
@@ -44,18 +47,19 @@ module.exports = (app, rootFolder, isCaching) => {
                 //Poison Null Bytes protection
                 //Poison null bytes are a way to trick your code into seeing another filename than the one that will actually be opened. This can in many cases be used to circumvent directory traversal protections, to trick servers into delivering files with wrong file types and to circumvent restrictions on the file names that may be used
                 if (finalPath.indexOf('\0') !== -1) {
-                   res.writeStatus("400");
-                   res.end("Poison Null Bytes detected!");
-                   return;
+                    result.status = 400;
+                    result.error = "Poison Null Bytes detected!";
+                    resolve(result);
+                    return;
                 }
 
                 //protection agains directory traversal
-                var fullPath = path.join(rootFolder, finalPath);
+                var fullPath = path.join(rootFolder, finalPath).replace(/\\/g, "/");
                 if (!fullPath.startsWith(rootFolder) && !("./" + fullPath).startsWith(rootFolder)) {
-                   res.writeStatus("400");
-                   //res.end("Directory traversal detected! - fullpath: " + fullPath + " - rootFolder: " + rootFolder);
-                   res.end("Directory traversal detected!");
-                   return;
+                    result.status = 400;
+                    result.error = "Directory traversal detected!";
+                    resolve(result);
+                    return;
                 }
 
                 //console.log(rootFolder + " - " + fullPath);
@@ -83,11 +87,9 @@ module.exports = (app, rootFolder, isCaching) => {
                         var now = +new Date();
 
                         if ((ms) > (now - (maxAge * 1000))) {
-                            if (!res.aborted) {
-                                res.writeStatus("304");
-                                res.end();
-                            }
-
+                            result.status = 304;
+                            resolve(result);
+                            return;
                         }
                         else {
                             /*
@@ -100,7 +102,6 @@ module.exports = (app, rootFolder, isCaching) => {
                             */
                         }
                     }
-
                 }
                 catch (ex) {
                     if (ex.indexOf("Invalid access of discarded") == -1) {
@@ -109,18 +110,14 @@ module.exports = (app, rootFolder, isCaching) => {
                     }
                 }
 
-
                 //set content type
                 try {
                     //this will crash if no extension is provided in the url
-                    if (!res.aborted) {
-                        res.writeHeader("content-type", mime.getType(finalPath));
-                    }
+                    result.headers["content-type"] = mime.getType(finalPath);
                 }
                 catch (ex) {
 
                 }
-
 
                 var urlParams = req.getQuery();
                 var cacheKey = req.getUrl() + "?" + urlParams;
@@ -144,19 +141,15 @@ module.exports = (app, rootFolder, isCaching) => {
                         */
 
 
-                        if (fullPath.endsWith(".html")) {
-                            //tools.GzipResponse(res, cache[cacheKey]);
-                            res.end(cache[cacheKey]);
-                        }
-                        else {
-                            res.end(cache[cacheKey]);
-                        }
+                        result.status = 200;
+                        result.content = cache[cacheKey];
+                        resolve(result);
+                        return ;
+                        // Here was a weird if (endswith.html, but inside if and else if the same)
                     }
 
                 }
                 else {
-
-                    //console.log("Loading file: " + fullPath);
 
                     //check if file exist
                     try {
@@ -164,12 +157,11 @@ module.exports = (app, rootFolder, isCaching) => {
                             //file exists
                             //console.log("served from disk: " + fullPath);
                             
-                            if (!res.aborted) {
-                                res.writeHeader("core-cache", "0");
-                                res.writeHeader("cache-control", "public, max-age=" + maxAge);
-                                res.writeHeader("expires", new Date(Date.now() + maxAge * 1000).toUTCString());
-                                res.writeHeader("last-modified", new Date(Date.now()).toUTCString());
-                            }
+                            result.headers["core-cache"] = "0";
+                            result.headers["cache-control"] = "public, max-age=" + maxAge;
+                            result.headers["expires"] = new Date(Date.now() + maxAge * 1000).toUTCString();
+                            result.headers["last-modified"] = new Date(Date.now()).toUTCString();
+                            
 
                             //check if processing is needed or if we should serv the raw file
                             var processingNeeded = false;
@@ -193,56 +185,22 @@ module.exports = (app, rootFolder, isCaching) => {
                                 if ( isCaching ){
                                     cache[cacheKey] = fileContent; //TODO: Cache duration + LRU
                                 }
-                                
-
-                                /* If we were aborted, you cannot respond */
-                                if (!res.aborted) {
-                                    //noit aborted so we can return the awaited response
-                                    //res.end(fileContent);
-                                    tools.GzipResponse(res, fileContent);
-                                }
-
+                                //noit aborted so we can return the awaited response
+                                //res.end(fileContent);
+                                result.headers['Content-Encoding'] = 'gzip';
+                                result.content = tools.GzipContent(fileContent);
                             }
                             else {
                                 var fileContent = fs.readFileSync(fullPath);
                                 if ( isCaching ){
                                     cache[cacheKey] = fileContent; //TODO: Cache duration + LRU
                                 }
-                                res.end(fileContent);
+                                result.content = fileContent;
                             }
-
                         }
                         else {
-
                             //console.log(finalPath);
-                            
-                            var path404 = path.join(__dirname, '..', './default/404.html' )
-
-                            if (!res.aborted) {
-                                res.writeHeader("cache-control", "public, max-age=30");
-                                res.writeHeader("expires", new Date(Date.now() + 30 * 1000).toUTCString());
-                                res.writeHeader("last-modified", new Date(Date.now()).toUTCString());
-                                res.writeHeader("content-type", "text/html;charset=utf-8;");
-                                res.writeStatus("404");
-                            }
-
-                            //404
-                            var content404 = "";
-                            if (cache[path404] != null) {
-                                res.writeHeader("core-cache", "1");
-                                //console.log("cached");
-                                res.end(cache[path404]);
-                                //tools.GzipResponse(res, cache[path404]);
-                            }
-                            else{
-                                content404 = fs.readFileSync(path404, { encoding: 'utf8' });
-                                cache[path404] = content404; 
-                                //console.log("not cached");
-                                res.end(content404);
-                                //tools.GzipResponse(res, content404);
-                            }
-
-                            
+                            result.processed = false;
                         }
                     }
                     catch (err) {
@@ -254,8 +212,6 @@ module.exports = (app, rootFolder, isCaching) => {
                         }
                     }
                 }
-            }
-
         }
         catch (ex) {
 
@@ -267,8 +223,9 @@ module.exports = (app, rootFolder, isCaching) => {
                 console.log(ex);
             }
 
-        }
-
-    })
+            }
+            resolve(result);
+        });
+    }
 }
 

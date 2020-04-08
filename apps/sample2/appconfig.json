@@ -7,11 +7,11 @@
   "publicFolder": "./public/",
   "db": {
       "MYSQL": {
-        "dbName": "MyApp1",
-        "dbUser": "myDBUserNameHere",
-        "dbPassword": "mysqlSecretPasswordHere",
-        "loadFrom": "./DB/MYSQL/dump.sql",
-        "backupTo": "./DB/MYSQL/backup.sql"
+        "host" : "vms2.terasp.net",
+        "port" : 13306,
+        "database": "db_name",
+        "user": "db_user",
+        "password": "6z15DCDEef5616g1hhR"
       },
       "REDIS": {
         "host": "127.0.0.1",
@@ -23,6 +23,7 @@
       }
   },
   "apiRuntime": "nodejs12",
+  "apiToken" : "SECURE42",
   "apiEndpoints": {
     "/tests/simple" : {
       "src": "./API/tests/",

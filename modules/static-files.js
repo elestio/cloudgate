@@ -1,5 +1,4 @@
 var fs = require('fs');
-var path = require('path');
 const mime = require('mime');
 const tools = require('../lib/tools.js');
 
@@ -16,7 +15,7 @@ module.exports = {
                 content: '',
                 headers: {},
             };
-            var rootFolder = path.join(appConfig.root, appConfig.publicFolder).replace(/\\/g, "/");
+            var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
 
 
             var isCaching = false;
@@ -54,7 +53,7 @@ module.exports = {
                 }
 
                 //protection agains directory traversal
-                var fullPath = path.join(rootFolder, finalPath).replace(/\\/g, "/");
+                var fullPath = tools.safeJoinPath(rootFolder, finalPath);
                 if (!fullPath.startsWith(rootFolder) && !("./" + fullPath).startsWith(rootFolder)) {
                     result.status = 400;
                     result.error = "Directory traversal detected!";

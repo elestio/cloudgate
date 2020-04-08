@@ -10,11 +10,9 @@ module.exports = {
     
     if (fs.existsSync(configPath)) {
       console.log("\nLoading app from " + configPath + "\n");
-      //load the app
-      //require('./lib/api-loader')(app, configPath, API_Token);
+      
       var apiDefinition = JSON.parse(fs.readFileSync(configPath));
       apiDefinition.root = fullAppPath;
-      //publicFolder = path.join(options.root, apiDefinition.publicFolder);
       apiDefinition.domains.forEach(function (domainObject) {
         memory.set(domainObject, apiDefinition);
       });

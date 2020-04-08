@@ -7,7 +7,7 @@ const connections = {
 }
 
 function getConnection(appConfig) {
-  var keyConnection = appConfig.host + ";" + appConfig.port + ";" + appConfig.dbName + ";" + appConfig.dbUser + ";" + appConfig.dbPassword;
+  var keyConnection = appConfig.db.MYSQL.host + ";" + appConfig.db.MYSQL.port + ";" + appConfig.db.MYSQL.user + ";" + appConfig.db.MYSQL.password + ";" + appConfig.db.MYSQL.database;
   if (typeof(connections[keyConnection]) == 'undefined') {
     connections[keyConnection] = mysql.createPool({
       connectionLimit : 10,
@@ -44,7 +44,7 @@ module.exports = {
 
         var curURL = req.getUrl();
 
-        if (curURL != "/api/SqlQuery") { // Todo : take it from the config
+        if (curURL != appConfig.db.MYSQL.endpoint) { 
           resolve({
             processed: false,
           });

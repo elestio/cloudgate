@@ -7,6 +7,7 @@
   "publicFolder": "./public/",
   "db": {
       "MYSQL": {
+        "endpoint" : "/mydb",
         "host" : "vms2.terasp.net",
         "port" : 13306,
         "database": "db_name",

@@ -19,7 +19,6 @@ module.exports = {
           var host = req.getHeader('host');
           var subDomain = host.split('.')[0];
           var domain = host.substring(host.indexOf('.') + 1).split(':')[0];
-          console.log("I'm on :" + curURL + " subdomain => " + subDomain + "domain => " + domain);
 
           var appConfig = memory.get(subDomain + "." + domain);
           if (typeof(appConfig) == 'undefined') {

@@ -7,6 +7,7 @@
   "publicFolder": "./public/",
   "db": {
     "MYSQL": {
+      "endpoint" : "/db",
       "host" : "94.130.97.141",
       "port" : 23306,
       "database": "db_name",

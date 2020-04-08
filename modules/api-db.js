@@ -39,7 +39,14 @@ function ExecuteQuery(appConfig, query) {
 module.exports = {
   process : (appConfig, req, res) => {
     return new Promise(async function (resolve, reject) {
-
+      if (typeof(appConfig.db) == 'undefined' || 
+      typeof(appConfig.db.MYSQL) == 'undefined' || 
+      typeof(appConfig.db.MYSQL.endpoint) == 'undefined') {
+        resolve({
+          processed: false
+        })
+        return ;
+      }
       try {
 
         var curURL = req.getUrl();

@@ -14,6 +14,8 @@ module.exports = {
         res.onAborted(() => {
             res.aborted = true;
         });
+
+
         try {
           var host = req.getHeader('host');
           var subDomain = host.split('.')[0];
@@ -24,18 +26,23 @@ module.exports = {
             headers: {},
             req: req,
           }
+          
           req.forEach((k, v) => {
             reqInfos.headers[k] = v;
           });
           
           reqInfos.body = await tools.getBody(req, res);
+          
 
           var appConfig = await memory.getObject(subDomain + "." + domain);
 
           //handle *
           if ( appConfig == null ){
-              appConfig = await memory.getObject("*");
+              appConfig = await memory.getObject("*", subDomain + "." + domain); //avoid constant call to redis
           }
+
+          res.end("Hello World!");
+          return;
 
           if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");

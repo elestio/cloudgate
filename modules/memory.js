@@ -27,11 +27,11 @@ module.exports = {
   setObject: function(key, value) {
     var str = JSON.stringify(value);
 
+    //store in memory
+    //memory[key] = str; //if this is activated server is twice slower even if we don't call this code
+
     //store in redis
     redis.set(key, str);
-
-    //store in memory
-    memory[key] = str;
 
     //pubsub update for other nodes
     //todo
@@ -56,12 +56,12 @@ module.exports = {
     
   },
   set: function(key, value) {
-    
-    //store in redis
-    redis.set(key, value);
 
     //store in memory 
-    memory[key] = value; 
+    //memory[key] = value;  //if this is activated server is twice slower even if we don't call this code
+
+    //store in redis
+    redis.set(key, value);
 
     //pubsub update
     //todo

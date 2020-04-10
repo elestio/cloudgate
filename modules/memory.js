@@ -26,13 +26,16 @@ module.exports = {
   },
   setObject: function(key, value) {
     var str = JSON.stringify(value);
+
+    //store in redis
     redis.set(key, str);
 
-    //TODO: store in memory + pubsub for other nodes
+    //store in memory
     memory[key] = str;
 
-    //pubsub update
-    
+    //pubsub update for other nodes
+    //todo
+
   },
   get: function(key, finalKey) {
     if ( memory[key] != null ){
@@ -53,7 +56,15 @@ module.exports = {
     
   },
   set: function(key, value) {
-    memory[key] = value; 
+    
+    //store in redis
     redis.set(key, value);
+
+    //store in memory 
+    memory[key] = value; 
+
+    //pubsub update
+    //todo
+    
   }
 }

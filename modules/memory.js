@@ -30,6 +30,7 @@ module.exports = {
 
     //TODO: store in memory + pubsub for other nodes
     //memory[key] = str;
+    console.log("NEVER DISPLAYED");
   },
   get: function(key, finalKey) {
     if ( memory[key] != null ){

@@ -41,8 +41,7 @@ module.exports = {
               appConfig = await memory.getObject("*", subDomain + "." + domain); //avoid constant call to redis
           }
 
-          res.end("Hello World!");
-          return;
+          
 
           if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");

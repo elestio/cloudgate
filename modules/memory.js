@@ -7,7 +7,7 @@ module.exports = {
     //TODO: think about expires / refresh
     if ( memory[key] != null ){
         //console.log("cached: " + key)
-        return memory[key];         
+        return JSON.parse(memory[key]);         
     }
     else{
         return new Promise(function(resolve, reject) {
@@ -28,7 +28,7 @@ module.exports = {
     var str = JSON.stringify(value);
 
     //store in memory
-    //memory[key] = str; //if this is activated server is twice slower even if we don't call this code
+    memory[key] = str; //if this is activated server is twice slower even if we don't call this code
 
     //store in redis
     redis.set(key, str);
@@ -58,7 +58,7 @@ module.exports = {
   set: function(key, value) {
 
     //store in memory 
-    //memory[key] = value;  //if this is activated server is twice slower even if we don't call this code
+    memory[key] = value;  //if this is activated server is twice slower even if we don't call this code
 
     //store in redis
     redis.set(key, value);

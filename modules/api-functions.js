@@ -36,7 +36,7 @@ module.exports = {
           if (err != null) {
             console.log(err);
           } else {
-            console.log(response);
+            //console.log(response);
           }
           resolve({
             processed: true,

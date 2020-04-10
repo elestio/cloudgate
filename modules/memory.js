@@ -29,8 +29,10 @@ module.exports = {
     redis.set(key, str);
 
     //TODO: store in memory + pubsub for other nodes
-    //memory[key] = str;
-    console.log("NEVER DISPLAYED");
+    memory[key] = str;
+
+    //pubsub update
+    
   },
   get: function(key, finalKey) {
     if ( memory[key] != null ){

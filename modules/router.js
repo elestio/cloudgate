@@ -31,8 +31,15 @@ module.exports = {
           reqInfos.body = await tools.getBody(req, res);
 
           var appConfig = await memory.getObject(subDomain + "." + domain);
-          if (typeof(appConfig) == 'undefined') {
+
+          //handle *
+          if ( appConfig == null ){
+              appConfig = await memory.getObject("*");
+          }
+
+          if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");
+            res.writeHeader("target", subDomain + "." + domain);
             res.end("No app configured...");
             return ;
           }

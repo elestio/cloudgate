@@ -27,11 +27,13 @@
   "apiRuntime": "nodejs12",
   "apiEndpoints": {
     "/tests/simple" : {
-      "handler": "./API/tests/simple.js",
+      "src": "./API/tests/",
+      "handler": "simple.handler",
       "timeout": 15, "memory": 256, "cpu": 2, "apiRuntime": "nodejs12"
     },
     "/tests/full" : {
-      "handler": "./API/tests/full.js"
+      "src" : "./API/tests/",
+      "handler": "full.handler"
     }
   }
 }

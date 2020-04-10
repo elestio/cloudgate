@@ -8,20 +8,19 @@ const utils = require('../lib/tools.js');
 var functionsCache = {};
 
 module.exports = {
-  process : (appConfig, req) => {
+  process : (appConfig, reqInfos) => {
     return new Promise(function (resolve, reject) {
       var functionsList = appConfig.apiEndpoints;
-      var endpointTarget = req.getUrl().split('?')[0];
+      var endpointTarget = reqInfos.curUrl.split('?')[0];
       var apiEndpoint = functionsList[endpointTarget];
       if (typeof(apiEndpoint) != 'undefined') {
-        //console.log(apiEndpoint);
         var functionIndexFile = apiEndpoint.handler.split('.')[0];
         var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
-        var functionPath = path.join("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js').replace(/\\/g, "/");
+        // TODO : check path doesn't crash
+        var functionPath = utils.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
         // TODO : check not using ../ (lower level from app root)
         curFunction = require(functionPath);
         if (curFunction[functionHandlerFunction] == undefined) {
-          console.log("handler not found");
           // TODO : Handle error here AND RETURN
         }
         var event = {};

@@ -37,8 +37,9 @@ function ExecuteQuery(appConfig, query) {
 
 
 module.exports = {
-  process : (appConfig, req, res) => {
+  process : (appConfig, reqInfos, res) => {
     return new Promise(async function (resolve, reject) {
+      // CHECK IF THERE IS A MYSQL DB SETUP
       if (typeof(appConfig.db) == 'undefined' || 
       typeof(appConfig.db.MYSQL) == 'undefined' || 
       typeof(appConfig.db.MYSQL.endpoint) == 'undefined') {
@@ -49,8 +50,8 @@ module.exports = {
       }
       try {
 
-        var curURL = req.getUrl();
-
+        var curURL = reqInfos.curUrl;
+        // CHECK IF MYSQL ENDPOINT MATCH THE CURRENT URL
         if (curURL != appConfig.db.MYSQL.endpoint) { 
           resolve({
             processed: false,
@@ -58,7 +59,8 @@ module.exports = {
           return ;
         }
 
-        var body = await tools.getBody(req, res);
+        // PROCESS REQUEST
+        var body = reqInfos.body;
 
         var result = {
           processed: true,
@@ -69,7 +71,7 @@ module.exports = {
         var data = null;
 
         try{
-            data = JSON.parse(body);
+          data = JSON.parse(body);
         }
         catch(ex){
             var badToken = { "status": "KO", "message": "INVALID_JSON", "details": body };

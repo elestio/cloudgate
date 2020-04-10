@@ -5,7 +5,7 @@ const tools = require('../lib/tools.js');
 //In-memory cache
 var cache = {};
 module.exports = {
-    process : (appConfig, req) => {
+    process : (appConfig, reqInfos) => {
         return new Promise(function (resolve, reject) {
             
             var result = {
@@ -34,7 +34,7 @@ module.exports = {
             }
             
             try {
-                var curURL = req.getUrl();
+                var curURL = reqInfos.curUrl;
 
                 //serve the public folder
                 var finalPath = curURL;
@@ -80,8 +80,8 @@ module.exports = {
                 
                 try {
                     //handle 304 Not Modified
-                    var ifmodifiedsince = req.getHeader("if-modified-since");
-                    if (ifmodifiedsince != null && ifmodifiedsince != "") {
+                    var ifmodifiedsince = reqInfos["if-modified-since"];
+                    if (ifmodifiedsince != null && typeof(ifmodifiedsince) != 'undefined' && ifmodifiedsince != "") {
                         var ms = Date.parse(ifmodifiedsince);
                         var now = +new Date();
 
@@ -118,8 +118,8 @@ module.exports = {
 
                 }
 
-                var urlParams = req.getQuery();
-                var cacheKey = req.getUrl() + "?" + urlParams;
+                var urlParams = reqInfos.query;
+                var cacheKey = reqInfos.curURL + "?" + urlParams;
 
                 //serve from in-memory LRU cache
                 //TODO: implement cache duration / LRU

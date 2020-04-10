@@ -14,7 +14,7 @@ module.exports = {
       var apiDefinition = JSON.parse(fs.readFileSync(configPath));
       apiDefinition.root = fullAppPath;
       apiDefinition.domains.forEach(function (domainObject) {
-        memory.set(domainObject, apiDefinition);
+        memory.setObject(domainObject, apiDefinition);
       });
     }
     else

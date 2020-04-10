@@ -15,12 +15,22 @@ module.exports = {
             res.aborted = true;
         });
         try {
-          var curURL = req.getUrl();
           var host = req.getHeader('host');
           var subDomain = host.split('.')[0];
           var domain = host.substring(host.indexOf('.') + 1).split(':')[0];
+          var reqInfos = {
+            curUrl : req.getUrl(),
+            query : req.getQuery(),
+            headers: {},
+            req: req,
+          }
+          req.forEach((k, v) => {
+            reqInfos.headers[k] = v;
+          });
+          
+          reqInfos.body = await tools.getBody(req, res);
 
-          var appConfig = memory.get(subDomain + "." + domain);
+          var appConfig = await memory.getObject(subDomain + "." + domain);
           if (typeof(appConfig) == 'undefined') {
             res.writeStatus("404");
             res.end("No app configured...");
@@ -31,7 +41,7 @@ module.exports = {
           var processResult = null;
           for (var i = 0; i < modules.length; i++) {
             var module = modules[i];
-            var result = await module.process(appConfig, req, res);
+            var result = await module.process(appConfig, reqInfos, res);
             if (result && result.processed) {
               hasBeenProcessed = true;
               processResult = result;
@@ -82,9 +92,8 @@ module.exports = {
             //console.log(ex);
             var erroMSG = ex + ""; //force a cast to string
             if (erroMSG.indexOf("Invalid access of discarded") == -1) {
-
-                console.log("Error11819: ");
-                console.log(ex);
+              console.log("Error11819: ");
+              console.log(ex);
             }
 
         }

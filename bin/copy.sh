@@ -1,0 +1,1 @@
+cp * ./../../cloudgate/bin/

@@ -4,8 +4,29 @@ const tools = require('../lib/tools.js');
 
 //In-memory cache
 var cache = {};
+var isCaching = false;
+var cacheStarted = false;
+
 module.exports = {
     process : (appConfig, reqInfos) => {
+
+        if ( !cacheStarted ){
+            cacheStarted = true;
+            if ( isCaching ){
+                //invalidate cache for changed files while the server is running
+                console.log("Listening to file changes on: " + appConfig.root);
+                const chokidar = require('chokidar');
+                chokidar.watch(appConfig.root, {
+                    ignored: /(^|[\/\\])\../, // ignore dotfiles
+                    persistent: true
+                }).on('all', (event, path) => {
+                    //console.log(event, path);
+                    //invalidate whole cache, todo: invalidate only the correct cache entries
+                    cache = {};
+                });
+            }
+        }
+
         return new Promise(function (resolve, reject) {
             
             var result = {
@@ -17,21 +38,6 @@ module.exports = {
             };
             var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
 
-
-            var isCaching = false;
-            if ( isCaching ){
-                //invalidate cache for changed files while the server is running
-                console.log("Listening to file changes on: " + rootFolder);
-                const chokidar = require('chokidar');
-                chokidar.watch(rootFolder, {
-                    ignored: /(^|[\/\\])\../, // ignore dotfiles
-                    persistent: true
-                }).on('all', (event, path) => {
-                    //console.log(event, path);
-                    //invalidate whole cache, todo: invalidate only the correct cache entries
-                    cache = {};
-                });
-            }
             
             try {
                 var curURL = reqInfos.curUrl;
@@ -127,25 +133,25 @@ module.exports = {
                     //console.log("served from cache" + fullPath);
                     //console.log("Loading file from cache: " + fullPath);
 
-                    if (!res.aborted) {
-                        //noit aborted so we can return the awaited response
+                   
+                    //not aborted so we can return the awaited response
 
 
-                        //performance impact calling the 4 writeHeader below is 20-25% of global RPS!!!
-                        /*
-                        res.writeHeader("core-cache", "1");
-                        res.writeHeader("cache-control", "public, max-age=" + maxAge);
-                        res.writeHeader("expires", new Date(Date.now() + maxAge * 1000).toUTCString());
-                        res.writeHeader("last-modified", new Date(Date.now()).toUTCString());
-                        */
+                    //performance impact calling the 4 writeHeader below is 20-25% of global RPS!!!
+                    /*
+                    res.writeHeader("core-cache", "1");
+                    res.writeHeader("cache-control", "public, max-age=" + maxAge);
+                    res.writeHeader("expires", new Date(Date.now() + maxAge * 1000).toUTCString());
+                    res.writeHeader("last-modified", new Date(Date.now()).toUTCString());
+                    */
 
 
-                        result.status = 200;
-                        result.content = cache[cacheKey];
-                        resolve(result);
-                        return ;
-                        // Here was a weird if (endswith.html, but inside if and else if the same)
-                    }
+                    result.status = 200;
+                    result.content = cache[cacheKey];
+                    resolve(result);
+                    return ;
+                    // Here was a weird if (endswith.html, but inside if and else if the same)
+                    
 
                 }
                 else {
@@ -186,8 +192,14 @@ module.exports = {
                                 }
                                 //noit aborted so we can return the awaited response
                                 //res.end(fileContent);
-                                result.headers['Content-Encoding'] = 'gzip';
-                                result.content = tools.GzipContent(fileContent);
+                                
+                                //15K RPS with GZIP
+                                //result.headers['Content-Encoding'] = 'gzip';
+                                //result.content = tools.GzipContent(fileContent);
+                                
+                                //25K RPS without GZIP
+                                result.content = fileContent;
+
                             }
                             else {
                                 var fileContent = fs.readFileSync(fullPath);

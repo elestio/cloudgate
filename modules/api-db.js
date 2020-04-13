@@ -64,6 +64,10 @@ module.exports = {
         reqInfos.body = await tools.getBody(req, res);
         var body = reqInfos.body;
 
+        req.forEach((k, v) => {
+            reqInfos.headers[k] = v;
+        });
+
         var result = {
           processed: true,
           headers: {

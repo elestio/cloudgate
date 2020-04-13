@@ -84,13 +84,6 @@ module.exports = {
           //res.end("after reading host header + url + query parameters");
           //return;
           
-          req.forEach((k, v) => {
-            reqInfos.headers[k] = v;
-          });
-
-          //130K RPS per core
-          //res.end("after reading ALL headers");
-          //return;
           
           var appConfig = memory.getObject(subDomain + "." + domain);
           //handle *

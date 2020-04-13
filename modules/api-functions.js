@@ -30,6 +30,10 @@ module.exports = {
             reqInfos.body = await tools.getBody(req, res);
         }
 
+        req.forEach((k, v) => {
+            reqInfos.headers[k] = v;
+        });
+
         var event = reqInfos;
         var ctx = {
           succeed: function(result) {

@@ -11,6 +11,7 @@ var cacheStarted = false;
 module.exports = {
     process : (appConfig, reqInfos) => {
 
+        /*
         if ( !cacheStarted ){
             cacheStarted = true;
             if ( isCaching ){
@@ -27,6 +28,7 @@ module.exports = {
                 });
             }
         }
+        */
 
         return new Promise(function (resolve, reject) {
             
@@ -37,8 +39,8 @@ module.exports = {
                 content: '',
                 headers: {},
             };
-            var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
-
+                        
+            var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);           
             
             try {
                 var curURL = reqInfos.url;
@@ -70,7 +72,8 @@ module.exports = {
 
                 //console.log(rootFolder + " - " + fullPath);
 
-
+                
+                
                 //define maxAge for caching            
                 var maxAge = 30;
                 var rawPath = finalPath.split('?')[0];

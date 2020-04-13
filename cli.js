@@ -91,6 +91,8 @@ if (version) {
     process.exit();
 }
 
+
+port = 3000;
 if (!port) {
     portfinder.basePort = 3000;
     portfinder.getPort(function(err, port) {

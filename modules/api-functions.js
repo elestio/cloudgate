@@ -3,45 +3,65 @@ var fs = require('fs');
 var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
-const utils = require('../lib/tools.js');
+const tools = require('../lib/tools.js');
 
 var functionsCache = {};
 
 module.exports = {
-  process : (appConfig, reqInfos) => {
-    return new Promise(function (resolve, reject) {
+  process : (appConfig, reqInfos, res, req) => {
+    return new Promise( async function (resolve, reject) {
+
       var functionsList = appConfig.apiEndpoints;
-      var endpointTarget = reqInfos.curUrl.split('?')[0];
+      var endpointTarget = reqInfos.url.split('?')[0];
       var apiEndpoint = functionsList[endpointTarget];
       if (typeof(apiEndpoint) != 'undefined') {
         var functionIndexFile = apiEndpoint.handler.split('.')[0];
         var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
         // TODO : check path doesn't crash
-        var functionPath = utils.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+        var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
         // TODO : check not using ../ (lower level from app root)
         curFunction = require(functionPath);
         if (curFunction[functionHandlerFunction] == undefined) {
           // TODO : Handle error here AND RETURN
         }
-        var event = {};
+        
+        //read the body only if needed
+        if ( reqInfos.method != "get" ){
+            reqInfos.body = await tools.getBody(req, res);
+        }
+
+        var event = reqInfos;
         var ctx = {
           succeed: function(result) {
-            console.log(result)
+            //console.log(result)
           },
           fail: function(error) {
             console.log(error);
           }
         };
         var callback = function (err, response) {
-          if (err != null) {
+          
+            if (err != null) {
             console.log(err);
           } else {
             //console.log(response);
           }
-          resolve({
-            processed: true,
-            content: response
-          });
+
+          if ( typeof response == "object" ){
+            resolve({
+                processed: true,
+                headers: response.headers,
+                content: response.content
+            });
+          }
+          else {
+            resolve({
+                processed: true,
+                content: response
+            });
+          }
+
+          
         };
         var result = curFunction[functionHandlerFunction](event, ctx, callback);
         if (result) {
@@ -91,7 +111,7 @@ module.exports = {
             try {
                 //TODO: could be replaced by firecracker or at least a way to isolate the process (v8 isolate?)
                 var baseUrl = req.getUrl().split('?')[0];
-                functionsCache[baseUrl](res, req, utils);
+                functionsCache[baseUrl](res, req, tools);
             }
             catch (ex) {
 

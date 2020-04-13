@@ -69,8 +69,10 @@ module.exports = {
           var subDomain = host.split('.')[0];
           var domain = host.substring(host.indexOf('.') + 1).split(':')[0];
           var reqInfos = {
-            curUrl : req.getUrl(),
+            url : req.getUrl(),
             query : req.getQuery(),
+            method: req.getMethod(),
+            ip: tools.getIP(req, res),
             headers: {},
             req: req,
           }
@@ -90,36 +92,38 @@ module.exports = {
           //res.end("after reading ALL headers");
           //return;
           
-          reqInfos.body = await tools.getBody(req, res);
-
-         //85K RPS per core
-         //res.end("after reading body");
-         //return;
-
-          var appConfig = await memory.getObject(subDomain + "." + domain);
-
+          var appConfig = memory.getObject(subDomain + "." + domain);
           //handle *
           if ( appConfig == null ){
-              appConfig = await memory.getObject("*", subDomain + "." + domain); //avoid constant call to redis
+              appConfig = memory.getObject("*", subDomain + "." + domain); //avoid constant call to redis
           }
-
           
-          //55K RPS per core
+          //120K RPS per core
           //res.end("after reading config");
           //return;
 
           if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");
             res.writeHeader("target", subDomain + "." + domain);
-            res.end("No app configured...");
+            res.end("No app configured for vhost [" + subDomain + "." + domain + "]");
             return ;
           }
+
+          //res.end("after reading config");
+          //return;
+
+          //var beginPipeline = process.hrtime();
 
           var hasBeenProcessed = false;
           var processResult = null;
           for (var i = 0; i < modules.length; i++) {
+            
+            //var begin = process.hrtime();
             var module = modules[i];
-            var result = await module.process(appConfig, reqInfos, res);
+            var result = await module.process(appConfig, reqInfos, res, req);      
+            //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
+            //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
+
             if (result && result.processed) {
               hasBeenProcessed = true;
               processResult = result;
@@ -127,8 +131,10 @@ module.exports = {
             }
           }
 
+          //const nanoSecondsPipeline = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+          //console.log("processing Pipeline: " + (nanoSecondsPipeline/1000000) + "ms");
 
-          //15K RPS per core after processing
+          //70K RPS per core after processing
           //res.end("after processing");
           //return;
 
@@ -147,18 +153,23 @@ module.exports = {
               // TODO : handle path to 404 in the config file
                 //404
                 var content404 = "";
-                /*if (cache[path404] != null) {
-                    res.writeHeader("core-cache", "1");
+                var cache404 = memory.get(path404);
+                if ( cache404 != null) {
                     //console.log("cached");
-                    res.end(cache[path404]);
-                    //tools.GzipResponse(res, cache[path404]);
+                    processResult.headers['core-cache'] = '1';
+                    processResult.headers['Content-Encoding'] = 'gzip';
+                    processResult.content = cache404;
+                    //res.writeHeader("core-cache", "1");
+                    //res.writeHeader("Content-Encoding", "gzip");
+                    //res.end(cache404);
                 }
-                else{*/
+                else{
                     content404 = fs.readFileSync(path404, { encoding: 'utf8' });
-                    processResult.content = content404;
-                    //cache[path404] = content404; 
+                    processResult.headers['Content-Encoding'] = 'gzip';
+                    processResult.content = tools.GzipContent(content404);
+                    memory.set(path404, processResult.content);
                     //tools.GzipResponse(res, content404);
-                //}
+                }
             }
 
             // FINAL WRITING
@@ -167,9 +178,12 @@ module.exports = {
               res.writeHeader(key, processResult.headers[key]);
             }
             
-            res.write(processResult.content);
+            if ( processResult.content != null ){
+                res.write(processResult.content);
+            }
             res.end();
             //res.end(processResult.content);
+
           }
           return;
         }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "title": "Sample App 1",
   "description": "This is a sample app",
-  "domains": ["*", "127.0.0.1", "116.202.112.237"], 
+  "domains": ["127.0.0.1", "116.202.112.237"], 
   "publicFolder": "./public/",
   "db": {
     "MYSQL": {

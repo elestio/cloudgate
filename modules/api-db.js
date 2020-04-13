@@ -37,7 +37,7 @@ function ExecuteQuery(appConfig, query) {
 
 
 module.exports = {
-  process : (appConfig, reqInfos, res) => {
+  process : (appConfig, reqInfos, res, req) => {
     return new Promise(async function (resolve, reject) {
       // CHECK IF THERE IS A MYSQL DB SETUP
       if (typeof(appConfig.db) == 'undefined' || 
@@ -50,7 +50,7 @@ module.exports = {
       }
       try {
 
-        var curURL = reqInfos.curUrl;
+        var curURL = reqInfos.url;
         // CHECK IF MYSQL ENDPOINT MATCH THE CURRENT URL
         if (curURL != appConfig.db.MYSQL.endpoint) { 
           resolve({
@@ -60,6 +60,8 @@ module.exports = {
         }
 
         // PROCESS REQUEST
+        //read the body only if needed
+        reqInfos.body = await tools.getBody(req, res);
         var body = reqInfos.body;
 
         var result = {

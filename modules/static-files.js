@@ -4,8 +4,9 @@ const tools = require('../lib/tools.js');
 
 //In-memory cache
 var cache = {};
-var isCaching = false;
+var isCaching = true;
 var cacheStarted = false;
+
 
 module.exports = {
     process : (appConfig, reqInfos) => {
@@ -40,7 +41,7 @@ module.exports = {
 
             
             try {
-                var curURL = reqInfos.curUrl;
+                var curURL = reqInfos.url;
 
                 //serve the public folder
                 var finalPath = curURL;
@@ -124,8 +125,17 @@ module.exports = {
 
                 }
 
+
                 var urlParams = reqInfos.query;
-                var cacheKey = reqInfos.curURL + "?" + urlParams;
+                var cacheKey = fullPath;//reqInfos.curURL + "?" + urlParams;
+
+                //check if processing is needed or if we should serv the raw file
+                var processingNeeded = false;
+                if (fullPath.endsWith(".html") || fullPath.endsWith(".css") || fullPath.endsWith(".js") || fullPath.endsWith(".json") || fullPath.endsWith(".xml") || fullPath.endsWith(".txt")) {
+                    processingNeeded = 1;
+                }
+
+
 
                 //serve from in-memory LRU cache
                 //TODO: implement cache duration / LRU
@@ -137,16 +147,17 @@ module.exports = {
                     //not aborted so we can return the awaited response
 
 
-                    //performance impact calling the 4 writeHeader below is 20-25% of global RPS!!!
-                    /*
-                    res.writeHeader("core-cache", "1");
-                    res.writeHeader("cache-control", "public, max-age=" + maxAge);
-                    res.writeHeader("expires", new Date(Date.now() + maxAge * 1000).toUTCString());
-                    res.writeHeader("last-modified", new Date(Date.now()).toUTCString());
-                    */
-
+                    //performance impact adding the 4 headers below is 20-25% of global RPS!!!
+                    result.headers['core-cache'] = '1';
+                    result.headers['cache-control'] = "public, max-age=" + maxAge;
+                    result.headers['expires'] = new Date(Date.now() + maxAge * 1000).toUTCString();
+                    result.headers['last-modified'] = new Date(Date.now()).toUTCString();
+                    
 
                     result.status = 200;
+                    if (processingNeeded) {
+                        result.headers['Content-Encoding'] = 'gzip';
+                    }
                     result.content = cache[cacheKey];
                     resolve(result);
                     return ;
@@ -167,13 +178,6 @@ module.exports = {
                             result.headers["expires"] = new Date(Date.now() + maxAge * 1000).toUTCString();
                             result.headers["last-modified"] = new Date(Date.now()).toUTCString();
                             
-
-                            //check if processing is needed or if we should serv the raw file
-                            var processingNeeded = false;
-                            if (fullPath.endsWith(".html")) {
-                                processingNeeded = 1;
-                            }
-
                             if (processingNeeded) {
                                 var fileContent = fs.readFileSync(fullPath, { encoding: 'utf8' });
                                 
@@ -193,12 +197,11 @@ module.exports = {
                                 //noit aborted so we can return the awaited response
                                 //res.end(fileContent);
                                 
-                                //15K RPS with GZIP
-                                //result.headers['Content-Encoding'] = 'gzip';
-                                //result.content = tools.GzipContent(fileContent);
-                                
-                                //25K RPS without GZIP
-                                result.content = fileContent;
+                                result.headers['Content-Encoding'] = 'gzip';
+                                result.content = tools.GzipContent(fileContent);
+                                if ( isCaching ){
+                                    cache[cacheKey] = result.content; //TODO: Cache duration + LRU
+                                }
 
                             }
                             else {

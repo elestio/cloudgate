@@ -5,6 +5,8 @@ const apiFunctions = require('../modules/api-functions.js');
 const apiDB = require('../modules/api-db.js');
 const tools = require('../lib/tools.js');
 
+//In-memory cache
+var cache = {};
 
 var testNGINX = `<!DOCTYPE html>
 <html>
@@ -77,24 +79,36 @@ module.exports = {
             req: req,
           }
 
-          
-          
-
-          //140K RPS per core
-          //res.end("after reading host header + url + query parameters");
-          //return;
-          
-          
-          var appConfig = memory.getObject(subDomain + "." + domain);
+                    
+          var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
+          //console.log("appconfig key: " + subDomain + "." + domain);
+          //console.log(memory.debug());
           //handle *
           if ( appConfig == null ){
-              appConfig = memory.getObject("*", subDomain + "." + domain); //avoid constant call to redis
+              appConfig = memory.getObject("*", subDomain + "." + domain, "GLOBAL"); //avoid constant call to redis
+          }
+
+          //Caching: think about caching of GET only!
+          var cacheKey = null;
+          if ( reqInfos.method == "get"){
+            cacheKey = host + "/" + reqInfos.url + reqInfos.query;
           }
           
-          //120K RPS per core
-          //res.end("after reading config");
-          //return;
-
+          //console.log(memory.debug());
+          
+          var cacheContent = memory.get(cacheKey, appConfig.root);
+          if (cacheContent != null) {
+            var processResult = cacheContent;
+            res.writeStatus("" + (processResult.status || 200));
+            for (var key in processResult.headers) {
+              res.writeHeader(key, processResult.headers[key]);
+            }
+            if ( processResult.content != null ){
+                res.end(processResult.content);
+            }
+            return;
+        }
+          
           if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");
             res.writeHeader("target", subDomain + "." + domain);
@@ -105,6 +119,8 @@ module.exports = {
           //res.end("after reading config");
           //return;
 
+          
+
           //var beginPipeline = process.hrtime();
 
           var hasBeenProcessed = false;
@@ -113,23 +129,22 @@ module.exports = {
             
             //var begin = process.hrtime();
             var module = modules[i];
-            var result = await module.process(appConfig, reqInfos, res, req);      
+            var result = await module.process(appConfig, reqInfos, res, req, memory);      
             //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
             //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
 
             if (result && result.processed) {
               hasBeenProcessed = true;
               processResult = result;
+              
+              memory.set(cacheKey, processResult, appConfig.root);
+              //cache[cacheKey] = processResult;
               break ; 
             }
           }
 
           //const nanoSecondsPipeline = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
           //console.log("processing Pipeline: " + (nanoSecondsPipeline/1000000) + "ms");
-
-          //70K RPS per core after processing
-          //res.end("after processing");
-          //return;
 
           if (!res.aborted) {
             if (!hasBeenProcessed) {
@@ -146,7 +161,7 @@ module.exports = {
               // TODO : handle path to 404 in the config file
                 //404
                 var content404 = "";
-                var cache404 = memory.get(path404);
+                var cache404 = memory.get(path404, appConfig.root);
                 if ( cache404 != null) {
                     //console.log("cached");
                     processResult.headers['core-cache'] = '1';
@@ -160,7 +175,7 @@ module.exports = {
                     content404 = fs.readFileSync(path404, { encoding: 'utf8' });
                     processResult.headers['Content-Encoding'] = 'gzip';
                     processResult.content = tools.GzipContent(content404);
-                    memory.set(path404, processResult.content);
+                    memory.set(path404, processResult.content, appConfig.root);
                     //tools.GzipResponse(res, content404);
                 }
             }

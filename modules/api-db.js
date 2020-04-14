@@ -37,7 +37,7 @@ function ExecuteQuery(appConfig, query) {
 
 
 module.exports = {
-  process : (appConfig, reqInfos, res, req) => {
+  process : (appConfig, reqInfos, res, req, memory) => {
     return new Promise(async function (resolve, reject) {
       // CHECK IF THERE IS A MYSQL DB SETUP
       if (typeof(appConfig.db) == 'undefined' || 

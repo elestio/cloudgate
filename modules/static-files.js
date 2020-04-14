@@ -7,6 +7,7 @@ var rootFolder = null;
 var fileMonitorStarted = false;
 
 module.exports = {
+    name: "static-files",
     process: (appConfig, reqInfos, res, req, memory) => {
 
         if (rootFolder == null) {

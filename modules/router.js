@@ -108,6 +108,7 @@ module.exports = {
             }
             return;
         }
+        
           
           if (typeof(appConfig) == 'undefined' || appConfig == null) {
             res.writeStatus("404");
@@ -127,6 +128,8 @@ module.exports = {
           var processResult = null;
           for (var i = 0; i < modules.length; i++) {
             
+            //console.log(modules[i]);
+
             //var begin = process.hrtime();
             var module = modules[i];
             var result = await module.process(appConfig, reqInfos, res, req, memory);      
@@ -137,8 +140,13 @@ module.exports = {
               hasBeenProcessed = true;
               processResult = result;
               
-              memory.set(cacheKey, processResult, appConfig.root);
-              //cache[cacheKey] = processResult;
+              //keep in cache only static files response
+              if ( modules[i].name == "static-files" ){
+                memory.set(cacheKey, processResult, appConfig.root);
+                //console.log("cache set for: " + cacheKey + "|" + appConfig.root);
+              }
+              
+              
               break ; 
             }
           }

@@ -8,6 +8,7 @@ const tools = require('../lib/tools.js');
 var functionsCache = {};
 
 module.exports = {
+  name: "api-functions",
   process : (appConfig, reqInfos, res, req, memory) => {
     return new Promise( async function (resolve, reject) {
 

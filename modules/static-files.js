@@ -15,22 +15,24 @@ module.exports = {
         }
         var curURL = reqInfos.url.split('?')[0];
 
-        if (!fileMonitorStarted){
-            fileMonitorStarted = true;
-            console.log("Listening to file changes on: " + rootFolder);
-            const chokidar = require('chokidar');
-            chokidar.watch(rootFolder, {
-                ignored: /(^|[\/\\])\../, // ignore dotfiles
-                persistent: true
-            }).on('all', (event, path) => {
-                //console.log(event, path);
-                if ( event == "change" ){
-                    //invalidate whole app cache, todo: invalidate only the correct cache entries
-                    console.log("File update detected: " + path);
-                    console.log("Clearing cache for app: " + appConfig.root);
-                    memory.clear(appConfig.root);
-                }
-            });
+        if (appConfig.AWS == null) {
+            if (!fileMonitorStarted) {
+                fileMonitorStarted = true;
+                console.log("Listening to file changes on: " + rootFolder);
+                const chokidar = require('chokidar');
+                chokidar.watch(rootFolder, {
+                    ignored: /(^|[\/\\])\../, // ignore dotfiles
+                    persistent: true
+                }).on('all', (event, path) => {
+                    //console.log(event, path);
+                    if (event == "change") {
+                        //invalidate whole app cache, todo: invalidate only the correct cache entries
+                        console.log("File update detected: " + path);
+                        console.log("Clearing cache for app: " + appConfig.root);
+                        memory.clear(appConfig.root);
+                    }
+                });
+            }
         }
 
         //serve the public folder
@@ -48,7 +50,7 @@ module.exports = {
             headers: {},
         };
 
-        
+
 
         return new Promise(function(resolve, reject) {
 
@@ -132,21 +134,21 @@ module.exports = {
                 var cacheKey = curURL;//reqInfos.curURL + "?" + urlParams;
 
                 //Handle AWS S3
-                if (appConfig.AWS != null){
-                  
+                if (appConfig.AWS != null) {
+
                     var aws = require('aws-sdk');
                     var s3 = new aws.S3({ region: appConfig.AWS.region, accessKeyId: appConfig.AWS.accessKeyId, secretAccessKey: appConfig.AWS.secretAccessKey });
 
-                    var s3RootPath = tools.safeJoinPath(appConfig.AWS.prefix, appConfig.publicFolder);
+                    var s3Path = tools.safeJoinPath(appConfig.AWS.prefix, finalPath);
                     var getParams = {
-                        Bucket: appConfig.AWS.bucket, 
-                        Key: s3RootPath + finalPath
+                        Bucket: appConfig.AWS.bucket,
+                        Key: s3Path
                     }
 
                     //console.log("bucket: " + appConfig.AWS.bucket + " - s3 path: " + s3RootPath + finalPath);
 
                     //Fetch or read data from aws s3
-                    s3.getObject(getParams, function (err, data) {
+                    s3.getObject(getParams, function(err, data) {
 
                         if (err) {
                             //console.log(err);

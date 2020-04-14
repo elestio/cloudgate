@@ -188,6 +188,8 @@ module.exports = {
                 }
             }
 
+            //console.log(processResult);
+
             // FINAL WRITING
             res.writeStatus("" + (processResult.status || 200));
             for (var key in processResult.headers) {
@@ -195,7 +197,13 @@ module.exports = {
             }
             
             if ( processResult.content != null ){
-                res.write(processResult.content);
+                if ( typeof processResult.content === 'object' ){
+                    res.write(JSON.stringify(processResult.content));
+                }
+                else{
+                    res.write(processResult.content);
+                }
+                
             }
             res.end();
             //res.end(processResult.content);

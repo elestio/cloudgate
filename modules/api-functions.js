@@ -23,7 +23,7 @@ module.exports = {
         // TODO : check not using ../ (lower level from app root)
 
         
-        //AWS Lambda Executor
+        //AWS Lambda Executor (tested at 2K RPS with -c128 in wrk on Hetzner to AWS direction)
         if (appConfig.AWS != null){
             
             var begin = process.hrtime();
@@ -42,20 +42,36 @@ module.exports = {
                 }
                 else  {  
                     var logs = new Buffer.from(data.LogResult, 'base64').toString('utf8');
-                    var payload = JSON.parse(data.Payload);
+                    
                     //console.log(payload);  
                     //console.log(logs);  
+
+                    var payload = JSON.parse(data.Payload);
 
                     const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                     var durationMS = (nanoSeconds/1000000);
                     //console.log("Lambda exec: " + durationMS + "ms");
 
-                    resolve({
-                        processed: true,
-                        content: payload,
-                        logs: logs,
-                        durationMS: durationMS
-                    });
+                    if ( typeof payload == "object" ){
+                        resolve({
+                            processed: true,
+                            status: payload.status,
+                            headers: payload.headers,
+                            content: payload.content,
+                            logs: logs,
+                            durationMS: durationMS
+                        });
+                    }
+                    else {
+                        resolve({
+                            status: 200,
+                            processed: true,
+                            content: payload,
+                            logs: logs,
+                            durationMS: durationMS
+                        });
+                    }
+                    
                 }
                 
             });

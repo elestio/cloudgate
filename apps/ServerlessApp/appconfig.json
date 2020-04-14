@@ -4,7 +4,7 @@
   "title": "Sample App 3",
   "description": "This is a sample AWS app",
   "domains": ["vms2.terasp.net"], 
-  "publicFolder": "./public",
+  "publicFolder": "",
   "AWS":{
       "region": "eu-west-3",
       "bucket": "cloudgate-apps",

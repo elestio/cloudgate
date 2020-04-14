@@ -21,6 +21,47 @@ module.exports = {
         // TODO : check path doesn't crash
         var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
         // TODO : check not using ../ (lower level from app root)
+
+        
+        //AWS Lambda Executor
+        if (appConfig.AWS != null){
+            
+            var begin = process.hrtime();
+
+            var aws = require('aws-sdk');
+            var lambda = new aws.Lambda({ region: appConfig.AWS.region, accessKeyId: appConfig.AWS.accessKeyId, secretAccessKey: appConfig.AWS.secretAccessKey });
+            var params = {
+                FunctionName: apiEndpoint.src, 
+                InvocationType: "RequestResponse", 
+                LogType: "Tail", 
+                Payload: JSON.stringify(reqInfos)
+            };
+            lambda.invoke(params, function(err, data) {
+                if (err) { 
+                    console.log(err, err.stack); 
+                }
+                else  {  
+                    var logs = new Buffer.from(data.LogResult, 'base64').toString('utf8');
+                    var payload = JSON.parse(data.Payload);
+                    //console.log(payload);  
+                    //console.log(logs);  
+
+                    const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
+                    var durationMS = (nanoSeconds/1000000);
+                    //console.log("Lambda exec: " + durationMS + "ms");
+
+                    resolve({
+                        processed: true,
+                        content: payload,
+                        logs: logs,
+                        durationMS: durationMS
+                    });
+                }
+                
+            });
+            return ;
+        }
+
         curFunction = require(functionPath);
         if (curFunction[functionHandlerFunction] == undefined) {
           // TODO : Handle error here AND RETURN
@@ -68,6 +109,10 @@ module.exports = {
 
           
         };
+
+
+        
+
         var result = curFunction[functionHandlerFunction](event, ctx, callback);
         if (result) {
             if (result.then) {

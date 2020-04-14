@@ -131,6 +131,55 @@ module.exports = {
                 var urlParams = reqInfos.query;
                 var cacheKey = curURL;//reqInfos.curURL + "?" + urlParams;
 
+                //Handle AWS S3
+                if (appConfig.AWS != null){
+                  
+                    var aws = require('aws-sdk');
+                    var s3 = new aws.S3({ region: appConfig.AWS.region, accessKeyId: appConfig.AWS.accessKeyId, secretAccessKey: appConfig.AWS.secretAccessKey });
+
+                    var s3RootPath = tools.safeJoinPath(appConfig.AWS.prefix, appConfig.publicFolder);
+                    var getParams = {
+                        Bucket: appConfig.AWS.bucket, 
+                        Key: s3RootPath + finalPath
+                    }
+
+                    //console.log("bucket: " + appConfig.AWS.bucket + " - s3 path: " + s3RootPath + finalPath);
+
+                    //Fetch or read data from aws s3
+                    s3.getObject(getParams, function (err, data) {
+
+                        if (err) {
+                            //console.log(err);
+
+                            result.status = 404;
+                            result.content = "404 NOT FOUND";
+                            result.error = "NOT FOUND";
+                            resolve(result);
+                            return;
+
+                        } else {
+                            //console.log(data.Body.toString()); //this will log data to console
+
+                            var processingNeeded = false;
+                            if (finalPath.endsWith(".html") || finalPath.endsWith(".css") || finalPath.endsWith(".js") || finalPath.endsWith(".json") || finalPath.endsWith(".xml") || finalPath.endsWith(".txt")) {
+                                processingNeeded = 1;
+                            }
+                            if (processingNeeded) {
+                                result.headers['Content-Encoding'] = 'gzip';
+                                result.content = tools.GzipContent(data.Body.toString());
+                            }
+                            else {
+                                result.content = data.Body;
+                            }
+
+                            resolve(result);
+                        }
+
+                    })
+
+                    return;
+
+                }
 
                 //check if file exist
                 try {
@@ -143,24 +192,15 @@ module.exports = {
                         result.headers["expires"] = new Date(Date.now() + maxAge * 1000).toUTCString();
                         result.headers["last-modified"] = new Date(Date.now()).toUTCString();
 
-                                //check if processing is needed or if we should serv the raw file
+                        //check if processing is needed or if we should serv the raw file
                         var processingNeeded = false;
                         if (curURL.endsWith(".html") || curURL.endsWith(".css") || curURL.endsWith(".js") || curURL.endsWith(".json") || curURL.endsWith(".xml") || curURL.endsWith(".txt")) {
                             processingNeeded = 1;
                         }
                         if (processingNeeded) {
                             var fileContent = fs.readFileSync(fullPath, { encoding: 'utf8' });
-
-                            //process dynamic datasource for the page if exist
-                            /*
-                            if (fileContent.indexOf('meta name="datasource"') > -1) {
-                                fileContent = await dynamicDS(urlParams, fileContent, connection, db);
-                            }
-                            */
-
                             result.headers['Content-Encoding'] = 'gzip';
                             result.content = tools.GzipContent(fileContent);
-
                         }
                         else {
                             var fileContent = fs.readFileSync(fullPath);

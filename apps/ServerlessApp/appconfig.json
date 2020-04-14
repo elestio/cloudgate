@@ -1,0 +1,27 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Sample App 3",
+  "description": "This is a sample AWS app",
+  "domains": ["vms2.terasp.net"], 
+  "publicFolder": "./public",
+  "AWS":{
+      "region": "eu-west-3",
+      "bucket": "cloudgate-apps",
+      "prefix": "MyApp3",
+      "accessKeyId": "AKIA3OUTJZZQ2WQ6IZGQ",
+      "secretAccessKey": "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"
+  },
+  "apiToken" : "7fd2b233-4e6b-4c97-9eb3-491519e9fdca",
+  "apiRuntime": "nodejs12",
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "simple",
+      "handler": "index.handler"
+    },
+    "/tests/full" : {
+      "src" : "full",
+      "handler": "index.handler"
+    }
+  }
+}

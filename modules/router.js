@@ -210,6 +210,10 @@ module.exports = {
             if (erroMSG.indexOf("Invalid access of discarded") == -1) {
               console.log("Error11819: ");
               console.log(ex);
+
+              //console.trace("I am here");
+
+              res.end("404 NOT FOUND"); //but in fact an error occured ...
             }
 
         }

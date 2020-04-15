@@ -12,7 +12,6 @@
       "secretAccessKey": "/sHdTvCVlhKZNm1FgTj5BGiCPj0VDvrX8e8uBnqe"
   },
   "apiToken" : "7fd2b233-4e6b-4c97-9eb3-491519e9fdca",
-  "apiRuntime": "nodejs12",
   "apiEndpoints": {
     "/tests/simple" : {
       "src": "cloudgate-MyApp3-simple",

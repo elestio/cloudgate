@@ -22,6 +22,14 @@ module.exports = {
         var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
         // TODO : check not using ../ (lower level from app root)
 
+        //read the body only if needed
+        if ( reqInfos.method != "get" ){
+            reqInfos.body = await tools.getBody(req, res);
+        }
+
+        req.forEach((k, v) => {
+            reqInfos.headers[k] = v;
+        });
         
         //AWS Lambda Executor (tested at 2K RPS with -c128 in wrk on Hetzner to AWS direction)
         if (appConfig.AWS != null){
@@ -83,14 +91,7 @@ module.exports = {
           // TODO : Handle error here AND RETURN
         }
         
-        //read the body only if needed
-        if ( reqInfos.method != "get" ){
-            reqInfos.body = await tools.getBody(req, res);
-        }
-
-        req.forEach((k, v) => {
-            reqInfos.headers[k] = v;
-        });
+        
 
         var event = reqInfos;
         var ctx = {

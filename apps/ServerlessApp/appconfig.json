@@ -2,13 +2,12 @@
   "env": "PROD",
   "version": "1.0.0",
   "title": "Sample App 3",
-  "description": "This is a sample AWS app",
+  "description": "This is a sample AWS Serverless app",
   "domains": ["vms2.terasp.net"], 
-  "publicFolder": "",
+  "publicFolder": "MyApp3",
   "AWS":{
       "region": "eu-west-3",
       "bucket": "cloudgate-apps",
-      "prefix": "MyApp3",
       "accessKeyId": "AKIA3OUTJZZQ2WQ6IZGQ",
       "secretAccessKey": "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"
   },
@@ -16,11 +15,11 @@
   "apiRuntime": "nodejs12",
   "apiEndpoints": {
     "/tests/simple" : {
-      "src": "simple",
+      "src": "cloudgate-MyApp3-simple",
       "handler": "index.handler"
     },
     "/tests/full" : {
-      "src" : "full",
+      "src" : "cloudgate-MyApp3-full",
       "handler": "index.handler"
     }
   }

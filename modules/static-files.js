@@ -144,7 +144,7 @@ module.exports = {
                     var aws = require('aws-sdk');
                     var s3 = new aws.S3({ region: appConfig.AWS.region, accessKeyId: appConfig.AWS.accessKeyId, secretAccessKey: appConfig.AWS.secretAccessKey });
 
-                    var s3Path = tools.safeJoinPath(appConfig.AWS.prefix, finalPath);
+                    var s3Path = tools.safeJoinPath(appConfig.publicFolder, finalPath);
                     var getParams = {
                         Bucket: appConfig.AWS.bucket,
                         Key: s3Path

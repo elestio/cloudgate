@@ -91,7 +91,7 @@ module.exports = {
 
                 try {
                     //TODO: must be moved in the router because of caching system
-                    
+
                     //handle 304 Not Modified
                     var ifmodifiedsince = reqInfos["if-modified-since"];
                     if (ifmodifiedsince != null && typeof (ifmodifiedsince) != 'undefined' && ifmodifiedsince != "") {
@@ -180,7 +180,6 @@ module.exports = {
                                 result.content = tools.GzipContent(data.Body.toString());
                             }
                             else {
-                                result.headers['Content-Length'] = data.ContentLength + "";
                                 result.content = data.Body;
                             }
 

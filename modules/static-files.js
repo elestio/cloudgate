@@ -90,6 +90,8 @@ module.exports = {
 
 
                 try {
+                    //TODO: must be moved in the router because of caching system
+                    
                     //handle 304 Not Modified
                     var ifmodifiedsince = reqInfos["if-modified-since"];
                     if (ifmodifiedsince != null && typeof (ifmodifiedsince) != 'undefined' && ifmodifiedsince != "") {
@@ -123,7 +125,10 @@ module.exports = {
                 //set content type
                 try {
                     //this will crash if no extension is provided in the url
-                    result.headers["content-type"] = mime.getType(finalPath);
+                    if ( result.headers["Content-Type"] == null || result.headers["Content-Type"] == "" ){
+                        result.headers["Content-Type"] = mime.getType(finalPath);
+                    }
+                    
                 }
                 catch (ex) {
 
@@ -162,6 +167,10 @@ module.exports = {
                         } else {
                             //console.log(data.Body.toString()); //this will log data to console
 
+                            result.headers['Last-Modified'] = data.LastModified  + "";
+                            result.headers['ETag'] = data.ETag + "";
+                            result.headers['Content-Type'] = data.ContentType + "";
+
                             var processingNeeded = false;
                             if (finalPath.endsWith(".html") || finalPath.endsWith(".css") || finalPath.endsWith(".js") || finalPath.endsWith(".json") || finalPath.endsWith(".xml") || finalPath.endsWith(".txt")) {
                                 processingNeeded = 1;
@@ -171,6 +180,7 @@ module.exports = {
                                 result.content = tools.GzipContent(data.Body.toString());
                             }
                             else {
+                                result.headers['Content-Length'] = data.ContentLength + "";
                                 result.content = data.Body;
                             }
 

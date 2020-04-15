@@ -8,33 +8,7 @@ const tools = require('../lib/tools.js');
 //In-memory cache
 var cache = {};
 
-var testNGINX = `<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-<style>
-    body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
-    }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
 
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>`;
-
-var buffNGINX = tools.GzipContent(testNGINX);
 
 
 module.exports = { 
@@ -51,20 +25,6 @@ module.exports = {
         //res.end("Hello World");
         //return;
         
-        //TEST EXACT SAME RESPONSE THAN NGINX
-        //133K RPS
-        /*
-        res.writeHeader("Connection", "keep-alive");
-        res.writeHeader("Server", "nginx/1.14.0 (Ubuntu)");
-        res.writeHeader("Content-Type", "text/html");
-        res.writeHeader("Content-Encoding", "gzip");
-        res.writeHeader("Date", "Sat, 11 Apr 2020 15:14:48 GMT");
-        res.writeHeader("ETag", 'W/"5df51e13-264"');
-        res.writeHeader("Last-Modified", "Sat, 14 Dec 2019 17:38:27 GMT");
-        res.end(buffNGINX); //pre-gzipped to avoid redoing slow gzip operations each time
-        return;
-        */
-
 
         try {
           var host = req.getHeader('host');
@@ -95,6 +55,7 @@ module.exports = {
           }
           
           //console.log(memory.debug());
+         
           
           var cacheContent = memory.get(cacheKey, appConfig.root);
           if (cacheContent != null) {
@@ -198,12 +159,12 @@ module.exports = {
             
             if ( processResult.content != null ){
                 if ( typeof processResult.content === 'object' ){
-                    res.write(JSON.stringify(processResult.content));
+                    //res.write(JSON.stringify(processResult.content));
+                    res.write(processResult.content);
                 }
                 else{
                     res.write(processResult.content);
                 }
-                
             }
             res.end();
             //res.end(processResult.content);

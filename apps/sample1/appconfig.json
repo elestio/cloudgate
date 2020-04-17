@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "title": "Sample App 1",
   "description": "This is a sample app",
-  "domains": ["127.0.0.1", "116.202.112.237"], 
-  "publicFolder": "./public/",
+  "mainDomain": "vms2.terasp.net",
+  "forceSSL": true,
+  "domains": ["116.202.112.237", "vms2.terasp.net", "www.vms2.terasp.net"], 
+  "publicFolder": "./public",
   "db": {
     "MYSQL": {
       "endpoint" : "/db",

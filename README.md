@@ -15,6 +15,9 @@ then run a sample script:
 or run a sample app container:
 `node cli.js ./apps/sample1/` 
 
+Start an app with AutoSSL:
+`node cli.js -p80 --ssl --sslport 443 --ssldomain vms2.terasp.net  ./apps/sample1/`
+
 Install and run as a service with PM2 and watch file changes:
 `pm2 start "node cli.js ./apps/sample1/" --name cloudgate -i 6 --watch` 
 where -i 6 indicate the number of vcores of your server

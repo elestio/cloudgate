@@ -25,7 +25,8 @@ module.exports = {
         //res.end("Hello World");
         //return;
         
-
+        //console.log(tools.getIP(req, res));
+        
         try {
           var host = req.getHeader('host');
           var subDomain = host.split('.')[0];
@@ -39,6 +40,8 @@ module.exports = {
             req: req,
           }
 
+          //console.log("ip: " + JSON.stringify(res.getRemoteAddress()));
+
                     
           var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
           //console.log("appconfig key: " + subDomain + "." + domain);
@@ -48,15 +51,43 @@ module.exports = {
               appConfig = memory.getObject("*", subDomain + "." + domain, "GLOBAL"); //avoid constant call to redis
           }
 
+
+          if (typeof(appConfig) == 'undefined' || appConfig == null) {
+            res.writeStatus("404");
+            res.writeHeader("target", subDomain + "." + domain);
+            res.end("No app configured for vhost [" + subDomain + "." + domain + "]");
+            return ;
+          }
+
+          //force main domain & SSL
+          /*
+          if ( appConfig.mainDomain != null && appConfig.mainDomain != "" && appConfig.mainDomain != subDomain + "." + domain ){
+            //should redirect to maindomain 
+            console.log("redirect to: " + appConfig.mainDomain);    
+            res.writeStatus("301");
+
+            var protocol = "http://";
+            if ( appConfig.forceSSL == true ){
+                protocol = "https://";
+            }
+            res.writeHeader("location", protocol + appConfig.mainDomain + reqInfos.url + reqInfos.query);
+
+            res.end("No app configured for vhost [" + subDomain + "." + domain + "]");
+            return ;
+          }
+          */
+
           //Caching: think about caching of GET only!
           var cacheKey = null;
           if ( reqInfos.method == "get"){
-            cacheKey = host + "/" + reqInfos.url + reqInfos.query;
+            cacheKey = host + reqInfos.url + reqInfos.query;
           }
           
           //console.log(memory.debug());
-         
-          
+          //console.log("cachekey")
+          //console.log(cacheKey);
+
+          //console.log(memory.debug());
           var cacheContent = memory.get(cacheKey, appConfig.root);
           if (cacheContent != null) {
             var processResult = cacheContent;
@@ -71,12 +102,7 @@ module.exports = {
         }
         
           
-          if (typeof(appConfig) == 'undefined' || appConfig == null) {
-            res.writeStatus("404");
-            res.writeHeader("target", subDomain + "." + domain);
-            res.end("No app configured for vhost [" + subDomain + "." + domain + "]");
-            return ;
-          }
+          
 
           //res.end("after reading config");
           //return;

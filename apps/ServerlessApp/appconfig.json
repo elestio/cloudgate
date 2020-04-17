@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "title": "Sample App 3",
   "description": "This is a sample AWS Serverless app",
-  "domains": ["vms2.terasp.net"], 
+  "domains": ["127.0.0.1"], 
   "publicFolder": "MyApp3",
   "AWS":{
       "region": "eu-west-3",

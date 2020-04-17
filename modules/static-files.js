@@ -125,8 +125,19 @@ module.exports = {
                 //set content type
                 try {
                     //this will crash if no extension is provided in the url
+                    //console.log(finalPath);
                     if ( result.headers["Content-Type"] == null || result.headers["Content-Type"] == "" ){
-                        result.headers["Content-Type"] = mime.getType(finalPath);
+                        var targetMime = mime.getType(finalPath);
+                        if ( targetMime != null ){
+
+                            if (targetMime.indexOf("text") > -1 || targetMime.indexOf("json") > -1){
+                                result.headers["Content-Type"] = targetMime + "; charset=utf-8";
+                            }
+                            else{
+                                result.headers["Content-Type"] = targetMime;
+                            }
+                        }
+                        
                     }
                     
                 }
@@ -169,10 +180,14 @@ module.exports = {
 
                             result.headers['Last-Modified'] = data.LastModified  + "";
                             result.headers['ETag'] = data.ETag + "";
-                            result.headers['Content-Type'] = data.ContentType + "";
+
+                            if ( data.ContentType != null && data.ContentType != ""){
+                                result.headers['Content-Type'] = data.ContentType + "";
+                            }
+                            
 
                             var processingNeeded = false;
-                            if (finalPath.endsWith(".html") || finalPath.endsWith(".css") || finalPath.endsWith(".js") || finalPath.endsWith(".json") || finalPath.endsWith(".xml") || finalPath.endsWith(".txt")) {
+                            if (finalPath.endsWith(".html") || finalPath.endsWith(".css") || finalPath.endsWith(".js") || finalPath.endsWith(".json") || finalPath.endsWith(".xml") || finalPath.endsWith(".txt") ) {
                                 processingNeeded = 1;
                             }
                             if (processingNeeded) {
@@ -194,6 +209,7 @@ module.exports = {
 
                 //check if file exist
                 try {
+                    
                     if (fs.existsSync(fullPath)) {
                         //file exists
                         console.log("served from disk: " + fullPath);
@@ -205,7 +221,7 @@ module.exports = {
 
                         //check if processing is needed or if we should serv the raw file
                         var processingNeeded = false;
-                        if (curURL.endsWith(".html") || curURL.endsWith(".css") || curURL.endsWith(".js") || curURL.endsWith(".json") || curURL.endsWith(".xml") || curURL.endsWith(".txt")) {
+                        if (curURL.endsWith(".html") || curURL.endsWith(".css") || curURL.endsWith(".js") || curURL.endsWith(".json") || curURL.endsWith(".xml") || curURL.endsWith(".txt") || curURL.endsWith("/")) {
                             processingNeeded = 1;
                         }
                         if (processingNeeded) {
@@ -214,9 +230,21 @@ module.exports = {
                             result.content = tools.GzipContent(fileContent);
                         }
                         else {
-                            var fileContent = fs.readFileSync(fullPath);
-                            result.content = fileContent;
+                            
+                            //TODO: find a way to handle extensionless files which are not binary
+                            if ( fullPath.indexOf(".well-known/acme-challenge/") > -1){
+                                var fileContent = fs.readFileSync(fullPath, { encoding: 'utf8' });
+                                result.content = fileContent;
+                                //console.log(result);
+                            }
+                            else{
+                                var fileContent = fs.readFileSync(fullPath);
+                                result.content = fileContent;
+                            }
+                               
                         }
+
+                        
 
                         result.sourcePath = fullPath;
                     }

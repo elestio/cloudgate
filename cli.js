@@ -22,25 +22,22 @@ if (argv.h || argv.help) {
         '',
         'options:',
         '  -p --port    Port to use [8080]',
-        '  -a           Address to use [0.0.0.0]',
+        //'  -a           Address to use [0.0.0.0]', //when used we can't get the visitor ip!
         '  -d           Show directory listings [true]',
-        '  -i           Display autoIndex [true]',
-        '  -g --gzip    Serve gzip files when possible [false]',
         '  --cors[=headers]   Enable CORS via the "Access-Control-Allow-Origin" header',
         '                     Optionally provide CORS headers list separated by commas',
         '  -c           Cache time (max-age) in seconds [3600], e.g. -c10 for 10 seconds.',
         '               To disable caching, use -c-1.',
-        '  -t           Connections timeout in seconds [120], e.g. -t60 for 1 minute.',
-        '               To disable timeout, use -t0',
-        '  -U --utc     Use UTC time format in log messages.',
         '  --username   Username for basic authentication [none]',
         '               Can also be specified with the env variable NODE_HTTP_SERVER_USERNAME',
         '  --password   Password for basic authentication [none]',
         '               Can also be specified with the env variable NODE_HTTP_SERVER_PASSWORD',
         '',
         '  -S --ssl     Enable https.',
+        '  --ssldomain     domain name on which you want to activate ssl (eg: test.com)',
         '  -C --cert    Path to ssl cert file (default: cert.pem).',
         '  -K --key     Path to ssl key file (default: key.pem).',
+        '  --sslport     SSL Port (default: 443)',
         '',
         '  -h --help          Print this list and exit.',
         '  -v --version       Print the version and exit.'
@@ -51,12 +48,12 @@ if (argv.h || argv.help) {
 var port = argv.p || argv.port || parseInt(process.env.PORT, 10),
     host = argv.a || '::',
     ssl = argv.S || argv.ssl,
-    proxy = argv.P || argv.proxy,
-    utc = argv.U || argv.utc,
+    ssldomain = argv.ssldomain,
+    sslport = argv.sslport,
     version = argv.v || argv.version,
     logger;
 
-if (!argv.s && !argv.silent) {
+    if (!argv.s && !argv.silent) {
     logger = {
         info: console.log,
         request: function(req, res, error) {
@@ -87,13 +84,15 @@ if (!argv.s && !argv.silent) {
 }
 
 if (version) {
-    logger.info('v' + require('package.json').version);
+    logger.info('v' + require('./package.json').version);
     process.exit();
 }
 
 
-port = 3000;
+//port = 3000;
 if (!port) {
+    
+    /*
     portfinder.basePort = 3000;
     portfinder.getPort(function(err, port) {
         if (err) {
@@ -101,11 +100,14 @@ if (!port) {
         }
         listen(port);
     });
+    */
+   port = 3000;
+   listen(port);
 } else {
     listen(port);
 }
 
-function listen(port) {
+async function listen(port) {
     var options = {
         root: argv._,
         cache: argv.c,
@@ -132,8 +134,11 @@ function listen(port) {
     if (ssl) {
         options.https = {
             cert: argv.C || argv.cert || 'cert.pem',
-            key: argv.K || argv.key || 'key.pem'
+            key: argv.K || argv.key || 'key.pem',
+            ssldomain: argv.ssldomain || 'test.com',
+            sslport: argv.sslport || 443
         };
+        /*
         try {
             fs.lstatSync(options.https.cert);
         } catch (err) {
@@ -146,6 +151,46 @@ function listen(port) {
             logger.info(colors.red('Error: Could not find private key ' + options.https.key));
             process.exit(1);
         }
+        */
+
+        //SSL Handling
+        var Letsencrypt = require('./lib/letsencrypt');
+        var certPath = options.root + "CERTS/";
+        var isProd = true;
+
+        //find root folder
+        var publicFolder = options.root[0] + "/public/"; //todo: replace with the real public folder from appconfig.json
+
+        try{
+            await Letsencrypt(certPath, publicFolder);
+            //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
+
+            var certInfos = null;
+            Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder).then(function(resp){
+                    certInfos = resp;
+                    
+                    //start the SSL Server
+                    var sslApp = require('./bin/cloudgate.js').SSLApp({
+                        key_file_name: certInfos.privateKeyPath,
+                        cert_file_name: certInfos.fullchain
+                    });
+                    
+                    router.start(sslApp);
+                    sslApp.listen(host, options.https.sslport, (listenSocket) => {
+                        if (listenSocket) {
+                            console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid );
+                        }
+                    });
+            });
+
+
+        }
+        catch(ex){
+            console.log("Unable to generate certificate or start SSL Server ...");
+            console.log(ex);
+            console.trace();
+        }
+        
     }
 
     const tools = require('./lib/tools.js');
@@ -169,7 +214,7 @@ function listen(port) {
 
     //Static files handler
     var isCaching = true;
-    console.log("\npublic root folder: " + publicFolder);
+    //console.log("\npublic root folder: " + publicFolder);
     router.start(app);
 
 
@@ -204,6 +249,8 @@ function listen(port) {
 
         }
     });
+
+
 
 
 }

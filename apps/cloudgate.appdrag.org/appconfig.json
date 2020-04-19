@@ -1,11 +1,11 @@
 {
   "env": "PROD",
   "version": "1.0.0",
-  "title": "Sample App 1",
-  "description": "This is a sample app",
-  "mainDomain": "116.202.112.237",
+  "title": "Cloudgate App 1",
+  "description": "This is a sample cloudgate app",
   "forceSSL": true,
-  "domains": ["116.202.112.237", "vms2.terasp.net"], 
+  "mainDomain": "cloudgate.appdrag.org",
+  "domains": ["cloudgate.appdrag.org"], 
   "publicFolder": "./public",
   "db": {
     "MYSQL": {
@@ -25,7 +25,7 @@
         "backupTo": "./DB/REDIS/backup.redis"
       }
   },
-  "apiToken" : "SECURE43",
+  "apiToken" : "213565188456156",
   "apiRuntime": "nodejs12",
   "apiEndpoints": {
     "/tests/simple" : {
@@ -36,6 +36,20 @@
     "/tests/full" : {
       "src" : "./API/tests/",
       "handler": "full.handler"
+    }
+  },
+  "websocketEndpoints": {
+    "/echo" : {
+      "src" : "./API/websocket/",
+      "open": "Echo.open",
+      "message": "Echo.message",
+      "close": "Echo.close"
+    },
+    "/chat" : {
+      "src" : "./API/websocket/",
+      "open": "Chat.open",
+      "message": "Chat.message",
+      "close": "Chat.close"
     }
   }
 }

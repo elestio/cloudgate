@@ -1,8 +1,8 @@
 {
   "env": "PROD",
   "version": "1.0.0",
-  "title": "Sample App 1",
-  "description": "This is a sample app",
+  "title": "Sample App 2",
+  "description": "This is a sample app 2",
   "domains": ["192.168.1.19"], 
   "publicFolder": "./public",
   "db": {

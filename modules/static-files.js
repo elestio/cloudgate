@@ -2,17 +2,13 @@ var fs = require('fs');
 const mime = require('mime');
 const tools = require('../lib/tools.js');
 
-var rootFolder = null;
-
 var fileMonitorStarted = false;
 
 module.exports = {
     name: "static-files",
     process: (appConfig, reqInfos, res, req, memory) => {
 
-        if (rootFolder == null) {
-            rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
-        }
+        var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
         var curURL = reqInfos.url.split('?')[0];
 
         if (appConfig.AWS == null) {
@@ -28,8 +24,8 @@ module.exports = {
                     if (event == "change") {
                         //invalidate whole app cache, todo: invalidate only the correct cache entries
                         console.log("File update detected: " + path);
-                        console.log("Clearing cache for app: " + appConfig.root);
-                        memory.clear(appConfig.root);
+                        console.log("Clearing cache for app: " + "ResponseCache_" + appConfig.root);
+                        memory.clear("ResponseCache_" + appConfig.root);
                     }
                 });
             }

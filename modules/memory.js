@@ -18,6 +18,8 @@ module.exports = {
     }
   },
   setObject: function(key, value, context) {
+
+    //console.log("setObject key: " + key + " - context: " + context);
     
     if ( memory[context] == null ) { memory[context] = {}; }
 
@@ -45,6 +47,8 @@ module.exports = {
     
   },
   set: function(key, value, context) {
+
+    //console.log("set key: " + key + " - context: " + context);
 
     if ( memory[context] == null ) { memory[context] = {}; }
 

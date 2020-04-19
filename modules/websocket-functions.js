@@ -35,13 +35,17 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
 
     reqInfos.isBinary = isBinary;
     if ( !isBinary ) {
-        reqInfos.body = tools.ab2str(msgBody);
+        if ( msgBody != null) {
+            reqInfos.body = decodeURIComponent(tools.ab2str(msgBody));
+        }
         reqInfos.isBinary = false;
     }
     else{
         reqInfos.body = msgBody;
         reqInfos.isBinary = true;
     }
+
+     //console.log(reqInfos.body);
 
     reqInfos.ws = res;
 

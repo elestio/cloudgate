@@ -28,7 +28,7 @@
             ws.onmessage = function(e) {
                 console.log('Message:', e.data);
 
-                var new_html = '<span class="line">' + e.data + '</span>';
+                var new_html = '<span class="line">' + (+new Date()) + ": " + sanitizeHTML(e.data) + '</span>';
                 var new_elem = document.createElement('div');
                 new_elem.innerHTML = new_html;
 
@@ -67,7 +67,13 @@
                 //websocket is closed, skip it ... (or queue it?)
                 return;
             }
-            globalWS.send(txt);
+            globalWS.send( encodeURIComponent(txt) );
         }
+
+        var sanitizeHTML = function (str) {
+            var temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        };
 
 	</script>

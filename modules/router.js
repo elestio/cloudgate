@@ -227,7 +227,7 @@ module.exports = {
             /* Options */
             compression: 0,
             maxPayloadLength: 16 * 1024 * 1024,
-            idleTimeout: 1800,
+            idleTimeout: 60*60*24*1, //1 day
 
             /* Handlers */
             open: async (ws, req) => {

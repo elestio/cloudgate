@@ -42,7 +42,7 @@ Install globally:
 
     npm i @elestio/cloudgate -g
 
-The you can clone samples: 
+Then you can clone samples: 
     
     git clone https://github.com/elestio/cloudgate-samples.git
 

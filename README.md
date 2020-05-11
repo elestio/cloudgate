@@ -31,7 +31,7 @@ Motivations:
 - Linux, Windows or Mac OS
 - Node 10+ for single-threaded mode, Node 12+ for multi-threaded mode
 
-if you are on Node 10, you can activate multithreding by executing this in your terminal:
+if you are on Node 10, you can activate multithreading by executing this in your terminal:
 
     export NODE_OPTIONS=--experimental-worker
 
@@ -51,7 +51,7 @@ Enter the cloned folder then install dependencies:
     cd cloudgate-samples
     npm install
 
-Your are not ready to run the samples below
+Your are now ready to run the samples below
 
 ## Run samples
  

@@ -11,6 +11,7 @@ It can be used for several use cases:
 - Serve multiple web applications in a single process and sharing the same ports (80, 443)
 - Websocket server 
 - SSL termination (with Letsencrypt automatic certs)
+- REST & Websocket API to reconfigure the cloudgate without downtime
 - Crazy high performances (up to 185K RPS per core)
 - Crazy low latencies (less than 30us, that's 0.03ms!)
 - Support multi-threading
@@ -31,7 +32,7 @@ Motivations:
 - Linux, Windows or Mac OS
 - Node 10+ for single-threaded mode, Node 12+ for multi-threaded mode
 
-if you are on Node 10, you can activate multithreading by executing this in your terminal:
+if you are on Node 10, you can activate multi-threading by executing this in your terminal:
 
     export NODE_OPTIONS=--experimental-worker
 

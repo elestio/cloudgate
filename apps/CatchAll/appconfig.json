@@ -16,9 +16,9 @@
       "src" : "./API/tests/",
       "handler": "full.handler"
     },
-    "/express" : {
+    "/wildcardtest/*" : {
       "src" : "./API/tests/",
-      "handler": "express.handler"
+      "handler": "full.handler"
     }
   }
 }

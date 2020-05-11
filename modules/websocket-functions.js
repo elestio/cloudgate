@@ -59,6 +59,21 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
 
             var endpointTarget = reqInfos.url.split('?')[0];
             var apiEndpoint = functionsList[endpointTarget];
+
+            //if not found, check if we have a rule with a wildcard (*) matching
+            if (functionsList[endpointTarget] == null) {
+                var routes = Object.keys(functionsList);
+                for (var i = 0; i < routes.length; i++){
+                    var curRoute = routes[i];
+                    if ( curRoute.indexOf('*') > -1){
+                        var prefix = curRoute.split('*')[0];
+                        if ( endpointTarget.startsWith(prefix) ){
+                            apiEndpoint = functionsList[curRoute];
+                        }
+                    }
+                }
+            }
+
             if (typeof (apiEndpoint) != 'undefined') {
                 var functionIndexFile = apiEndpoint[subFunction].split('.')[0];
                 var functionHandlerFunction = apiEndpoint[subFunction].split('.')[1];

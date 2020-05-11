@@ -187,7 +187,8 @@ Run benchmark in single core:
 Run benchmark in multi core:
 `./benchmarks/multi.sh`
 
-  
+A special endpoint is available to benchmark the raw performance with no processing pipeline:
+http://localhost:3000/cloudgate/debug/raw
 
 ## CLI usage
 

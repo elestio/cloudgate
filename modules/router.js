@@ -30,13 +30,16 @@ module.exports = {
                 res.aborted = true;
             });
 
-            //170K RPS per core - best perf possible
+            //185K RPS per core - best perf possible
             //res.end("Hello World");
             //return;
 
-            //console.log(tools.getIP(req, res));
-
-            //console.log(memory.debug());
+            //test raw performance without any processing pipeline
+            var tmpUrl = req.getUrl();
+            if ( tmpUrl == "/cloudgate/debug/raw") {
+                res.end("Hello World!");
+                return;
+            }
 
             //UPDATE STATS
             memory.incr("http.requests", 1, "STATS");
@@ -55,10 +58,6 @@ module.exports = {
                     headers: {},
                     req: req,
                 }
-
-                //console.log(reqInfos);
-                //console.log(serverConfig);
-               
 
                 //handle cloudgate commands (control + replication)
                 if ( serverConfig && serverConfig.adminEnabled == "1" ){
@@ -90,8 +89,6 @@ module.exports = {
 
 
                 var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
-                //console.log("appconfig key: " + subDomain + "." + domain);
-                //console.log(memory.debug());
                 
                 //handle *
                 if (appConfig == null) {
@@ -137,17 +134,13 @@ module.exports = {
                 if (reqInfos.method == "get") {
                     cacheKey = host + reqInfos.url + reqInfos.query;
                 }
-
-                //console.log(memory.debug());
-                //console.log("cachekey")
-                //console.log(cacheKey + " - " + host);
-                
+        
                 //console.log(memory.debug());
                 var cacheContent = memory.get(cacheKey, "ResponseCache");
                 if (cacheContent != null) {
 
                     if ( serverConfig.debug){
-                        //console.log("Serving from cache:" + cacheKey)  ;
+                        console.log("Serving from cache:" + cacheKey)  ;
                     }
 
                     //console.log("cachefound for: " + cacheKey + " - " + host)
@@ -181,31 +174,6 @@ module.exports = {
                 }
 
 
-
-
-                //res.end("after reading config");
-                //return;
-
-                
-
-                //experiment direct file serving with a stream ... SLOW                
-                /*
-                var finalPath = reqInfos.url.split('?')[0];
-                if (finalPath == "/") {
-                    finalPath = "/index.html"; //default document in a folder
-                    //console.log(finalPath);
-                }
-
-                var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
-                var fullPath = tools.safeJoinPath(rootFolder, finalPath);
-                const readStream = fs.createReadStream(fullPath);
-                const totalSize = fs.statSync(fullPath).size;
-                tools.pipeStreamOverResponse(res, readStream, totalSize);
-                return;
-                */
-
-                
-
                 //var beginPipeline = process.hrtime();
 
                 var hasBeenProcessed = false;
@@ -217,18 +185,6 @@ module.exports = {
                     var result = await module.process(appConfig, reqInfos, res, req, memory, serverConfig);
                     //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                     //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
-
-                    
-                    /*
-                    if ( module.name == "static-files"){
-                        //this request is already processed, stop execution here
-                        
-                        console.log(result);
-                        console.log(reqInfos);
-                        console.log("EXEC INTERUPTED");
-                        //res.end();
-                    }
-                    */
 
                     if (result && result.processed) {
                         
@@ -273,27 +229,17 @@ module.exports = {
                         var cache404Key = appConfig.root + "_" + path404;
                         var cache404 = memory.get(cache404Key, "ResponseCache");
                         if (cache404 != null) {
-                            //console.log("cached");
                             processResult.headers['core-cache'] = '1';
                             processResult.headers['Content-Encoding'] = 'gzip';
                             processResult.content = cache404;
-                            //res.writeHeader("core-cache", "1");
-                            //res.writeHeader("Content-Encoding", "gzip");
-                            //res.end(cache404);
                         }
                         else {
                             content404 = fs.readFileSync(path404, { encoding: 'utf8' });
                             processResult.headers['Content-Encoding'] = 'gzip';
                             processResult.content = tools.GzipContent(content404);
                             memory.set(cache404Key, processResult.content, "ResponseCache");
-                            //tools.GzipResponse(res, content404);
                         }
                     }
-
-                    //console.log(processResult);
-
-                    //console.log(memory.debug());
-
 
                     var totalBytesSent = 0;
 
@@ -306,7 +252,6 @@ module.exports = {
 
                     if (processResult.content != null) {
                         if (typeof processResult.content === 'object') {
-                            //res.write(JSON.stringify(processResult.content));
                             res.write(processResult.content);
                         }
                         else {
@@ -315,11 +260,8 @@ module.exports = {
                         totalBytesSent += processResult.content.length;
                     }
                     res.end();
-                    //res.end(processResult.content);
 
                     memory.incr("http.data.out", totalBytesSent, "STATS");
-
-
                     tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
 
                 }
@@ -332,17 +274,10 @@ module.exports = {
                 if (erroMSG.indexOf("Invalid access of discarded") == -1) {
                     console.log("Error11819: ");
                     console.log(ex);
-
-                    //console.trace("I am here");
-
                     res.end("404 NOT FOUND"); //but in fact an error occured ...
                 }
 
             }
-
-            
-            
-            
 
         })
 

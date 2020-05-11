@@ -85,7 +85,6 @@ else{
 function Start(argv) {
     var colors = require('colors/safe'),
         os = require('os'),
-        portfinder = require('portfinder'),
         path = require('path'),
         argv = require('optimist')(argv)
             .boolean('cors')

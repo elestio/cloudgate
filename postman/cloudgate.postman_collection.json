@@ -1,0 +1,180 @@
+{
+	"info": {
+		"_postman_id": "07821d81-cc95-4772-bac7-a0efa5f2951b",
+		"name": "cloudgate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "list",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YOUR_CLOUDGATE_ADMIN_TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"action\": \"list\"\n}"
+				},
+				"url": {
+					"raw": "http://vms2.terasp.net:3000/CloudGateAdmin",
+					"protocol": "http",
+					"host": [
+						"vms2",
+						"terasp",
+						"net"
+					],
+					"port": "3000",
+					"path": [
+						"CloudGateAdmin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "loadLocalPath",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YOUR_CLOUDGATE_ADMIN_TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"action\": \"loadAppFromLocalPath\",\n\t\"appPath\": \"./apps/sample1/\"\n}"
+				},
+				"url": {
+					"raw": "http://vms2.terasp.net:3000/CloudGateAdmin",
+					"protocol": "http",
+					"host": [
+						"vms2",
+						"terasp",
+						"net"
+					],
+					"port": "3000",
+					"path": [
+						"CloudGateAdmin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "loadAppFromString (Serverless)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YOUR_CLOUDGATE_ADMIN_TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"action\": \"loadAppFromJSON\",\r\n\t\"appID\": \"MyS3App\",\r\n\t\"appConfig\": {\r\n\t\t\"env\": \"PROD\",\r\n\t\t\"version\": \"1.0.0\",\r\n\t\t\"title\": \"Sample App 3\",\r\n\t\t\"description\": \"This is a sample AWS Serverless app\",\r\n\t\t\"domains\": [\"vms2.terasp.net\"],\r\n\t\t\"publicFolder\": \"MyApp3\",\r\n\t\t\"TypeFS\": \"S3\",\r\n\t\t\"AWS\": {\r\n\t\t\t\"region\": \"eu-west-3\",\r\n\t\t\t\"bucket\": \"cloudgate-apps\",\r\n\t\t\t\"accessKeyId\": \"XXXXXXXXXXXXXXXXXXXX\",\r\n\t\t\t\"secretAccessKey\": \"XXXXXXXXXXXXXXXXXXXXXXX\"\r\n\t\t},\r\n\t\t\"apiToken\": \"7fd2b233-4e6b-4c97-9eb3-491519e9fdca\",\r\n\t\t\"apiEndpoints\": {\r\n\t\t\t\"/tests/simple\": {\r\n\t\t\t\t\"src\": \"cloudgate-MyApp3-simple\",\r\n\t\t\t\t\"handler\": \"index.handler\"\r\n\t\t\t},\r\n\t\t\t\"/tests/full\": {\r\n\t\t\t\t\"src\": \"cloudgate-MyApp3-full\",\r\n\t\t\t\t\"handler\": \"index.handler\"\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}"
+				},
+				"url": {
+					"raw": "http://vms2.terasp.net:3000/CloudGateAdmin",
+					"protocol": "http",
+					"host": [
+						"vms2",
+						"terasp",
+						"net"
+					],
+					"port": "3000",
+					"path": [
+						"CloudGateAdmin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "loadAppFromString (local)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YOUR_CLOUDGATE_ADMIN_TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"action\": \"loadAppFromJSON\",\r\n\t\"appID\": \"./apps/sample1/\",\r\n\t\"appConfig\": {\r\n  \"env\": \"PROD\",\r\n  \"version\": \"1.0.0\",\r\n  \"title\": \"Sample App 1\",\r\n  \"description\": \"This is a sample app\",\r\n  \"mainDomain\": \"116.202.112.237\",\r\n  \"forceSSL\": true,\r\n  \"domains\": [\"116.202.112.237\", \"vms2.terasp.net\"], \r\n  \"publicFolder\": \"./public\",\r\n   \"apiToken\" : \"XXXXXXXXXXXXXXXXXX\",\r\n  \"apiRuntime\": \"nodejs12\",\r\n  \"apiEndpoints\": {\r\n    \"/tests/simple\" : {\r\n      \"src\": \"./API/tests/\",\r\n      \"handler\": \"simple.handler\",\r\n      \"timeout\": 15, \"memory\": 256, \"cpu\": 2, \"apiRuntime\": \"nodejs12\"\r\n    },\r\n    \"/tests/full\" : {\r\n      \"src\" : \"./API/tests/\",\r\n      \"handler\": \"full.handler\"\r\n    }\r\n  }\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "http://vms2.terasp.net:3000/CloudGateAdmin",
+					"protocol": "http",
+					"host": [
+						"vms2",
+						"terasp",
+						"net"
+					],
+					"port": "3000",
+					"path": [
+						"CloudGateAdmin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unload",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YOUR_CLOUDGATE_ADMIN_TOKEN",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"action\": \"unloadApp\",\n\t\"appPath\": \"MyS3App\"\n}"
+				},
+				"url": {
+					"raw": "http://vms2.terasp.net:3000/CloudGateAdmin",
+					"protocol": "http",
+					"host": [
+						"vms2",
+						"terasp",
+						"net"
+					],
+					"port": "3000",
+					"path": [
+						"CloudGateAdmin"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

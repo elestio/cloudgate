@@ -1,0 +1,1 @@
+./wrk -t6 -c256 http://localhost:3000/ --latency

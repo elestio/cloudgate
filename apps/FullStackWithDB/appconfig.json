@@ -1,0 +1,54 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Full-Stack demo",
+  "description": "This is a sample cloudgate app showing usage of static files / REST API / Websockets / Database",
+  "domains": ["my.domain.com", "127.0.0.1"], 
+  "publicFolder": "./public",
+  "db": {
+    "MYSQL": {
+      "endpoint" : "/db",
+      "host" : "127.0.0.1",
+      "port" : 3306,
+      "database": "db_name",
+      "user": "db_user",
+      "password": "db_password"
+    },
+      "REDIS": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "redisDB": 0,
+        "password": "myRedisSecretPasswordHere",
+        "loadFrom": "./DB/REDIS/dump.redis",
+        "backupTo": "./DB/REDIS/backup.redis"
+      }
+  },
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "apiRuntime": "nodejs12",
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "./API/tests/",
+      "handler": "simple.handler",
+      "timeout": 15, "memory": 256, "cpu": 2, "apiRuntime": "nodejs12"
+    },
+    "/tests/full" : {
+      "src" : "./API/tests/",
+      "handler": "full.handler"
+    }
+  },
+  "websocketEndpoints": {
+    "/echo" : {
+      "src" : "./API/websocket/",
+      "open": "Echo.open",
+      "message": "Echo.message",
+      "close": "Echo.close"
+    },
+    "/chat" : {
+      "src" : "./API/websocket/",
+      "open": "Chat.open",
+      "message": "Chat.message",
+      "close": "Chat.close"
+    }
+  }
+}

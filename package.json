@@ -1,0 +1,36 @@
+{
+  "name": "cloudgate",
+  "bin": "cloudgate.js",
+  "version": "1.0.0",
+  "description": "CloudGate is a fast web application server for Node.js",
+  "main": "cloudgate.js",
+  "scripts": {
+    "example": "node cloudgate.js -p 3000 ./apps/CatchAll",
+    "example-multi": "node cloudgate.js -p 3000 ./apps/Static ./apps/CatchAll ./apps/Websocket",
+    "serve": "node cloudgate.js -p 3000 ."
+  },
+  "dependencies": {
+    "@greenlock/manager": "^3.1.0",
+    "@root/csr": "^0.8.1",
+    "@root/encoding": "^1.0.1",
+    "@root/keypairs": "^0.9.0",
+    "@root/pem": "^1.0.4",
+    "acme": "^3.0.3",
+    "acme-http-01-webroot": "^3.0.0",
+    "aws-sdk": "^2.656.0",
+    "chokidar": "^3.3.1",
+    "clear-module": "^4.1.1",
+    "colors": "^1.4.0",
+    "express": "^4.17.1",
+    "external-ip": "^2.3.1",
+    "ioredis": "^4.16.0",
+    "mime": "^2.4.4",
+    "mysql": "^2.18.1",
+    "optimist": "^0.6.1",
+    "portfinder": "^1.0.25",
+    "serverless-http": "^2.3.2",
+    "systeminformation": "^4.23.5",
+    "uuid": "^7.0.3",
+    "ws": "^7.2.5"
+  }
+}

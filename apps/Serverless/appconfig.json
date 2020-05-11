@@ -1,0 +1,26 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Serverless App",
+  "description": "This is a sample Serverless app hosted on AWS S3/Lambda",
+  "domains": ["127.0.0.1", "mydomain.com", "www.mydomain.com"], 
+  "publicFolder": "FILL_YOUR_S3_PUBLIC_FOLDER",
+  "AWS":{
+      "region": "us-east-1",
+      "bucket": "FILL_YOUR_BUCKET_NAME",
+      "accessKeyId": "FILL_YOUR_AWS_ACCESS_KEY",
+      "secretAccessKey": "FILL_YOUR_AWS_SECRET_KEY"
+  },
+  "TypeFS": "S3",
+  "TypeAPI": "LAMBDA",
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "FILL_YOUR_DEPLOYED_LAMBDA_FUNCTION_NAME_1",
+      "handler": "index.handler"
+    },
+    "/tests/full" : {
+      "src" : "FILL_YOUR_DEPLOYED_LAMBDA_FUNCTION_NAME_2",
+      "handler": "index.handler"
+    }
+  }
+}

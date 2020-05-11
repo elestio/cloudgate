@@ -1,0 +1,24 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Catch All App",
+  "description": "This is a sample app that catch all domains not configured",
+  "domains": ["*"], 
+  "publicFolder": "./public",
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "./API/tests/",
+      "handler": "simple.handler"
+    },
+    "/tests/full" : {
+      "src" : "./API/tests/",
+      "handler": "full.handler"
+    },
+    "/express" : {
+      "src" : "./API/tests/",
+      "handler": "express.handler"
+    }
+  }
+}

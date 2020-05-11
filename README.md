@@ -11,13 +11,13 @@ It can be used for several use cases:
 - Serve multiple web applications in a single process and sharing the same ports (80, 443)
 - Websocket server 
 - SSL termination (with Letsencrypt automatic certs)
-- Firewall / Rate limiter / DDOS protection (Coming soon)
-- Reverse proxy (Coming soon)
 - Crazy high performances (up to 185K RPS per core)
 - Crazy low latencies (less than 30us, that's 0.03ms!)
 - Support multi-threading
 - Support cluster mode with multiple servers (can be in different datacenters)
-- All-in-one application server
+- Firewall / Rate limiter / DDOS protection (Coming soon)
+- Reverse proxy (Coming soon)
+- Replicated in-memory datastore (Coming soon)
 
 Motivations:
 - Multi-tenant clustering able to handle thousands of applications per node 
@@ -31,31 +31,35 @@ Motivations:
 - Linux, Windows or Mac OS
 - Node 10+ for single-threaded mode, Node 12+ for multi-threaded mode
 
+if you are on Node 10, you can activate multithreding by executing this in your terminal:
+
+    export NODE_OPTIONS=--experimental-worker
+
 
 ## Installation
 
-Install:  `git clone ssh://git@github.com/elestio/cloudgate.git`
+Install globally:  `npm i @elestio/cloudgate -g`
 
+Clone samples: `git clone ssh://git@github.com/elestio/cloudgate.git`
 Enter the cloned folder:  `cd cloudgate`
 Then install dependencies: `npm install`
 
-
 ## Run samples
  
-run a sample app container on the default port (3000): `node cloudgate.js ./apps/CatchAll/ --rootfolder ./`
+run a sample app on the default port (3000): `cloudgate ./apps/CatchAll/ --rootfolder ./`
 
 Then open the site in your browser: http://127.0.0.1:3000/
 
 
-run a sample an app in another root folder: `node cloudgate.js ./apps/CatchAll/ --rootfolder /my/custom/folder`
+run a sample an app in another root folder: `cloudgate ./apps/CatchAll/ --rootfolder /my/custom/folder`
 
   
 Start multiple apps on port 80 with **adminAPI** activated:
-`sudo node cloudgate.js -p80 ./apps/Static ./apps/Websocket ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./`
+`sudo cloudgate -p80 ./apps/Static ./apps/Websocket ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./`
 Here sudo is required if you are not root to bind port 80
 
 Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
-`sudo node cloudgate.js -p80 --ssl --sslport 443 --ssldomain www.mydomain.com ./apps/Static --rootfolder ./`
+`sudo cloudgate -p80 --ssl --sslport 443 --ssldomain www.mydomain.com ./apps/Static --rootfolder ./`
 
 
 Note: By default, cloudgate will use all the cores availables on your server, you can specify the number of cores to use with the option "-c"
@@ -64,7 +68,7 @@ eg: `-c 4` means cloudgate will use 4 cores instead of all the cores availables
  ## Run as a service
 
 Install and run as a service with PM2: 
-`pm2 start "node cloudgate.js ./apps/CatchAll/ --rootfolder ./" --name cloudgate`
+`pm2 start "cloudgate ./apps/CatchAll/ --rootfolder ./" --name cloudgate`
 
 
 ## AdminAPI 
@@ -136,16 +140,16 @@ unload an App:
 ## Remote Shell
 
 Check the sample app RemoteShell for more details about using Websocket to control your instance
-You can also try it with this command: `node cloudgate.js -p3000 ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G`
+You can also try it with this command: `cloudgate -p3000 ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G`
 
 Then open your browser on: http://127.0.0.1:3000/wsAdmin.html?token=12345A000G
 
 
 ## EXPERIMENTAL: Cluster mode
 
-Serve an app on port 3000 in cluster mode as the master with **adminAPI** activated: `node cloudgate.js ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --master 0.0.0.0:8081@A_Random_Secret_Token_Here`
+Serve an app on port 3000 in cluster mode as the master with **adminAPI** activated: `cloudgate ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --master 0.0.0.0:8081@A_Random_Secret_Token_Here`
 
-Serve an app on port 3000 in cluster mode as a slave with **adminAPI** activated: `node cloudgate.js ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --slave 0.0.0.0:8081@A_Random_Secret_Token_Here`
+Serve an app on port 3000 in cluster mode as a slave with **adminAPI** activated: `cloudgate ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --slave 0.0.0.0:8081@A_Random_Secret_Token_Here`
 
  
 ## Benchmarks
@@ -198,10 +202,10 @@ To create a new App you can clone one of the samples in /apps folder of this rep
 
 Another option is to create a new empty folder, and create a file named "appconfig.json", inside paste this:
 
-    `{
+    {
 	    "domains": ["*"],
 	    "publicFolder": "./public"
-    }`
+    }
 
 This is the bare minimum configuration required to define an application
 
@@ -211,7 +215,7 @@ Another Eg.: "domains": ["127.0.0.1", "localhost", "192.168.1.1", "mydomain.com"
 
 In this example we are requesting several domains, you can notice that 127.0.0.1 and localhost are 2 different domains, a private network ip is also another domain. You can also use wildcards "*" to catch ALL domains not specified in a more specific rule. Subdomains wildcards are also supported "*.mydomain.com"
 
-**publicFolder**: is a string containing the path of rhe public folder of your app, it must be relative to the folder of your app
+**publicFolder**: is a string containing the path of the public folder of your app, it must be relative to the folder of your app
 
 ## Options in appconfig.json
 
@@ -298,7 +302,7 @@ You can also expose safely your DB using the REST API or WEBSOCKET API
 ## TODO
 
    1) finish multinodes infra
-   2) MUST improve serving large files (4-8GB/s .... vs 28GB/s on nginx!)
+   2) MUST improve serving large files (currently 4-8GB/s .... vs 28GB/s on nginx!)
 
  
  - [ ] Add a rate limiter

@@ -1,13 +1,12 @@
 {
-  "name": "cloudgate",
+  "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
   "version": "1.0.0",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
-    "example": "node cloudgate.js -p 3000 ./apps/CatchAll",
-    "example-multi": "node cloudgate.js -p 3000 ./apps/Static ./apps/CatchAll ./apps/Websocket",
-    "serve": "node cloudgate.js -p 3000 ."
+    "example": "node cloudgate.js ./apps/CatchAll -p 3000 -r ./",
+    "example-multi": "node cloudgate.js ./apps/Static ./apps/CatchAll ./apps/Websocket -p 3000 -r ./"
   },
   "dependencies": {
     "@greenlock/manager": "^3.1.0",
@@ -21,8 +20,6 @@
     "chokidar": "^3.3.1",
     "clear-module": "^4.1.1",
     "colors": "^1.4.0",
-    "express": "^4.17.1",
-    "external-ip": "^2.3.1",
     "ioredis": "^4.16.0",
     "mime": "^2.4.4",
     "mysql": "^2.18.1",
@@ -32,5 +29,10 @@
     "systeminformation": "^4.23.5",
     "uuid": "^7.0.3",
     "ws": "^7.2.5"
-  }
+  },
+  "author" : "elest.io",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/elestio/cloudgate"
+    }
 }

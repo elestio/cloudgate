@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 //const { Worker, isMainThread, threadId } = require('worker_threads');
 
 //Handle multithreading (require node 12+), single thread mode stay compatible with node 10

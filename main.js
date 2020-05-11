@@ -22,7 +22,6 @@ const fs = require('fs');
 
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
-const getIP = require('external-ip')();
 
 //Load memory from dump if present
 var memoryPath = "./memorystate.json";

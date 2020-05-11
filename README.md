@@ -38,11 +38,20 @@ if you are on Node 10, you can activate multithreding by executing this in your 
 
 ## Installation
 
-Install globally:  `npm i @elestio/cloudgate -g`
+Install globally:  
 
-Clone samples: `git clone ssh://git@github.com/elestio/cloudgate.git`
-Enter the cloned folder:  `cd cloudgate`
-Then install dependencies: `npm install`
+    npm i @elestio/cloudgate -g
+
+The you can clone samples: 
+    
+    git clone https://github.com/elestio/cloudgate-samples.git
+
+Enter the cloned folder then install dependencies:  
+    
+    cd cloudgate-samples
+    npm install
+
+Your are not ready to run the samples below
 
 ## Run samples
  

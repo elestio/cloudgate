@@ -1,9 +1,9 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CloudGate is a fast web application server for Node.js",
-  "main": "cloudgate.js",
+  "main": "core.js",
   "scripts": {
     "example": "node cloudgate.js ./apps/CatchAll -p 3000 -r ./",
     "example-multi": "node cloudgate.js ./apps/Static ./apps/CatchAll ./apps/Websocket -p 3000 -r ./"

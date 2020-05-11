@@ -1,5 +1,5 @@
 #Require Node.js12
-FROM node:12
+FROM node:12-slim
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -12,5 +12,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-EXPOSE 80
-CMD [ "node", "index.js" ]
+EXPOSE 3000
+CMD [ "node", "cloudgate.js", "./apps/CatchAll" ]

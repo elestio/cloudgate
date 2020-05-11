@@ -314,7 +314,7 @@ function Start(argv) {
                     certInfos = resp;
 
                     //start the SSL Server
-                    var sslApp = require('./bin/cloudgate.js').SSLApp({
+                    var sslApp = require('./core').SSLApp({
                         key_file_name: certInfos.privateKeyPath,
                         cert_file_name: certInfos.fullchain
                     });
@@ -338,7 +338,7 @@ function Start(argv) {
         }
 
         const tools = require('./lib/tools.js');
-        var app = require('./bin/cloudgate.js').App();
+        var app = require('./core').App();
 
         //REST API sample / test
         //require('./lib/debug')(app, options.root);

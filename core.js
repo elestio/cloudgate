@@ -1,6 +1,6 @@
 module.exports = (() => {
 	try {
-		const cloudgate = require('./cloudgate_' + process.platform + '_' + process.arch + '_' + process.versions.modules + '.node');
+		const cloudgate = require('./bin/cloudgate_' + process.platform + '_' + process.arch + '_' + process.versions.modules + '.node');
 		if (process.env.EXPERIMENTAL_FASTCALL) {
 			process.nextTick = (f, ...args) => {
 				Promise.resolve().then(() => {

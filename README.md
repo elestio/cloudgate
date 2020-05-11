@@ -266,7 +266,11 @@ Here is the full list of configuration options supported in appconfig.json:
     	"/tests/full": {
     		"src": "./API/tests/",
     		"handler": "full.handler"
-    	}
+    	},
+        "/wildcardtest/*" : {
+            "src" : "./API/tests/",
+            "handler": "full.handler"
+        }
     }
 
 
@@ -275,7 +279,7 @@ first one is on the virtual path "/tests/simple"
 and will be served using the code in the folder defined by the attribute "src"
 The handler attribute here "simple.handler" mean our handler source code will be in the file simple.js
 In this example a second function is declared, the handler code is in the same folder but in a different file named full.js
-
+In the third apiEndpoint we are using a wildcard (*) so all path starting the the prefix /wildcardtest/ will be routed to that function
   
 
 **websocketEndpoints**: this works exactly like apiEndpoints, but instead of declaring an handler we have to declare several events: open, message, close

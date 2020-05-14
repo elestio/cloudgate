@@ -244,9 +244,17 @@ module.exports = {
                     var totalBytesSent = 0;
 
                     // FINAL WRITING
+                    if ( memory.getObject("AdminConfig", "GLOBAL").debug == true ){
+                        console.log(processResult);
+                    }
+               
                     res.writeStatus("" + (processResult.status || 200));
                     for (var key in processResult.headers) {
-                        res.writeHeader(key, processResult.headers[key]);
+
+                        if ( key.toLowerCase() != "content-length" ){
+                            res.writeHeader(key, processResult.headers[key]);
+                        }
+                        
                         totalBytesSent += key.length + processResult.headers[key].length;
                     }
 

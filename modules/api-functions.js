@@ -57,13 +57,20 @@ module.exports = {
             
             var begin = process.hrtime();
 
+            var apiGatewayEvent = {
+                httpMethod: reqInfos.method.toUpperCase(),
+                path: reqInfos.url,
+                queryStringParameters: qs.parse(reqInfos.query),
+                headers: reqInfos.headers
+            };
+
             var aws = require('aws-sdk');
             var lambda = new aws.Lambda({ region: appConfig.AWS.region, accessKeyId: appConfig.AWS.accessKeyId, secretAccessKey: appConfig.AWS.secretAccessKey });
             var params = {
                 FunctionName: apiEndpoint.src, 
                 InvocationType: "RequestResponse", 
                 LogType: "Tail", 
-                Payload: JSON.stringify(reqInfos)
+                Payload: JSON.stringify(apiGatewayEvent)
             };
             lambda.invoke(params, function(err, data) {
                 if (err) { 
@@ -95,7 +102,7 @@ module.exports = {
                     if ( typeof payload == "object" ){
                         resolve({
                             processed: true,
-                            status: payload.status,
+                            status: payload.statusCode,
                             headers: payload.headers,
                             content: payload.content,
                             logs: logs,

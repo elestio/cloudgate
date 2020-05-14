@@ -104,7 +104,7 @@ module.exports = {
                             processed: true,
                             status: payload.statusCode,
                             headers: payload.headers,
-                            content: payload.content,
+                            content: payload.body,
                             logs: logs,
                             durationMS: durationMS
                         });

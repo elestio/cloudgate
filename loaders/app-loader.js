@@ -23,7 +23,7 @@ module.exports = {
 
             memory.set("mustSaveConfig", 1, "TEMP");
 
-            console.log("App Loaded from localPath: " + configPath);
+            //console.log("App Loaded from localPath: " + configPath);
 
             return "App Loaded from: " + configPath;
         }

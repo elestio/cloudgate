@@ -24,7 +24,7 @@ Motivations:
 - Multi-tenant clustering able to handle thousands of applications per node 
 - High availability & scalability without Docker/Kubernetes overhead
 - Less moving parts, simplify infrastructure
-- Exterme performances exploration
+- Extreme performances exploration
 
 
 ## Requirements

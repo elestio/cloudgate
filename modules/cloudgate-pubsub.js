@@ -24,7 +24,7 @@ var cloudgateMaster = require('../core').App();
 module.exports = {
     startServer: function(host, port, memory, token) {
 
-        cloudgateMaster.ws('/GateMaster', {
+        cloudgateMaster.ws('/*', {
             compression: 0,
             maxPayloadLength: 16 * 1024 * 1024,
             idleTimeout: 60 * 60 * 24 * 1, //1 day
@@ -35,18 +35,20 @@ module.exports = {
             },
             message: async (ws, message, isBinary) => {
                 //receive new memory SET, store them, publish them on a pub/sub channel
-                //console.log("Message received on GateMaster");
                 //console.log(message); //binary
                 var msgSTR = tools.ab2str(message);
+                //console.log("Message received on GateMaster");
                 //console.log(msgSTR);
                 
                 var msg = JSON.parse(msgSTR);
 
                 //send to master thread
-                parentPort.postMessage(msg);
+                //parentPort.postMessage(msg);
 
                 //send to all other nodes 
                 cloudgateMaster.publish('CloudgateCluster', msgSTR);
+                //cloudgateMaster.publish('CloudgateCluster', message);
+                //console.log("Pushed to channel CloudgateCluster");
                 
             },
             drain: (ws) => {

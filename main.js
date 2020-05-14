@@ -348,7 +348,7 @@ function Start(argv) {
         //console.log(options.root);
 
         options.root.forEach(function(configPath) {
-            appLoader.load(configPath);
+            appLoader.load(configPath, serverConfig);
         });
 
 

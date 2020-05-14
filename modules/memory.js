@@ -261,6 +261,11 @@ function DoPost(obj){
     //POST TO GateMaster for global replication in all nodes
     obj.source = hostname;
     cloudgatePubSub.postToServer(obj);
-    //console.log("Worker Posting " + obj.a + "/" + obj.k + " to GateMaster");
-    
+
+    /*
+    if ( module.exports.getObject("AdminConfig", "GLOBAL").debug == true ){
+        console.log("Worker Posting " + obj.a + "/" + obj.k + " to GateMaster");
+    }
+    */
+        
 }

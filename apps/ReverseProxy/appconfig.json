@@ -1,0 +1,28 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "Reverse Proxy App",
+  "description": "This is a sample app using reverse proxy endpoints",
+  "domains": ["*"], 
+  "publicFolder": "./public",
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "apiEndpoints": {
+    "/local" : {
+      "src": "./API/",
+      "handler": "home.handler"
+    },
+    "/" : {
+      "src" : "http://vm.terasp.net/",
+      "http2": false
+    },
+    "/*" : {
+      "src" : "https://youzeek.com/",
+      "http2": false
+    },
+    "/hello.html" : {
+      "src" : "https://crimson-sea-278.fly.dev/",
+      "http2": true
+    }
+  }
+}

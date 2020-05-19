@@ -6,6 +6,9 @@ const qs = require('querystring');
 const tools = require('../lib/tools.js');
 
 var functionsCache = {};
+var proxyCache = {};
+
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
 module.exports = {
   name: "api-functions",
@@ -36,11 +39,7 @@ module.exports = {
       
 
       if (typeof(apiEndpoint) != 'undefined') {
-        var functionIndexFile = apiEndpoint.handler.split('.')[0];
-        var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
-        // TODO : check path doesn't crash
-        var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
-        // TODO : check not using ../ (lower level from app root)
+
 
         //read headers
         req.forEach((k, v) => {
@@ -51,6 +50,101 @@ module.exports = {
         if ( reqInfos.method != "get" ){
             reqInfos.body = await tools.getBody(req, res);
         }
+
+        var apiSrc = apiEndpoint.src;
+        if ( apiSrc.startsWith("http://") || apiSrc.startsWith("https://") ){
+
+            
+
+            //reverse proxy
+            try{
+
+                const { Client } = require('undici')
+                const client = new Client(apiSrc);
+
+                //TODO: populate the correct headers before sending the proxied query
+                delete reqInfos.headers["host"];
+
+                //we should return the correct status code to be able to handle 304 ...
+                delete reqInfos.headers["if-none-match"];
+                delete reqInfos.headers["if-modified-since"];
+
+                //we should be able to handle GZIP before sending accept-encoding
+                delete reqInfos.headers["accept-encoding"];
+                
+
+                var reqOptions = {
+                    path: reqInfos.url,
+                    method: reqInfos.method.toUpperCase(),
+                    headers: reqInfos.headers
+                };
+                if ( reqInfos.body != null ){
+                    reqOptions.body = reqInfos.body;
+                }
+                
+                if ( apiEndpoint.http2 == true ){
+                    //HTTP2 ...
+                    res.end("HTTP2 requests are not yet implemented ...");
+                }
+                else{
+
+                    //UNDICI for HTTP 1.1
+                    const { statusCode, headers, body } = await client.request(reqOptions)
+                    //console.log(reqOptions);
+                    for (var key in headers) {
+                        if ( key.toUpperCase() != 'CONTENT-LENGTH'){
+                            //res.writeHeader(key, headers[key]);
+                        }
+                    }
+
+                    //res.writeStatus("" + (statusCode || 200));
+
+                    //return the whole response at once
+                    //var str = await tools.streamToString(body);
+                    //res.end(str);
+
+                    //res.end( tools.toArrayBuffer(body) ) ;
+
+                    //TODO: pipe stream instead of reading the whole response in memory
+                    
+                    //TODO: seems to work but return only a partial response ...
+                    tools.pipeStreamOverResponse(res, body, body.length, memory);
+
+                    /*
+                    resolve({
+                        processed: true,
+                        status: statusCode,
+                        headers: headers,
+                        content: await tools.streamToString(body),
+                        logs: "",
+                        durationMS: 25
+                    });
+                    */
+
+                    return;
+
+                }
+
+                
+                                
+            }
+            catch(ex){
+                console.log("Proxy Crash: ");
+                console.log(ex);
+            }
+            
+             
+            //return;
+
+        }
+
+
+        var functionIndexFile = apiEndpoint.handler.split('.')[0];
+        var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
+        // TODO : check path doesn't crash
+        var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+        // TODO : check not using ../ (lower level from app root)
+
         
         //AWS Lambda Executor (tested at 2K RPS with -c128 in wrk on Hetzner to AWS direction)
         if (appConfig.AWS != null && appConfig.TypeAPI == "LAMBDA"){

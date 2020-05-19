@@ -313,7 +313,7 @@ function Start(argv) {
                     certInfos = resp;
 
                     //start the SSL Server
-                    var sslApp = require('./core').SSLApp({
+                    var sslApp = require('./coregate').SSLApp({
                         key_file_name: certInfos.privateKeyPath,
                         cert_file_name: certInfos.fullchain
                     });
@@ -337,7 +337,7 @@ function Start(argv) {
         }
 
         const tools = require('./lib/tools.js');
-        var app = require('./core').App();
+        var app = require('./coregate').App();
 
         //REST API sample / test
         //require('./lib/debug')(app, options.root);

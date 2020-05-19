@@ -341,7 +341,7 @@ You can also expose safely your DB using the REST API or WEBSOCKET API
               https://github.com/coreybutler/node-windows
               https://github.com/coreybutler/node-mac
  - [ ] reverse proxy
-              https://github.com/OptimalBits/redbird
+              https://www.npmjs.com/package/fast-proxy
  - [ ] Managed MySQL Cluster
  - [ ] Managed PostgreSQL Cluster
  - [ ] Managed Redis Cluster

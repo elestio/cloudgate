@@ -19,7 +19,7 @@ const tools = require('../lib/tools.js');
 const WebSocket = require('ws');
 var wsClient = null;
 
-var cloudgateMaster = require('../core').App();
+var cloudgateMaster = require('../coregate').App();
 
 module.exports = {
     startServer: function(host, port, memory, token) {

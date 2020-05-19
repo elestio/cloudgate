@@ -3,7 +3,7 @@
   "bin": "cloudgate.js",
   "version": "1.0.6",
   "description": "CloudGate is a fast web application server for Node.js",
-  "main": "core.js",
+  "main": "coregate.js",
   "scripts": {
     "example": "node cloudgate.js ./apps/CatchAll -p 3000 -r ./",
     "example-multi": "node cloudgate.js ./apps/Static ./apps/CatchAll ./apps/Websocket -p 3000 -r ./"
@@ -20,6 +20,7 @@
     "chokidar": "^3.3.1",
     "clear-module": "^4.1.1",
     "colors": "^1.4.0",
+    "fast-proxy": "^1.6.2",
     "ioredis": "^4.16.0",
     "mime": "^2.4.4",
     "mysql": "^2.18.1",

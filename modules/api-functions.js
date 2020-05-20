@@ -4,7 +4,14 @@ var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
-const axios = require('axios');
+
+const https = require('https');
+const Axios = require('axios');
+const axios = Axios.create({
+  httpsAgent: new https.Agent({  
+    rejectUnauthorized: false
+  })
+});
 
 var functionsCache = {};
 var proxyCache = {};
@@ -104,45 +111,44 @@ module.exports = {
                     optAxios.data = reqInfos.body;
                 }
 
-                //console.log(optAxios);
-                //console.log(finalUrl);
-
+    
                 axios(finalUrl, optAxios)
                 .then(async function (response) {
 
                     //console.log(response.request);
 
-                    for (var key in response.headers) {
-                        if ( key.toUpperCase() != 'CONTENT-LENGTH'){
-                            res.writeHeader(key, response.headers[key]);
+                    try{
+                        for (var key in response.headers) {
+                            if ( key.toUpperCase() != 'CONTENT-LENGTH'){
+                                res.writeHeader(key, response.headers[key]);
+                            }
+                        }
+                        
+                        res.writeStatus("" + response.status);
+
+                        const stream = response.data;
+                        //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
+                        
+                        stream.on('data', (chunk ) => {
+                            //console.log("Chunk received: " + chunk.length);
+                            if (!res.aborted){
+                                res.write(chunk);
+                            }
+                        });
+                        stream.on('end', () => {
+                            //console.log("end of chunks!");
+                            if (!res.aborted){
+                                res.end();
+                            } 
+                        });
+                    }
+                    catch(ex){
+                        var erroMSG = ex + ""; //force a cast to string
+                        if (erroMSG.indexOf("Invalid access of discarded") == -1) {
+                            console.log("Error46110: ");
+                            console.log(ex);
                         }
                     }
-                    
-                    res.writeStatus("" + response.status);
-                    //return the whole response at once
-                    //var buff = await tools.streamToBuffer(response.data);
-                    //res.end(buff);
-
-                    //console.log(stream);
-
-                    const stream = response.data;
-                    //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
-                    
-                    stream.on('data', (chunk ) => {
-                        //console.log("Chunk received: " + chunk.length);
-                        if (!res.aborted){
-                            res.write(chunk);
-                        }
-                    });
-                    stream.on('end', () => {
-                        //console.log("end of chunks!");
-                        if (!res.aborted){
-                            res.end();
-                        } 
-                    });
-                    
-                    
-                    //tools.pipeStreamOverResponse(res, response.data, response.data.length, memory);
 
                     return;
                 })
@@ -165,10 +171,7 @@ module.exports = {
                     console.log(ex);
                 }
             }
-            
-             
-            //return;
-
+   
         }
 
         if ( apiEndpoint.handler == null ){

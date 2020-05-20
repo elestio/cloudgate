@@ -21,7 +21,6 @@ if ( Worker == null ){
     return;
 }
 
-
 const os = require('os');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');

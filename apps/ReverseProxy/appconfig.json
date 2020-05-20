@@ -12,17 +12,10 @@
       "src": "./API/",
       "handler": "home.handler"
     },
-    "/" : {
-      "src" : "http://vm.terasp.net/",
-      "http2": false
-    },
     "/*" : {
-      "src" : "https://youzeek.com/",
+      "skipPrefix": false,
+      "src": "https://vms2.terasp.net/",
       "http2": false
-    },
-    "/hello.html" : {
-      "src" : "https://crimson-sea-278.fly.dev/",
-      "http2": true
     }
   }
 }

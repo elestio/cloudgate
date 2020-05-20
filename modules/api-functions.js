@@ -4,11 +4,10 @@ var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
+const axios = require('axios');
 
 var functionsCache = {};
 var proxyCache = {};
-
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
 module.exports = {
   name: "api-functions",
@@ -21,9 +20,11 @@ module.exports = {
       }
 
       var endpointTarget = reqInfos.url.split('?')[0];
+      var matchingPrefix = endpointTarget;
       var apiEndpoint = functionsList[endpointTarget];
 
       //if not found, check if we have a rule with a wildcard (*) matching
+      
       if (functionsList[endpointTarget] == null) {
         var routes = Object.keys(functionsList);
         for (var i = 0; i < routes.length; i++){
@@ -32,6 +33,7 @@ module.exports = {
                 var prefix = curRoute.split('*')[0];
                 if ( endpointTarget.startsWith(prefix) ){
                     apiEndpoint = functionsList[curRoute];
+                    matchingPrefix = prefix;
                 }
             }
         }
@@ -54,83 +56,114 @@ module.exports = {
         var apiSrc = apiEndpoint.src;
         if ( apiSrc.startsWith("http://") || apiSrc.startsWith("https://") ){
 
-            
+            var skipPrefix = false;
+            if ( apiEndpoint.skipPrefix == true ){
+                skipPrefix = true;
+            }   
 
             //reverse proxy
             try{
 
-                const { Client } = require('undici')
-                const client = new Client(apiSrc);
-
                 //TODO: populate the correct headers before sending the proxied query
                 delete reqInfos.headers["host"];
-
+                
                 //we should return the correct status code to be able to handle 304 ...
                 delete reqInfos.headers["if-none-match"];
                 delete reqInfos.headers["if-modified-since"];
 
                 //we should be able to handle GZIP before sending accept-encoding
                 delete reqInfos.headers["accept-encoding"];
-                
 
-                var reqOptions = {
-                    path: reqInfos.url,
-                    method: reqInfos.method.toUpperCase(),
-                    headers: reqInfos.headers
-                };
-                if ( reqInfos.body != null ){
-                    reqOptions.body = reqInfos.body;
-                }
-                
-                if ( apiEndpoint.http2 == true ){
-                    //HTTP2 ...
-                    res.end("HTTP2 requests are not yet implemented ...");
+                var finalPath = reqInfos.url;
+                if ( skipPrefix ){
+                    finalPath = reqInfos.url.replace(matchingPrefix, "");
                 }
                 else{
-
-                    //UNDICI for HTTP 1.1
-                    const { statusCode, headers, body } = await client.request(reqOptions)
-                    //console.log(reqOptions);
-                    for (var key in headers) {
-                        if ( key.toUpperCase() != 'CONTENT-LENGTH'){
-                            //res.writeHeader(key, headers[key]);
-                        }
+                    if ( finalPath.startsWith("/") ){
+                        finalPath = finalPath.substring(1, finalPath.length);
                     }
-
-                    //res.writeStatus("" + (statusCode || 200));
-
-                    //return the whole response at once
-                    //var str = await tools.streamToString(body);
-                    //res.end(str);
-
-                    //res.end( tools.toArrayBuffer(body) ) ;
-
-                    //TODO: pipe stream instead of reading the whole response in memory
-                    
-                    //TODO: seems to work but return only a partial response ...
-                    tools.pipeStreamOverResponse(res, body, body.length, memory);
-
-                    /*
-                    resolve({
-                        processed: true,
-                        status: statusCode,
-                        headers: headers,
-                        content: await tools.streamToString(body),
-                        logs: "",
-                        durationMS: 25
-                    });
-                    */
-
-                    return;
-
                 }
 
+
+                //console.log(finalPath);
+
+                var finalUrl = (apiSrc + finalPath);
+
+                var host = finalUrl.split('/')[2];
+                reqInfos.headers["Host"] = host;
+                reqInfos.headers["path"] = finalPath;
+
+                //AXIOS
+                var optAxios = {
+                    url: finalPath,
+                    method: reqInfos.method.toUpperCase(),
+                    headers: reqInfos.headers,
+                    responseType: 'stream'
+                };
+                if ( reqInfos.body != null ){
+                    optAxios.data = reqInfos.body;
+                }
+
+                //console.log(optAxios);
+                //console.log(finalUrl);
+
+                axios(finalUrl, optAxios)
+                .then(async function (response) {
+
+                    //console.log(response.request);
+
+                    for (var key in response.headers) {
+                        if ( key.toUpperCase() != 'CONTENT-LENGTH'){
+                            res.writeHeader(key, response.headers[key]);
+                        }
+                    }
+                    
+                    res.writeStatus("" + response.status);
+                    //return the whole response at once
+                    //var buff = await tools.streamToBuffer(response.data);
+                    //res.end(buff);
+
+                    //console.log(stream);
+
+                    const stream = response.data;
+                    //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
+                    
+                    stream.on('data', (chunk ) => {
+                        //console.log("Chunk received: " + chunk.length);
+                        if (!res.aborted){
+                            res.write(chunk);
+                        }
+                    });
+                    stream.on('end', () => {
+                        //console.log("end of chunks!");
+                        if (!res.aborted){
+                            res.end();
+                        } 
+                    });
+                    
+                    
+                    //tools.pipeStreamOverResponse(res, response.data, response.data.length, memory);
+
+                    return;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    res.writeStatus("500")
+                    res.end(error.message);
+                    return;
+                });
+
+                return;
                 
-                                
+
+                         
             }
             catch(ex){
-                console.log("Proxy Crash: ");
-                console.log(ex);
+                var erroMSG = ex + ""; //force a cast to string
+                if (erroMSG.indexOf("Invalid access of discarded") == -1) {
+                    console.log("Error16810: ");
+                    console.log(ex);
+                }
             }
             
              
@@ -138,6 +171,9 @@ module.exports = {
 
         }
 
+        if ( apiEndpoint.handler == null ){
+            return;
+        }
 
         var functionIndexFile = apiEndpoint.handler.split('.')[0];
         var functionHandlerFunction = apiEndpoint.handler.split('.')[1];

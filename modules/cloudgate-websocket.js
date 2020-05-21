@@ -59,6 +59,11 @@ module.exports = {
             async  function (event, ctx, callback){
                 //console.log("msg websocket: " + event.body);
 
+                if ( obj.body == "[HEARTBEAT]" ){
+                    //ignore heartbeats, nothing to do here ...
+                    return;
+                }
+
                 var obj = null;
                 try{
                     obj = JSON.parse( decodeURIComponent(event.body) );
@@ -72,11 +77,6 @@ module.exports = {
                     }
                     SendRespObj(resp, res, memory);
 
-                    return;
-                }
-
-                if ( obj.body == "[HEARTBEAT]" ){
-                    //ignore heartbeats, nothing to do here ...
                     return;
                 }
 

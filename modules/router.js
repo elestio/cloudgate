@@ -65,6 +65,8 @@ module.exports = {
                         
                         var result = await cloudgateAPI.process(reqInfos, res, req, memory, serverConfig);
 
+                        //console.log("write status: " + result.status + " for path: " + reqInfos.url )
+
                         res.writeStatus("" + (result.status || 200));
                         for (var key in result.headers) {
                             res.writeHeader(key, result.headers[key]);

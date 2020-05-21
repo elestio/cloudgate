@@ -169,6 +169,14 @@
 
             function getParamFromUrl(n){var t=new RegExp("[?&]"+n+"=([^&#]*)").exec(window.location.href);return t==null?null:t[1]||0};
 
+            //Heartbeat system to avoid cloudflare and other CDNs to close the channel
+            setInterval(function(){
+                if ( globalWS.readyState != 1 ){
+                    return;
+                }
+                globalWS.send( "[HEARTBEAT]" );
+            }, 60*1000);
+
         </script>
 
     </body>

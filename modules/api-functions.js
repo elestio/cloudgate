@@ -115,16 +115,22 @@ module.exports = {
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
 
-                                //console.log(response.request);
+                                //console.log(response.request.headers);
+                                console.log(response.headers);
+                                console.log(response.status);
 
                                 try {
                                     for (var key in response.headers) {
-                                        if (key.toUpperCase() != 'CONTENT-LENGTH') {
+                                        if (key.toUpperCase() != 'CONTENT-LENGTH') 
+                                        {
                                             res.writeHeader(key, response.headers[key]);
                                         }
                                     }
 
+                                    //here we should be able to return 206 ... but it seems to fail
+                                    //test url: http://vms2.terasp.net:3000/stream/fYwRsJAPfec
                                     res.writeStatus("" + response.status);
+                                    //res.writeStatus("500");
 
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);

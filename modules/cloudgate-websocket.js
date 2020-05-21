@@ -75,6 +75,11 @@ module.exports = {
                     return;
                 }
 
+                if ( obj.body == "[HEARTBEAT]" ){
+                    //ignore heartbeats, nothing to do here ...
+                    return;
+                }
+
                 //echo the current message
                 var resp = { action: "echo", body: "<b>" + obj.body + "</b>" };
                 SendRespObj(resp, res, memory);

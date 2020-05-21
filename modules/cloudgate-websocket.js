@@ -59,7 +59,7 @@ module.exports = {
             async  function (event, ctx, callback){
                 //console.log("msg websocket: " + event.body);
 
-                if ( obj.body == "[HEARTBEAT]" ){
+                if ( event.body == "[HEARTBEAT]" ){
                     //ignore heartbeats, nothing to do here ...
                     return;
                 }

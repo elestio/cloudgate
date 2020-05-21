@@ -225,20 +225,11 @@ module.exports = {
                         var path404 = tools.safeJoinPath(__dirname, '..', './default/404.html')
                         // TODO : handle path to 404 in the config file
                         //404
-                        var content404 = "";
-                        var cache404Key = appConfig.root + "_" + path404;
-                        var cache404 = memory.get(cache404Key, "ResponseCache");
-                        if (cache404 != null) {
-                            processResult.headers['core-cache'] = '1';
-                            processResult.headers['Content-Encoding'] = 'gzip';
-                            processResult.content = cache404;
-                        }
-                        else {
-                            content404 = fs.readFileSync(path404, { encoding: 'utf8' });
-                            processResult.headers['Content-Encoding'] = 'gzip';
-                            processResult.content = tools.GzipContent(content404);
-                            memory.set(cache404Key, processResult.content, "ResponseCache");
-                        }
+                        var content404 = "404 - Page not found";
+                        processResult.headers['Content-Encoding'] = 'gzip';
+                        processResult.content = tools.GzipContent(content404);
+                        memory.set(cache404Key, processResult.content, "ResponseCache");
+                    
                     }
 
                     var totalBytesSent = 0;

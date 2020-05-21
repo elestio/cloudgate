@@ -1,6 +1,17 @@
 #!/usr/bin/env node
 
 //process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+
+//prevent global crash
+//TODO: should be loggued
+process.on('uncaughtException', function (err) {
+    if ( !err.toString().startsWith("Invalid access of closed") ){
+        console.log("uncaughtException");
+        console.log(err);
+    }
+})
+
+
 var os = require("os");
 
 var global = {};

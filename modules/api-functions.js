@@ -181,7 +181,14 @@ module.exports = {
         var functionIndexFile = apiEndpoint.handler.split('.')[0];
         var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
         // TODO : check path doesn't crash
-        var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+        var functionPath = "";
+        if ( appConfig.root.startsWith("./") ){
+            functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+        }
+        else{
+            functionPath = tools.safeJoinPath(appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+        }
+
         // TODO : check not using ../ (lower level from app root)
 
         
@@ -296,7 +303,8 @@ module.exports = {
             resolve({
                 processed: true,
                 headers: response.headers,
-                content: response.content
+                //content: response.content
+                content: JSON.stringify(response.content)
             });
           }
           else {

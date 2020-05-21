@@ -301,6 +301,7 @@ module.exports = {
 
                     if (typeof response == "object") {
                         resolve({
+                            status: (response.status || 200),
                             processed: true,
                             headers: response.headers,
                             content: response.content
@@ -308,6 +309,7 @@ module.exports = {
                     }
                     else {
                         resolve({
+                            status: (response.status || 200),
                             processed: true,
                             content: response
                         });

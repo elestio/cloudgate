@@ -260,7 +260,8 @@ module.exports = {
 
                     if (processResult.content != null) {
                         if (typeof processResult.content === 'object') {
-                            res.write(processResult.content);
+                            //res.write(processResult.content);
+                            res.write(JSON.stringify(processResult.content));
                         }
                         else {
                             res.write(processResult.content);

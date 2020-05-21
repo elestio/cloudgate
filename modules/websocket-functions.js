@@ -78,7 +78,16 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                 var functionIndexFile = apiEndpoint[subFunction].split('.')[0];
                 var functionHandlerFunction = apiEndpoint[subFunction].split('.')[1];
                 // TODO : check path doesn't crash
-                var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+                
+                //var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+                var functionPath = "";
+                if (appConfig.root.startsWith("./")) {
+                    functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+                }
+                else {
+                    functionPath = tools.safeJoinPath(appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
+                }
+
                 // TODO : check not using ../ (lower level from app root)
 
                 //AWS Lambda Executor (tested at 2K RPS with -c128 in wrk on Hetzner to AWS direction)

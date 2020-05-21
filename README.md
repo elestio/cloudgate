@@ -90,6 +90,23 @@ Install and run as a service with PM2:
     pm2 start "cloudgate ./CatchAll/ --rootfolder ./" --name cloudgate
 
 
+## Run with Docker 
+
+    git clone https://github.com/elestio/cloudgate.git
+    cd cloudgate
+
+then make some changes in **Dockerfile** if needed then build the docker image
+
+    docker build -t cloudgate .
+
+To **run it once** interactively:
+
+    docker run -it cloudgate
+
+To **run as a service** in docker:
+    
+    docker run -p 80:3000 -d cloudgate --restart always
+
 ## AdminAPI 
 
 

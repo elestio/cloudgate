@@ -146,8 +146,7 @@ function Start(argv) {
 
         ].join('\n'));
         
-        //process.exit();
-        parentPort.postMessage("EXIT");
+        process.exit();
     }
 
     var port = argv.p || argv.port || parseInt(process.env.PORT, 10),

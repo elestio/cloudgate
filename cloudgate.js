@@ -141,7 +141,7 @@ function HandleMessage(msg){
     
     //this is in the MASTER thread
     
-    console.log("msg received from a child worker");
+    //console.log("msg received from a child worker");
     //console.log(msg);
 
     /*

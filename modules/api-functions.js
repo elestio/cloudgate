@@ -111,13 +111,24 @@ module.exports = {
                             optAxios.data = reqInfos.body;
                         }
 
+                        
 
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
 
+                                //handle byte ranges
+                                if ( response.status == 206 || response.status == "206" || response.headers && response.headers["content-range"] != null ){
+                                    res.writeStatus("206");
+                                }
+                                
                                 //console.log(response.request.headers);
-                                console.log(response.headers);
-                                console.log(response.status);
+                                //console.log(response.headers);
+                                //console.log(response.status);
+
+                                //here we should be able to return 206 ... but it seems to fail
+                                //test url: http://vms2.terasp.net:3000/stream/fYwRsJAPfec
+                                //res.writeStatus("" + response.status);
+                                //res.end("OK");
 
                                 try {
                                     for (var key in response.headers) {
@@ -126,11 +137,6 @@ module.exports = {
                                             res.writeHeader(key, response.headers[key]);
                                         }
                                     }
-
-                                    //here we should be able to return 206 ... but it seems to fail
-                                    //test url: http://vms2.terasp.net:3000/stream/fYwRsJAPfec
-                                    res.writeStatus("" + response.status);
-                                    //res.writeStatus("500");
 
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);

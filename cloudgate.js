@@ -70,12 +70,16 @@ if (argv.h || argv.help) {
 
 
 //change root dir (for code loading in nodejs, require, ...)
-if ( argv.rootfolder != null && argv.rootfolder != ""){
+if (process.env.NODE_ROOT){
+    process.chdir(process.env.NODE_ROOT);
+}
+else if ( argv.rootfolder != null && argv.rootfolder != ""){
     process.chdir(argv.rootfolder);
 }
 else if ( argv.r != null && argv.r != ""){
     process.chdir(argv.r);
 }
+
 //console.log("Current Working Directory: " + process.cwd());
 
 
@@ -87,6 +91,13 @@ if ( paramCores != "" && paramCores != null ){
         nbThreads = parseInt(paramCores);
     }
 }
+
+if ( process.env.THREADS ){
+    if (!isNaN(process.env.THREADS) && process.env.THREADS > 0){
+        nbThreads = parseInt(process.env.THREADS);
+    }
+}
+
 //console.log(nbThreads);
 
 //try to implement memory cache only in the master thread and childrens asking data to the master

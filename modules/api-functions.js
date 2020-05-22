@@ -123,7 +123,7 @@ module.exports = {
                                 }
                                 
                                 //console.log(response.request.headers);
-                                console.log(response.headers);
+                                //console.log(response.headers);
                                 //console.log(response.status);
 
                                 

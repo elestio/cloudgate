@@ -129,9 +129,11 @@ ENV Variables:
 
 | Var name    | default value | details                                             |
 |-------------|---------------|-----------------------------------------------------|
+| THREADS     |               | Number of CPU Threads to use, default to ALL        |
 | PORT        | 3000          | TCP port to use                                     |
 | HOST        | ::            | Interface to listen to (public/local ip or * or ::) |
-| ROOT        |               | folder containing your node_modules                 |
+| APP_ROOT    |               | folder containing your app (and appconfig.json)     |
+| NODE_ROOT   |               | path to folder containing node_modules              |
 | SSL         | 0             | Enable SSL with 1                                   |
 | SSL_DOMAIN  |               | domain name for SSL                                 |
 | SSL_PORT    | 443           | TCP port for SSL                                    |

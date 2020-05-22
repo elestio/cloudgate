@@ -162,6 +162,8 @@ function Start(argv) {
         master = argv.master || process.env.MASTER,
         slave = argv.slave || process.env.SLAVE,
         version = argv.v || argv.version,
+        app_root = argv._ || process.env.APP_ROOT,
+        node_root = argv.r || argv.rootfolder || process.env.NODE_ROOT,
         logger;
 
     if (!argv.s && !argv.silent) {
@@ -232,7 +234,7 @@ function Start(argv) {
 
     async function listen(port) {
         var options = {
-            root: argv._,
+            root: argv.app_root,
             admin: argv.admin,
             adminpath: argv.adminpath,
             admintoken: argv.admintoken,

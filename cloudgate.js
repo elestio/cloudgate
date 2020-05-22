@@ -30,6 +30,45 @@ var argv = require('optimist')(process.argv)
 .boolean('log-ip')
 .argv;
 
+
+//help
+if (argv.h || argv.help) {
+    console.log([
+        '',
+        'USAGE: cloudgate [path] [options]',
+        '',
+        '[GENERAL]',
+        '  -r --rootfolder [path] root folder for your app',
+        '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
+        '  -p --port [port]    Port to use [8080]',
+        '  -h --help          Print this list and exit.',
+        '  -v --version       Print the version and exit.',
+        '  -w --watch   Activate file change watch to auto invalidate cache [default: disabled]',
+        '  -d --debug    Activate the console logs for debugging',
+        //'  -a           Address to use [0.0.0.0]', //when used we can't get the visitor ip!
+        '',
+        '[SSL]',
+        '  -S --ssl     Enable https.',
+        '  --sslport    SSL Port (default: 443)',
+        '  --ssldomain  Domain name on which you want to activate ssl (eg: test.com)',
+        '',
+        '[ADMIN]',
+        '  --admin 1    Enable Admin Remote API (default: disabled)',
+        '  --adminpath /cgadmin    Declare the virtual path of the admin api',
+        '  --admintoken XXXXXXXX    The admin token to use for authentication of the REST API & Websocket',
+        '',
+        '[CLUSTER]',
+        '  --master     Declare this host as the master',
+        '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master'
+        //'  -C --cert    Path to ssl cert file (default: cert.pem).',
+        //'  -K --key     Path to ssl key file (default: key.pem).',
+
+    ].join('\n'));
+    
+    process.exit();
+}
+
+
 //change root dir (for code loading in nodejs, require, ...)
 if ( argv.rootfolder != null && argv.rootfolder != ""){
     process.chdir(argv.rootfolder);
@@ -102,7 +141,7 @@ function HandleMessage(msg){
     
     //this is in the MASTER thread
     
-    //console.log("msg received from a child worker");
+    console.log("msg received from a child worker");
     //console.log(msg);
 
     /*

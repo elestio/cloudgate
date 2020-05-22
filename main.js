@@ -145,21 +145,23 @@ function Start(argv) {
             //'  -K --key     Path to ssl key file (default: key.pem).',
 
         ].join('\n'));
-        process.exit();
+        
+        //process.exit();
+        parentPort.postMessage("EXIT");
     }
 
     var port = argv.p || argv.port || parseInt(process.env.PORT, 10),
-        host = argv.a || '::',
-        ssl = argv.S || argv.ssl,
-        ssldomain = argv.ssldomain,
-        sslport = argv.sslport,
-        admin = argv.admin,
-        adminpath = argv.adminpath,
-        admintoken = argv.admintoken,
-        debug = argv.d || argv.debug,
-        watch = argv.w || argv.watch,
-        master = argv.master,
-        slave = argv.slave,
+        host = argv.a || process.env.HOST || '::',
+        ssl = argv.S || argv.ssl || process.env.SSL == '1',
+        ssldomain = argv.ssldomain || process.env.SSL_DOMAIN,
+        sslport = argv.sslport || process.env.SSL_PORT,
+        admin = argv.admin || process.env.ADMIN,
+        adminpath = argv.adminpath || process.env.ADMIN_PATH,
+        admintoken = argv.admintoken || process.env.ADMIN_TOKEN,
+        debug = argv.d || argv.debug || process.env.VERBOSE == '1',
+        watch = argv.w || argv.watch || process.env.WATCH == '1',
+        master = argv.master || process.env.MASTER,
+        slave = argv.slave || process.env.SLAVE,
         version = argv.v || argv.version,
         logger;
 

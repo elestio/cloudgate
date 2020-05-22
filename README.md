@@ -125,6 +125,25 @@ To **run as a service** in docker:
     
     docker run -p 80:3000 -d cloudgate --restart always
 
+ENV Variables:
+
+| Var name    | default value | details                                             |
+|-------------|---------------|-----------------------------------------------------|
+| PORT        | 3000          | TCP port to use                                     |
+| HOST        | ::            | Interface to listen to (public/local ip or * or ::) |
+| ROOT        | ""            | folder containing your node_modules                 |
+| SSL         | 0             | Enable SSL with 1                                   |
+| SSL_DOMAIN  | ""            | domain name for SSL                                 |
+| SSL_PORT    | 443           | TCP port for SSL                                    |
+| ADMIN       | 0             | Enable Admin API/WS with 1                          |
+| ADMIN_PATH  | ""            | path to listen (eg.: CloudGateAdmin)                |
+| ADMIN_TOKEN | ""            | security token to protect your Admin                |
+| VERBOSE     | 0             | Enable verbose mode with 1                          |
+| WATCH       | 0             | Enable file watch with 1 (auto invalidate cache)    |
+| MASTER      | ""            | [Public IP, Local IP or *]:[Port]@[Token]           |
+| SLAVE       | ""            | [Master IP]:[Port]@[Token]                          |
+
+
 ## AdminAPI 
 
 
@@ -241,7 +260,7 @@ cloudgate [path] [options]
     
     --admin 1   Enable Admin Remote API (default: disabled)
     
-    --adminpath /cgadmin    Declare the virtual path of the admin api
+    --adminpath /CloudGateAdmin    Declare the virtual path of the admin api
     
     --admintoken XXXXXXXX   The admin token to use for authentication of the REST API & Websocket
     

@@ -9,7 +9,7 @@ It can be used for several use cases:
 - Static file web server with local file system and AWS S3 support
 - API Gateway with local microservices and AWS lambda support
 - Serve multiple web applications in a single process and sharing the same ports (80, 443)
-- Websocket server 
+- Reverse proxy / Websocket server
 - SSL termination (with Letsencrypt automatic certs)
 - REST & Websocket API to reconfigure the cloudgate without downtime
 - Crazy high performances (up to 185K RPS per core)
@@ -17,7 +17,6 @@ It can be used for several use cases:
 - Support multi-threading
 - Support cluster mode with multiple servers (can be in different datacenters)
 - Firewall / Rate limiter / DDOS protection (Coming soon)
-- Reverse proxy (Coming soon)
 - Replicated in-memory datastore (Coming soon)
 
 Motivations:
@@ -82,6 +81,25 @@ Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
 
 Note: By default, cloudgate will use all the cores availables on your server, you can specify the number of cores to use with the option "-c"
 eg: `-c 4` means cloudgate will use 4 cores instead of all the cores availables
+
+ ## Reverse Proxy
+
+Check our Reverse proxy example, this will proxy the web trafic from port 80 to the target configured in ./ReverseProxy/appconfig.json
+    
+    sudo cloudgate ./ReverseProxy --rootfolder ./ -p80
+
+Here is ther relevant part of the appconfig.json
+
+        ...
+        "apiEndpoints": {
+            "/*" : {
+                "skipPrefix": false,
+                "src": "https://youzeek.com/"
+            }
+        },
+        ...
+
+This rule capture /* and proxy it to the url indicated in the src attribute
 
  ## Run as a service
 
@@ -357,8 +375,6 @@ You can also expose safely your DB using the REST API or WEBSOCKET API
               https://github.com/coreybutler/node-linux
               https://github.com/coreybutler/node-windows
               https://github.com/coreybutler/node-mac
- - [ ] reverse proxy
-              https://www.npmjs.com/package/fast-proxy
  - [ ] Managed MySQL Cluster
  - [ ] Managed PostgreSQL Cluster
  - [ ] Managed Redis Cluster

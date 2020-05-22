@@ -111,7 +111,8 @@ module.exports = {
                             optAxios.data = reqInfos.body;
                         }
 
-                        
+
+                        //TODO: fix issue when proxying google.com!
 
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
@@ -122,15 +123,12 @@ module.exports = {
                                 }
                                 
                                 //console.log(response.request.headers);
-                                //console.log(response.headers);
+                                console.log(response.headers);
                                 //console.log(response.status);
 
-                                //here we should be able to return 206 ... but it seems to fail
-                                //test url: http://vms2.terasp.net:3000/stream/fYwRsJAPfec
-                                //res.writeStatus("" + response.status);
-                                //res.end("OK");
-
-                                try {
+                                
+                                try 
+                                {
                                     for (var key in response.headers) {
                                         if (key.toUpperCase() != 'CONTENT-LENGTH') 
                                         {
@@ -140,9 +138,11 @@ module.exports = {
 
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
+                                    //return;
 
                                     stream.on('data', (chunk) => {
                                         //console.log("Chunk received: " + chunk.length);
+                                        //console.log(chunk);
                                         if (!res.aborted) {
                                             res.write(chunk);
                                         }
@@ -154,13 +154,15 @@ module.exports = {
                                         }
                                     });
                                 }
-                                catch (ex) {
+                                catch (ex) 
+                                {
                                     var erroMSG = ex + ""; //force a cast to string
                                     if (erroMSG.indexOf("Invalid access of discarded") == -1) {
                                         console.log("Error46110: ");
                                         console.log(ex);
                                     }
                                 }
+                                
 
                                 return;
                             })
@@ -309,6 +311,11 @@ module.exports = {
                         console.log(err);
                     } else {
                         //console.log(response);
+                    }
+
+                    //prevent a crash if the cloud function don't return anything
+                    if (response == null){
+                        response = {"content": "No content returned by the cloud function ..."};
                     }
 
                     if (typeof response == "object") {

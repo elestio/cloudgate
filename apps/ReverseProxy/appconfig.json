@@ -14,7 +14,7 @@
     },
     "/*" : {
       "skipPrefix": false,
-      "src": "https://youzeek.com/",
+      "src": "https://www.google.com/",
       "http2": false
     }
   }

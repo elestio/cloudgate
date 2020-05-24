@@ -91,6 +91,7 @@ module.exports = {
                             }
                         }
 
+                        
 
                         //console.log(finalPath);
 
@@ -99,6 +100,10 @@ module.exports = {
                         var host = finalUrl.split('/')[2];
                         reqInfos.headers["Host"] = host;
                         reqInfos.headers["path"] = finalPath;
+
+                        if ( reqInfos.query != null && reqInfos.query != ""){
+                            finalUrl = finalUrl + "?" + reqInfos.query;
+                        }
 
                         //AXIOS
                         var optAxios = {
@@ -113,6 +118,12 @@ module.exports = {
 
 
                         //TODO: fix issue when proxying google.com!
+                        if ( memory.getObject("AdminConfig", "GLOBAL").debug == true ){
+                            console.log("Fetching remote url: " + finalUrl);
+                            console.log(reqInfos.query);
+                            console.log(optAxios);
+                        }
+                        
 
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
@@ -129,19 +140,31 @@ module.exports = {
                                 
                                 try 
                                 {
+
+
                                     for (var key in response.headers) {
-                                        if (key.toUpperCase() != 'CONTENT-LENGTH') 
+                                        if (key.toUpperCase() != 'CONTENT-LENGTH' && key.toUpperCase() != 'TRANSFER-ENCODING' && key.toUpperCase() != 'X-FRAME-OPTIONS') 
                                         {
-                                            res.writeHeader(key, response.headers[key]);
+                                            var value = response.headers[key] + "";
+                                            res.writeHeader(key, value);
                                         }
                                     }
+
+                                    //disable various securities of the remote host
+                                    res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
+                                    res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
+                                    res.writeHeader("access-control-allow-origin", "*" );
+
 
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
                                     //return;
 
+                                    //console.log("TEST 00000");
+
                                     stream.on('data', (chunk) => {
                                         //console.log("Chunk received: " + chunk.length);
+                                        //console.log(typeof chunk);
                                         //console.log(chunk);
                                         if (!res.aborted) {
                                             res.write(chunk);
@@ -167,7 +190,7 @@ module.exports = {
                                 return;
                             })
                             .catch(function(error) {
-                                console.log(error);
+                                //console.log(error);
                                 res.writeStatus("500")
                                 res.end(error.message);
                                 return;

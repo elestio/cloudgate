@@ -314,12 +314,21 @@ module.exports = {
                 }
 
                 if (curFunction[functionHandlerFunction] == undefined) {
-                    // TODO : Handle error here AND RETURN
+                // TODO : Handle error here AND RETURN
                 }
+                var path = reqInfos.url;
+                if (curRoute.endsWith('/*')) {
+                    path = reqInfos.url.substring(curRoute.length - 3);
+                }
+                console.log(path);
+                var event = {
+                    httpMethod: reqInfos.method.toUpperCase(),
+                    path: path,
+                    queryStringParameters: qs.parse(reqInfos.query),
+                    body: reqInfos.body,
+                    headers: reqInfos.headers,
+                };
 
-
-
-                var event = reqInfos;
                 var ctx = {
                     succeed: function(result) {
                         //console.log(result)
@@ -340,6 +349,14 @@ module.exports = {
                     if (response == null){
                         response = {"content": "No content returned by the cloud function ..."};
                     }
+
+                    if ( response.headers == null ){
+                        response.headers = {};
+                    }
+
+                    response.headers["Access-Control-Allow-Origin"] = "*";
+                    response.headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT";
+                    response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
 
                     if (typeof response == "object") {
                         resolve({

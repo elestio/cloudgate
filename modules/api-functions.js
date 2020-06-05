@@ -385,11 +385,22 @@ module.exports = {
                 var result = null;
 
                 try {
-                    result = curFunction[functionHandlerFunction](event, ctx, callback);
+                    result = await curFunction[functionHandlerFunction](event, ctx, callback);
+                    resolve({
+                        status: (result.statusCode || 200),
+                        processed: true,
+                        headers: result.headers,
+                        content: result.body
+                    });
                 }
                 catch (ex) {
                     resolve({
                         processed: true,
+                        headers: {
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
+                            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+                        },
                         content: ex.message + "\nTrace: " + ex.stack
                     });
                     return;

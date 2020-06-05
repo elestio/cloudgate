@@ -251,7 +251,12 @@ function Start(argv) {
         };
 
         if (options.root == null) {
-            options.root = ["."];
+            if ( argv.r != null ){
+                options.root = [argv.r];
+            }
+            else{
+                options.root = ["."];
+            }
         }
 
         if (argv.cors) {

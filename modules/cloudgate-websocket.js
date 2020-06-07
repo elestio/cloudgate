@@ -72,7 +72,6 @@ module.exports = {
                                         
                     var errResp = {
                         action: "error",
-                        origTS: obj.ts,
                         body: "INVALID MESSAGE: must be in json"
                     }
                     SendRespObj(resp, res, memory);

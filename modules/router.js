@@ -237,6 +237,8 @@ module.exports = {
                         console.log(processResult);
                     }
 
+                    //console.log(processResult);
+
                     res.writeStatus("" + (processResult.status || 200));
                     for (var key in processResult.headers) {
 
@@ -262,6 +264,7 @@ module.exports = {
                         else {
 
                             //check if the response is in JSON
+                            processResult.origContent = processResult.content;
                             try{
                                 processResult.content = JSON.parse(processResult.content);
                             }
@@ -277,7 +280,7 @@ module.exports = {
                                 res.write(buffer);
                             }
                             else{
-                                res.write(processResult.content);
+                                res.write(processResult.origContent);
                             }
 
                         }

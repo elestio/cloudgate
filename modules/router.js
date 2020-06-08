@@ -247,7 +247,7 @@ module.exports = {
                         totalBytesSent += key.length + processResult.headers[key].length;
                     }
 
-                    if (processResult.content != null) {
+                    if (processResult.content != null && processResult.content != "") {
                         if (typeof processResult.content === 'object') {
                             //res.write(processResult.content);
                             if ( Buffer.isBuffer(processResult.content) ){

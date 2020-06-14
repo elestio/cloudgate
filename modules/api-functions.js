@@ -83,7 +83,7 @@ module.exports = {
 
                         var finalPath = reqInfos.url;
                         if (skipPrefix) {
-                            finalPath = reqInfos.url.replace(matchingPrefix, "");
+                            finalPath = reqInfos.url.replace(matchingPrefix.replace("*", ""), "");
                         }
                         else {
                             if (finalPath.startsWith("/")) {

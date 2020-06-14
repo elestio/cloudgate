@@ -317,7 +317,7 @@ module.exports = {
                 // TODO : Handle error here AND RETURN
                 }
                 var path = reqInfos.url;
-                if (curRoute.endsWith('/*')) {
+                if ( curRoute != null && curRoute.endsWith('/*')) {
                     path = reqInfos.url.substring(curRoute.length - 3);
                 }
                 console.log(path);

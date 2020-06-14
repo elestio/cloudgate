@@ -323,7 +323,11 @@ module.exports = {
                 //console.log(path);
                 var event = {
                     httpMethod: reqInfos.method.toUpperCase(),
+                    method: reqInfos.method.toUpperCase(),
+                    url: path,
                     path: path,
+                    ip: reqInfos.ip,
+                    query: reqInfos.query,
                     queryStringParameters: qs.parse(reqInfos.query),
                     body: reqInfos.body,
                     headers: reqInfos.headers,

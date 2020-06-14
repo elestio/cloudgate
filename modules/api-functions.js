@@ -320,7 +320,7 @@ module.exports = {
                 if ( curRoute != null && curRoute.endsWith('/*')) {
                     path = reqInfos.url.substring(curRoute.length - 3);
                 }
-                console.log(path);
+                //console.log(path);
                 var event = {
                     httpMethod: reqInfos.method.toUpperCase(),
                     path: path,

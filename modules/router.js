@@ -188,6 +188,24 @@ module.exports = {
                     //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                     //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
 
+                    //SPA routing - Redirect all 404 to index.html
+                    if ( appConfig.redirect404toIndex == "1" ){
+                        if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
+                            //let's redirect that to index.html (SPA routing)
+                            console.log('inside 404 redirect!!!!');
+
+                            if (reqInfos.url.indexOf('?') > -1 )
+                            {
+                                reqInfos.url = "/index.html?" + reqInfos.url.split('?')[1];
+                            }
+                            else{
+                                reqInfos.url = "/index.html";
+                            }
+                            result = await module.process(appConfig, reqInfos, res, req, memory, serverConfig);
+                        }
+                    }
+                       
+
                     if (result && result.processed) {
                         
                         hasBeenProcessed = true;

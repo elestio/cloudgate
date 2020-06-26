@@ -344,6 +344,7 @@ module.exports = {
                     else {
                         //console.log(finalPath);
                         result.processed = false;
+                        result.status = 404;
                     }
                 }
                 catch (err) {

@@ -311,7 +311,7 @@ Here is the full list of configuration options supported in appconfig.json:
 
 **TypeFS**: Define the source of public files, can be defined to LOCAL or S3, default value is LOCAL
 
-**redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is "0" (disabled), set it to "1" to activate it
+**redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
   
 **apiEndpoints**: object containing list of defined endpoints.
 

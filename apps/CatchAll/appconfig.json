@@ -7,7 +7,7 @@
   "publicFolder": "./public",
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",
-  "redirect404toIndex": "1",
+  "redirect404toIndex": true,
   "apiEndpoints": {
     "/tests/simple" : {
       "src": "./API/tests/",

@@ -189,7 +189,7 @@ module.exports = {
                     //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
 
                     //SPA routing - Redirect all 404 to index.html
-                    if ( appConfig.redirect404toIndex == "1" ){
+                    if ( appConfig.redirect404toIndex == true ){
                         if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
                             //let's redirect that to index.html (SPA routing)
                             console.log('inside 404 redirect!!!!');

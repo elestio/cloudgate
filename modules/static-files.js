@@ -345,6 +345,7 @@ module.exports = {
                         //console.log(finalPath);
                         result.processed = false;
                         result.status = 404;
+                        result.details = "File not found: " + fullPath;
                     }
                 }
                 catch (err) {

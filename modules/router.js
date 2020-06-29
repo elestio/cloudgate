@@ -135,46 +135,46 @@ module.exports = {
                 var cacheKey = null;
                 if (reqInfos.method == "get") {
                     cacheKey = host + reqInfos.url + reqInfos.query;
+
+                    //console.log(memory.debug());
+                    var cacheContent = memory.get(cacheKey, "ResponseCache");
+                    if (cacheContent != null) {
+
+                        if ( serverConfig.debug){
+                            console.log("Serving from cache:" + cacheKey)  ;
+                        }
+
+                        //console.log("cachefound for: " + cacheKey + " - " + host)
+                        var totalBytesSent = 0;
+
+                        var processResult = cacheContent;
+                        res.writeStatus("" + (processResult.status || 200));
+                        for (var key in processResult.headers) {
+                            res.writeHeader(key, processResult.headers[key]);
+                            totalBytesSent += key.length + processResult.headers[key].length;
+                        }
+
+                        if (processResult.content != null) {
+                            
+                            if ( processResult.content.length != null ){
+                                totalBytesSent += processResult.content.length;
+                                //console.log("content: " + totalBytesSent);
+                            }
+                            
+                            res.end(processResult.content);
+                        }
+
+                        if ( totalBytesSent != null ){
+                            //console.log("Adding: " + totalBytesSent);
+                            memory.incr("http.data.out", totalBytesSent, "STATS");
+                        }
+
+                        tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
+                        
+                        return;
+                    }
                 }
         
-                //console.log(memory.debug());
-                var cacheContent = memory.get(cacheKey, "ResponseCache");
-                if (cacheContent != null) {
-
-                    if ( serverConfig.debug){
-                        console.log("Serving from cache:" + cacheKey)  ;
-                    }
-
-                    //console.log("cachefound for: " + cacheKey + " - " + host)
-                    var totalBytesSent = 0;
-
-                    var processResult = cacheContent;
-                    res.writeStatus("" + (processResult.status || 200));
-                    for (var key in processResult.headers) {
-                        res.writeHeader(key, processResult.headers[key]);
-                        totalBytesSent += key.length + processResult.headers[key].length;
-                    }
-
-                    if (processResult.content != null) {
-                        
-                        if ( processResult.content.length != null ){
-                            totalBytesSent += processResult.content.length;
-                            //console.log("content: " + totalBytesSent);
-                        }
-                        
-                        res.end(processResult.content);
-                    }
-
-                    if ( totalBytesSent != null ){
-                        //console.log("Adding: " + totalBytesSent);
-                        memory.incr("http.data.out", totalBytesSent, "STATS");
-                    }
-
-                    tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
-                    
-                    return;
-                }
-
 
                 //var beginPipeline = process.hrtime();
 
@@ -191,7 +191,9 @@ module.exports = {
                     //SPA routing - Redirect all 404 to index.html
                     if ( appConfig.redirect404toIndex == true ){
                         if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
+                            
                             //let's redirect that to index.html (SPA routing)
+                            console.log(result);
                             console.log('inside 404 redirect!!!!');
 
                             if (reqInfos.url.indexOf('?') > -1 )
@@ -212,12 +214,14 @@ module.exports = {
                         processResult = result;
 
                         //keep in cache only static files response
-                        if (modules[i].name == "static-files") {
+                        //if (modules[i].name == "static-files" || modules[i].name == "api-functions" && reqInfos.method == "get") {
+                        if (modules[i].name == "static-files" ) {
 
                             //keep in cache only if no error
                             if ( processResult.error == null || processResult.error.trim() == "" )
                             {
                                 //console.log("cache written for " + reqInfos.url);
+                                //console.log(processResult);
                                 memory.set(cacheKey, processResult, "ResponseCache");
                             }
                             else{

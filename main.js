@@ -315,7 +315,7 @@ function Start(argv) {
             
             if ( options.https.sslcert != null ){
                 try {
-                    fs.lstatSync(options.https.cert);
+                    fs.lstatSync(options.https.sslcert);
                 } catch (err) {
                     logger.info(colors.red('Error: Could not find certificate ' + options.https.sslcert));
                     process.exit(1);
@@ -324,7 +324,7 @@ function Start(argv) {
 
             if ( options.https.sslcert != null ){
                 try {
-                    fs.lstatSync(options.https.key);
+                    fs.lstatSync(options.https.sslkey);
                 } catch (err) {
                     logger.info(colors.red('Error: Could not find private key ' + options.https.sslkey));
                     process.exit(1);

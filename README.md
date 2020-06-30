@@ -135,6 +135,8 @@ ENV Variables:
 | APP_ROOT    |               | folder containing your app (and appconfig.json)     |
 | NODE_ROOT   |               | path to folder containing node_modules              |
 | SSL         | 0             | Enable SSL with 1                                   |
+| SSL_CERT    |               | optional path to your SSL cert fullchain            |
+| SSL_KEY     |               | optional path to your SSL private key               |
 | SSL_DOMAIN  |               | domain name for SSL                                 |
 | SSL_PORT    | 443           | TCP port for SSL                                    |
 | ADMIN       | 0             | Enable Admin API/WS with 1                          |
@@ -271,6 +273,10 @@ cloudgate [path] [options]
     --sslport   SSL Port (default: 443)
     
     --ssldomain     Domain name on which you want to activate ssl (eg: test.com)
+
+    --sslcert  optional path to your SSL cert. E.g: /etc/letsencrypt/live/yourdomain.com/cert.pem
+    
+    --sslkey  optional path to your SSL key. E.g: /etc/letsencrypt/live/yourdomain.com/privkey.pem
 
     --master [Public IP, Local IP or *]:[Port]@[Token]   Declare this host as the master, Eg.: *:8081@000110b2-fb48-435c-a5b3-fce08c7f49da
     

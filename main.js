@@ -132,6 +132,8 @@ function Start(argv) {
             '  -S --ssl     Enable https.',
             '  --sslport    SSL Port (default: 443)',
             '  --ssldomain  Domain name on which you want to activate ssl (eg: test.com)',
+            '  --sslcert  optional path to your SSL cert. E.g: /etc/letsencrypt/live/yourdomain.com/cert.pem',
+            '  --sslkey  optional path to your SSL key. E.g: /etc/letsencrypt/live/yourdomain.com/privkey.pem',
             '',
             '[ADMIN]',
             '  --admin 1    Enable Admin Remote API (default: disabled)',
@@ -153,6 +155,8 @@ function Start(argv) {
         host = argv.a || process.env.HOST || '::',
         ssl = argv.S || argv.ssl || process.env.SSL == '1',
         ssldomain = argv.ssldomain || process.env.SSL_DOMAIN,
+        sslcert = argv.sslcert || process.env.SSL_CERT,
+        sslkey = argv.sslkey || process.env.SSL_KEY,
         sslport = argv.sslport || process.env.SSL_PORT,
         admin = argv.admin || process.env.ADMIN,
         adminpath = argv.adminpath || process.env.ADMIN_PATH,
@@ -295,63 +299,95 @@ function Start(argv) {
 
         if (ssl) {
             options.https = {
-                cert: argv.C || argv.cert || 'cert.pem',
-                key: argv.K || argv.key || 'key.pem',
                 ssldomain: argv.ssldomain || 'test.com',
                 sslport: argv.sslport || 443
             };
-            /*
-            try {
-                fs.lstatSync(options.https.cert);
-            } catch (err) {
-                logger.info(colors.red('Error: Could not find certificate ' + options.https.cert));
-                process.exit(1);
+
+            if ( argv.sslcert != null && argv.sslkey != null ){
+                options.https.sslcert = argv.sslcert;
+                options.https.sslkey = argv.sslkey;
             }
-            try {
-                fs.lstatSync(options.https.key);
-            } catch (err) {
-                logger.info(colors.red('Error: Could not find private key ' + options.https.key));
-                process.exit(1);
+
+            if ( process.env.SSL_CERT != null && process.env.SSL_KEY != null ){
+                options.https.sslcert = process.env.SSL_CERT;
+                options.https.sslkey = process.env.SSL_KEY;
             }
-            */
+            
+            if ( options.https.sslcert != null ){
+                try {
+                    fs.lstatSync(options.https.cert);
+                } catch (err) {
+                    logger.info(colors.red('Error: Could not find certificate ' + options.https.sslcert));
+                    process.exit(1);
+                }
+            }
+
+            if ( options.https.sslcert != null ){
+                try {
+                    fs.lstatSync(options.https.key);
+                } catch (err) {
+                    logger.info(colors.red('Error: Could not find private key ' + options.https.sslkey));
+                    process.exit(1);
+                }
+            }
+            
 
             //SSL Handling
-            var Letsencrypt = require('./lib/letsencrypt');
-            var certPath = options.root + "CERTS/";
-            var isProd = true;
 
-            //find root folder
-            var publicFolder = options.root[0] + "/public/"; //todo: replace with the real public folder from appconfig.json
-
-
-            try {
-                await Letsencrypt(certPath, publicFolder);
-                //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
-
-                var certInfos = null;
-                Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder).then(function(resp) {
-                    certInfos = resp;
-
-                    //start the SSL Server
-                    var sslApp = require('./coregate').SSLApp({
-                        key_file_name: certInfos.privateKeyPath,
-                        cert_file_name: certInfos.fullchain
-                    });
-
-                    router.start(sslApp, serverConfig);
-                    sslApp.listen(host, options.https.sslport, (listenSocket) => {
-                        if (listenSocket) {
-                            console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
-                        }
-                    });
+            if ( options.https.sslcert != null ){
+                //SSL Cert provided
+                //Start the SSL Server
+                var sslApp = require('./coregate').SSLApp({
+                    key_file_name: options.https.sslkey,
+                    cert_file_name: options.https.sslcert
                 });
 
-
+                router.start(sslApp, serverConfig);
+                sslApp.listen(host, options.https.sslport, (listenSocket) => {
+                    if (listenSocket) {
+                        console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                    }
+                });
             }
-            catch (ex) {
-                console.log("Unable to generate certificate or start SSL Server ...");
-                console.log(ex);
-                console.trace();
+            else{
+                //Need to generate / renew the cert
+                try {
+
+                    var Letsencrypt = require('./lib/letsencrypt');
+                    var certPath = options.root + "CERTS/";
+                    var isProd = true;
+
+                    //find root folder
+                    var publicFolder = options.root[0] + "/public/"; //todo: replace with the real public folder from appconfig.json
+                    
+                    await Letsencrypt(certPath, publicFolder);
+                    //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
+
+                    var certInfos = null;
+                    Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder).then(function(resp) {
+                        certInfos = resp;
+
+                        //start the SSL Server
+                        var sslApp = require('./coregate').SSLApp({
+                            key_file_name: certInfos.privateKeyPath,
+                            cert_file_name: certInfos.fullchain
+                        });
+
+                        router.start(sslApp, serverConfig);
+                        sslApp.listen(host, options.https.sslport, (listenSocket) => {
+                            if (listenSocket) {
+                                console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                            }
+                        });
+                    });
+
+
+                }
+                catch (ex) {
+                    console.log("Unable to generate certificate or start SSL Server ...");
+                    console.log(ex);
+                    console.trace();
+                }                
             }
 
         }

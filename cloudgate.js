@@ -51,6 +51,8 @@ if (argv.h || argv.help) {
         '  -S --ssl     Enable https.',
         '  --sslport    SSL Port (default: 443)',
         '  --ssldomain  Domain name on which you want to activate ssl (eg: test.com)',
+        '  --sslcert  optional path to your SSL cert. E.g: /etc/letsencrypt/live/yourdomain.com/cert.pem',
+        '  --sslkey  optional path to your SSL key. E.g: /etc/letsencrypt/live/yourdomain.com/privkey.pem',
         '',
         '[ADMIN]',
         '  --admin 1    Enable Admin Remote API (default: disabled)',

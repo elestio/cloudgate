@@ -104,8 +104,10 @@ module.exports = {
                 
                 if (typeof (appConfig) == 'undefined' || appConfig == null) {
 
-                    tools.debugLog("GLOBAL", 404, result.content.length, reqInfos, serverConfig);
-                    
+                    if ( result != null && result.content != null ){
+                        tools.debugLog("GLOBAL", 404, result.content.length, reqInfos, serverConfig);
+                    }
+                                        
                     res.writeStatus("404");
                     res.writeHeader("target", subDomain + "." + domain);
                     res.end("No app configured for vhost [" + subDomain + "." + domain + "]");
@@ -131,48 +133,53 @@ module.exports = {
                 }
                 */
 
+                //console.log(appConfig);
+                //console.log(__dirname);
+
                 //Caching: think about caching of GET only!
                 var cacheKey = null;
                 if (reqInfos.method == "get") {
                     cacheKey = host + reqInfos.url + reqInfos.query;
+                    
+                    if ( serverConfig.outputcache ){
+                        var cacheContent = memory.get(cacheKey, "ResponseCache");
+                        if (cacheContent != null) {
 
-                    //console.log(memory.debug());
-                    var cacheContent = memory.get(cacheKey, "ResponseCache");
-                    if (cacheContent != null) {
-
-                        if ( serverConfig.debug){
-                            console.log("Serving from cache:" + cacheKey)  ;
-                        }
-
-                        //console.log("cachefound for: " + cacheKey + " - " + host)
-                        var totalBytesSent = 0;
-
-                        var processResult = cacheContent;
-                        res.writeStatus("" + (processResult.status || 200));
-                        for (var key in processResult.headers) {
-                            res.writeHeader(key, processResult.headers[key]);
-                            totalBytesSent += key.length + processResult.headers[key].length;
-                        }
-
-                        if (processResult.content != null) {
-                            
-                            if ( processResult.content.length != null ){
-                                totalBytesSent += processResult.content.length;
-                                //console.log("content: " + totalBytesSent);
+                            if ( serverConfig.debug){
+                                console.log("Serving from cache:" + cacheKey)  ;
                             }
+
+                            //console.log("cachefound for: " + cacheKey + " - " + host)
+                            var totalBytesSent = 0;
+
+                            var processResult = cacheContent;
+                            res.writeStatus("" + (processResult.status || 200));
+                            for (var key in processResult.headers) {
+                                res.writeHeader(key, processResult.headers[key]);
+                                totalBytesSent += key.length + processResult.headers[key].length;
+                            }
+
+                            if (processResult.content != null) {
+                                
+                                if ( processResult.content.length != null ){
+                                    totalBytesSent += processResult.content.length;
+                                    //console.log("content: " + totalBytesSent);
+                                }
+                                
+                                res.end(processResult.content);
+                            }
+
+                            if ( totalBytesSent != null ){
+                                //console.log("Adding: " + totalBytesSent);
+                                memory.incr("http.data.out", totalBytesSent, "STATS");
+                            }
+
+                            tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
                             
-                            res.end(processResult.content);
+                            return;
                         }
-
-                        if ( totalBytesSent != null ){
-                            //console.log("Adding: " + totalBytesSent);
-                            memory.incr("http.data.out", totalBytesSent, "STATS");
-                        }
-
-                        tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
-                        
-                        return;
                     }
+                    
                 }
         
 
@@ -215,7 +222,7 @@ module.exports = {
 
                         //keep in cache only static files response
                         //if (modules[i].name == "static-files" || modules[i].name == "api-functions" && reqInfos.method == "get") {
-                        if (modules[i].name == "static-files" ) {
+                        if (modules[i].name == "static-files" && serverConfig.outputcache ) {
 
                             //keep in cache only if no error
                             if ( processResult.error == null || processResult.error.trim() == "" )

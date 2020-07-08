@@ -10,6 +10,9 @@ module.exports = {
         }
         var configPath = fullAppPath + "appconfig.json";
 
+        //console.log("Path: " + configPath);
+        //console.log("exist: " + fs.existsSync(configPath));
+
         if (fs.existsSync(configPath)) {
             //console.log("\nLoading app from " + configPath + "\n");
 

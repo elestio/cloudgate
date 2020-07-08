@@ -60,7 +60,7 @@ module.exports = {
   },
   getObject: function(key, context) {
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //TODO: think about expires / refresh
     //console.log(memory[key]);
@@ -76,13 +76,13 @@ module.exports = {
   },
   setObject: function(key, value, context, source) {
 
-    if ( context == null ) {
+    if ( context == null || key == null ) {
         return;
     }
 
     //console.log("setObject key: " + key + " - context: " + context);
     
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //store in memory
     memory[context][key] = value; 
@@ -106,7 +106,7 @@ module.exports = {
   },
   get: function(key, context) {
     
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     if ( memory[context][key] != null ){
         return memory[context][key];         
@@ -118,13 +118,9 @@ module.exports = {
   },
   set: function(key, value, context, source) {
 
-    if ( context == null ) {
-        return;
-    }
-
     //console.log("set key: " + key + " - context: " + context + " - " + source);
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
 
     
@@ -180,7 +176,7 @@ module.exports = {
 
     //console.log("set key: " + key + " - context: " + context);
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //store in memory 
     if ( memory[context][key] == null ) { memory[context][key] = 0; }
@@ -201,7 +197,7 @@ module.exports = {
   },
   remove: function(key, context, source) {
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //store in memory 
     delete memory[context][key];  
@@ -221,10 +217,10 @@ module.exports = {
   },
   clear: function(context, source) {
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //store in memory 
-    memory[context] = {}; 
+    delete memory[context] ;
 
     //DO NOT PROPAGATE ResponseCache context!! Infinite loop prevention
     //DO NOT PROPAGATE EVENTS from pubsub origin!! Infinite loop prevention
@@ -239,7 +235,7 @@ module.exports = {
   },
   debug: function(context) {
 
-    if ( memory[context] == null ) { memory[context] = {}; }
+    if ( memory[context] == null && context != null && context != "null" ) { memory[context] = {}; }
 
     //console.log(memory);
     return memory;

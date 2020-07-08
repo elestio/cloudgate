@@ -319,7 +319,9 @@ module.exports = {
                     var list = Object.keys(mainMemory);
                     var finalList = {};
                     for (var i = 0; i < list.length; i++ ){
-                        finalList[mainMemory[list[i]].root] = 1;
+                        if ( mainMemory[list[i]].root != null ){
+                            finalList[mainMemory[list[i]].root] = 1;
+                        }
                     }
                     var resp = { action: "list", origTS: obj.ts, body: JSON.stringify(Object.keys(finalList)) };
                     SendRespObj(resp, res, memory);

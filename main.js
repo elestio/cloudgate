@@ -43,6 +43,8 @@ if (fs.existsSync(memoryPath)) {
     //console.log("Memory restored from dump file!");
 }
 
+
+
 //console.log(memory.debug());
 
 //const { parentPort } = require('worker_threads');
@@ -122,6 +124,7 @@ function Start(argv) {
             '  -r --rootfolder [path] root folder for your app',
             '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
             '  -p --port [port]    Port to use [8080]',
+            '  -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.',
             '  -h --help          Print this list and exit.',
             '  -v --version       Print the version and exit.',
             '  -w --watch   Activate file change watch to auto invalidate cache [default: disabled]',
@@ -153,7 +156,8 @@ function Start(argv) {
 
     var port = argv.p || argv.port || parseInt(process.env.PORT, 10),
         host = argv.a || process.env.HOST || '::',
-        ssl = argv.S || argv.ssl || process.env.SSL == '1',
+        outputcache = argv.oc == '1' || argv.outputcache == '1' || process.env.OUTPUT_CACHE == '1',
+        ssl = argv.S  == '1' || argv.ssl  == '1' || process.env.SSL == '1',
         ssldomain = argv.ssldomain || process.env.SSL_DOMAIN,
         sslcert = argv.sslcert || process.env.SSL_CERT,
         sslkey = argv.sslkey || process.env.SSL_KEY,
@@ -161,8 +165,8 @@ function Start(argv) {
         admin = argv.admin || process.env.ADMIN,
         adminpath = argv.adminpath || process.env.ADMIN_PATH,
         admintoken = argv.admintoken || process.env.ADMIN_TOKEN,
-        debug = argv.d || argv.debug || process.env.VERBOSE == '1',
-        watch = argv.w || argv.watch || process.env.WATCH == '1',
+        debug = argv.d  == '1' || argv.debug  == '1' || process.env.VERBOSE == '1',
+        watch = argv.w  == '1' || argv.watch  == '1' || process.env.WATCH == '1',
         master = argv.master || process.env.MASTER,
         slave = argv.slave || process.env.SLAVE,
         version = argv.v || argv.version,
@@ -211,6 +215,7 @@ function Start(argv) {
     if ( parentPort == null ){
         //single thread mode
         StartGatePub(argv);
+        WelcomBanner(argv);
 
         //Start auto save config every 5secs (if needed), only on the master thread
         setInterval(function(){
@@ -221,6 +226,7 @@ function Start(argv) {
         //multi threads mode, we set the first thread to be the gateMaster
         if ( threadId == 1){
             StartGatePub(argv);
+            WelcomBanner(argv);
 
             //Start auto save config every 5secs (if needed), only on the master thread
             setInterval(function(){
@@ -236,6 +242,18 @@ function Start(argv) {
         listen(port);
     }
 
+    function WelcomBanner(argv){
+        setTimeout(function(){
+            console.log("");
+            console.log("======================================================");    
+            console.log("CloudGate V" + process.env.npm_package_version + " - " + new Date().toString().split('(')[0]);
+            console.log("======================================================");
+            console.log("");
+            console.log("Root App Folder: " + argv.r);   
+            
+        }, 200);
+    }
+
     async function listen(port) {
         var options = {
             root: argv.app_root,
@@ -247,6 +265,7 @@ function Start(argv) {
             showDir: argv.d,
             watch: argv.w || argv.watch,
             debug: argv.d || argv.debug,
+            outputcache: argv.oc || argv.outputcache,
             gzip: argv.g || argv.gzip,
             ext: argv.e || argv.ext,
             logFn: logger.request,
@@ -291,8 +310,11 @@ function Start(argv) {
             adminpath: options.adminpath,
             admintoken: options.admintoken,
             watch: watchBool,
+            outputcache: options.outputcache,
             debug: debugBool
         }
+
+        
 
         memory.setObject("AdminConfig", serverConfig, "GLOBAL");
 

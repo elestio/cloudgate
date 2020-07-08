@@ -1,12 +1,11 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "coregate.js",
   "scripts": {
-    "example": "node cloudgate.js ./apps/CatchAll -p 3000 -r ./",
-    "example-multi": "node cloudgate.js ./apps/Static ./apps/CatchAll ./apps/Websocket -p 3000 -r ./"
+    "example": "node cloudgate.js ./apps/CatchAll -p 3000"
   },
   "dependencies": {
     "@greenlock/manager": "^3.1.0",

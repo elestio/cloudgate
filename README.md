@@ -57,36 +57,32 @@ Your are now ready to run the samples below
  
 run a sample app on the default port (3000): 
 
-    cloudgate ./CatchAll --rootfolder ./
+    cloudgate ./CatchAll
 
 Then open the site in your browser: http://127.0.0.1:3000/
 
+Note: By default, cloudgate will use all the cores availables on your server, you can specify the number of cores to use with the option "-c"
+eg: `-c 4` means cloudgate will use 4 cores instead of all the cores availables
 
-run a sample an app in another root folder: 
-    
-    cloudgate ./CatchAll/ --rootfolder /my/custom/folder
+Note2: You can use relative or absolute path to point to your app folder
 
-  
-Start multiple apps on port 80 with **adminAPI** activated:
 
-    sudo cloudgate -p80 ./Static ./Websocket ./CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./
+Start an app on port 80 with **adminAPI** activated:
+
+    sudo cloudgate -p80 ./CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
 
 Here sudo is required if you are not root to bind port 80
 
 
 Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
     
-    sudo cloudgate ./Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com --rootfolder ./
-
-
-Note: By default, cloudgate will use all the cores availables on your server, you can specify the number of cores to use with the option "-c"
-eg: `-c 4` means cloudgate will use 4 cores instead of all the cores availables
+    sudo cloudgate ./Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com
 
  ## Reverse Proxy
 
 Check our Reverse proxy example, this will proxy the web trafic from port 80 to the target configured in ./ReverseProxy/appconfig.json
     
-    sudo cloudgate ./ReverseProxy --rootfolder ./ -p80
+    sudo cloudgate ./ReverseProxy -p80
 
 Here is ther relevant part of the appconfig.json
 
@@ -105,7 +101,7 @@ This rule capture /* and proxy it to the url indicated in the src attribute
 
 Install and run as a service with PM2: 
     
-    pm2 start "cloudgate ./CatchAll/ --rootfolder ./" --name cloudgate
+    pm2 start "cloudgate ./CatchAll" --name cloudgate
 
 
 ## Run with Docker 
@@ -134,6 +130,7 @@ ENV Variables:
 | HOST        | ::            | Interface to listen to (public/local ip or * or ::) |
 | APP_ROOT    |               | folder containing your app (and appconfig.json)     |
 | NODE_ROOT   |               | path to folder containing node_modules              |
+| OUTPUT_CACHE| 0             | Enable Caching of GET requests with 1               |
 | SSL         | 0             | Enable SSL with 1                                   |
 | SSL_CERT    |               | optional path to your SSL cert fullchain            |
 | SSL_KEY     |               | optional path to your SSL private key               |
@@ -228,11 +225,11 @@ Then open your browser on: http://127.0.0.1:3000/wsAdmin.html?token=12345A000G
 
 Serve an app on port 3000 in cluster mode as the master with **adminAPI** activated: 
 
-    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --master 0.0.0.0:8081@A_Random_Secret_Token_Here
+    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --master 0.0.0.0:8081@A_Random_Secret_Token_Here
 
 Serve an app on port 3000 in cluster mode as a slave with **adminAPI** activated: 
 
-    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --rootfolder ./ --slave 0.0.0.0:8081@A_Random_Secret_Token_Here
+    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --slave 0.0.0.0:8081@A_Random_Secret_Token_Here
 
  
 ## Benchmarks
@@ -254,9 +251,11 @@ cloudgate [path] [options]
  
 **options:**
 
-    -r --rootfolder [path] root folder for your app, this impact the chdir and from where your code is loaded when doing require()
+    -r [path] root folder for your app, this impact the chdir and from where your code is loaded when doing require()
 
     -p --port   Port to use [3000]
+    
+    -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.
 
     -w --watch  Activate file change watch [default: disabled]
 
@@ -363,36 +362,7 @@ In the third apiEndpoint we are using a wildcard (*) so all path starting the th
      }
 
   
-  
-
-**db**: you can configure your app to get access to MySQL or Redis by adding this configuration
-and connect to your DB from your app. 
-You can also expose safely your DB using the REST API or WEBSOCKET API
-
-**TODO: Must describe / Implement**
-
-    `{
-    	"MYSQL": {
-    		"endpoint": "/db",
-    		"host": "127.0.0.1",
-    		"port": 3306,
-    		"database": "db_name",
-    		"user": "db_user",
-    		"password": "db_password"
-    	},
-    	"REDIS": {
-    		"host": "127.0.0.1",
-    		"port": 6379,
-    		"redisDB": 0,
-    		"password": "myRedisSecretPasswordHere",
-    		"loadFrom": "./DB/REDIS/dump.redis",
-    		"backupTo": "./DB/REDIS/backup.redis"
-    	}
-    }`
-
- 
-
-## TODO
+  ## TODO
 
    1) finish multinodes infra
    2) MUST improve serving large files (currently 4-8GB/s .... vs 28GB/s on nginx!)
@@ -403,7 +373,7 @@ You can also expose safely your DB using the REST API or WEBSOCKET API
               https://github.com/coreybutler/node-linux
               https://github.com/coreybutler/node-windows
               https://github.com/coreybutler/node-mac
- - [ ] Managed MySQL Cluster
- - [ ] Managed PostgreSQL Cluster
- - [ ] Managed Redis Cluster
- - [ ] Managed MongoDB Cluster
+ - [ ] Managed MySQL
+ - [ ] Managed PostgreSQL
+ - [ ] Managed Redis
+ - [ ] Managed MongoDB

@@ -41,6 +41,7 @@ if (argv.h || argv.help) {
         '  -r --rootfolder [path] root folder for your app',
         '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
         '  -p --port [port]    Port to use [8080]',
+        '  -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.',
         '  -h --help          Print this list and exit.',
         '  -v --version       Print the version and exit.',
         '  -w --watch   Activate file change watch to auto invalidate cache [default: disabled]',
@@ -71,15 +72,44 @@ if (argv.h || argv.help) {
 }
 
 
+if ( isMainThread ){
+
+    var appPath = argv["_"][2];
+    if ( appPath == null ){
+        appPath = __dirname;
+    }
+    //console.log(appPath)
+
+    //if no root path is passed, let's build it based on provided app Path
+    if ( argv.r == null) {
+        if ( appPath.startsWith(".") ){
+            argv.r = require("path").join(__dirname, appPath);
+        }
+        else{
+            argv.r = appPath;
+        }
+        
+        process.argv.push("-r");
+        process.argv.push(argv.r);
+    }
+
+    //console.log("Root: " + __dirname);   
+    //console.log("Root2: " + argv.r);   
+    //console.log(process.argv);   
+    
+}
+
 //change root dir (for code loading in nodejs, require, ...)
 if (process.env.NODE_ROOT){
     process.chdir(process.env.NODE_ROOT);
 }
 else if ( argv.rootfolder != null && argv.rootfolder != ""){
     process.chdir(argv.rootfolder);
+    //console.log("changing curDIR to: " + argv.rootfolder);
 }
 else if ( argv.r != null && argv.r != ""){
     process.chdir(argv.r);
+    //console.log("changing curDIR to: " + argv.r);
 }
 
 //console.log("Current Working Directory: " + process.cwd());
@@ -146,7 +176,7 @@ if (isMainThread) {
 else
 {
     //console.log(process.argv);
-    const main = require('./main.js'); //HERE we should pass ARGS!!
+    const main = require('./main.js');
 }
 
 var globalStats = {};

@@ -57,7 +57,7 @@ if (parentPort != null) {
         //console.log(__dirname);
 
         if ( msg.source == os.hostname()){
-            console.log("Msg discarded because coming from this host!")
+            //console.log("Msg discarded because coming from this host!")
             return;
         }
 

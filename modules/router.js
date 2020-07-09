@@ -200,8 +200,8 @@ module.exports = {
                         if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
                             
                             //let's redirect that to index.html (SPA routing)
-                            console.log(result);
-                            console.log('inside 404 redirect!!!!');
+                            //console.log(result);
+                            //console.log('inside 404 redirect!!!!');
 
                             if (reqInfos.url.indexOf('?') > -1 )
                             {
@@ -367,7 +367,25 @@ module.exports = {
                     headers: {},
                 }
 
-                reqInfos.app = app;
+                //overide publish to allow multithread replication of publish()
+                var uApp = {
+                    publish: function(channel, msg){
+                        
+                        //publish on the current Thread
+                        app.publish(channel, msg);
+
+                        //send a copy to other threads
+                        if ( parentPort != null ){
+                            var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
+                            var content = msg;
+                            var obj = { type: "CG_WS_MSG", channel: channel, message: content, source: clusteredProcessIdentifier };
+                            parentPort.postMessage(obj);
+                        }
+                    }
+                }
+
+                //reqInfos.app = app;
+                reqInfos.app = uApp;
 
                 req.forEach((k, v) => {
                     reqInfos.headers[k] = v;
@@ -439,12 +457,14 @@ module.exports = {
 
                     //handle normal apps
                     var result = await websocketFunctions.message(ws.appConfig, ws.reqInfos, ws, null, memory, message, isBinary);
-                    if ( result.content != null ){
+                    if ( result != null && result.content != null ){
 
                         memory.incr("websocket.data.out", result.content.length, "STATS");
                         ws.send(result.content, false, false);
 
-                        tools.debugLog("WS", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                        if ( reqInfos != null){
+                            tools.debugLog("WS", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                        }
                     }
                 }
                 catch(ex){
@@ -474,7 +494,7 @@ module.exports = {
                     }
 
                     //handle normal apps
-                    var result = await websocketFunctions.message(ws.appConfig, ws.reqInfos, ws, null, memory);
+                    var result = await websocketFunctions.close(ws.appConfig, ws.reqInfos, ws, null, memory);
                 }
                 catch(ex){
                     console.log(ex);
@@ -482,6 +502,25 @@ module.exports = {
 
             }
         })
+
+        //multithread communication
+        var parentPort = require('worker_threads').parentPort;
+        if (parentPort != null) {
+            parentPort.on('message', (msg) => {
+
+                var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
+                if ( msg.source == clusteredProcessIdentifier ){
+                    //same computer, let's discard it!
+                    //console.log("Thread replication discarded because it's from the same origin!");
+                }
+                else if ( msg.type == "CG_WS_MSG" ){
+                    app.publish(msg.channel, msg.message);
+                    //console.log("msg received: ");
+                    //console.log(msg);
+                }
+                
+            });
+        }
 
     }
 }

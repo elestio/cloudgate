@@ -14,8 +14,8 @@ It can be used for several use cases:
 - REST & Websocket API to reconfigure the cloudgate without downtime
 - Crazy high performances (up to 185K RPS per core)
 - Crazy low latencies (less than 30us, that's 0.03ms!)
-- Support multi-threading
-- Support cluster mode with multiple servers (can be in different datacenters)
+- Multi-threading with websockets sync between threads
+- Multi nodes cluster suppot (Alpha)
 - Firewall / Rate limiter / DDOS protection (Coming soon)
 - Replicated in-memory datastore (Coming soon)
 

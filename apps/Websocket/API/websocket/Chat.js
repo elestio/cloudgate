@@ -2,7 +2,7 @@
 exports.open = (event, context, callback) => {
     //Say hello or send a message to the client, increment number of connected users, ...
     event.ws.subscribe('mainChannel');
-    callback(null, "Open from CloudGate!");
+    callback(null, "Open from CloudGate! Thread: " + require('worker_threads').threadId);
 };
 
 exports.message = (event, context, callback) => {

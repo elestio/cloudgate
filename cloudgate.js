@@ -164,6 +164,11 @@ if (isMainThread) {
             console.log(`Worker stopped with exit code ${code}`);
         });
 
+
+        process.argv.push("--nbThreads");
+        process.argv.push(nbThreads);
+        
+
         var obj = { argv: process.argv };
         worker.postMessage(obj);
 

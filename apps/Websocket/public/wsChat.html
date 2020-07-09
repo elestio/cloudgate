@@ -19,6 +19,13 @@
                 SendMessage()
             }
         });
+
+        function addZero(x, n) {
+            while (x.toString().length < n) {
+                x = "0" + x;
+            }
+            return x;
+        }
                  
 		function connect() {
             var protocolPrefix = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
@@ -33,7 +40,8 @@
             ws.onmessage = function(e) {
                 console.log('Message:', e.data);
 
-                var curTime = new Date().toTimeString().split(' ')[0];
+                var curNow = new Date();
+                var curTime = curNow.toTimeString().split(' ')[0] + "." + addZero(curNow.getMilliseconds(), 3);
                 var new_html = '<span class="line">' + curTime + ": " + sanitizeHTML(e.data) + '</span>';
                 var new_elem = document.createElement('div');
                 new_elem.innerHTML = new_html;

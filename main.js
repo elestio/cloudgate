@@ -13,6 +13,7 @@ process.on('uncaughtException', function (err) {
 
 
 var os = require("os");
+const si = require('systeminformation');
 
 var global = {};
 
@@ -242,14 +243,29 @@ function Start(argv) {
         listen(port);
     }
 
-    function WelcomBanner(argv){
-        setTimeout(function(){
+    async function WelcomBanner(argv){
+        setTimeout(async function(){
             console.log("");
             console.log("======================================================");    
-            console.log("CloudGate V" + process.env.npm_package_version + " - " + new Date().toString().split('(')[0]);
+            console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);
             console.log("======================================================");
-            console.log("");
             console.log("Root App Folder: " + argv.r);   
+
+            var cpuData = await si.cpu();
+            var osInfo = await si.osInfo();
+            var memoryInfo = await si.mem();
+
+            console.log("Platform: " + os.platform() + " | " + osInfo.arch + " | " + osInfo.distro + " | " + osInfo.release);
+            console.log("Total Mem: " + (memoryInfo.total/1024/1024/1024).toFixed(2) + "GB | Free: " + (memoryInfo.free/1024/1024/1024).toFixed(2) + "GB | Used: " + (memoryInfo.used/1024/1024/1024).toFixed(2) + "GB");
+            
+
+            var multiThreading = "No";
+            if ( argv.nbThreads > 1 ) {
+                multiThreading = "Yes";
+            }
+            console.log("CPU: " + cpuData.manufacturer + " | " + cpuData.brand );
+            console.log("Multithreading: "+ multiThreading +" | Threads: " + argv.nbThreads );
+            console.log("======================================================");
             
         }, 200);
     }

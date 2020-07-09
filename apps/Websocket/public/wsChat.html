@@ -33,7 +33,8 @@
             ws.onmessage = function(e) {
                 console.log('Message:', e.data);
 
-                var new_html = '<span class="line">' + (+new Date()) + ": " + sanitizeHTML(e.data) + '</span>';
+                var curTime = new Date().toTimeString().split(' ')[0];
+                var new_html = '<span class="line">' + curTime + ": " + sanitizeHTML(e.data) + '</span>';
                 var new_elem = document.createElement('div');
                 new_elem.innerHTML = new_html;
 

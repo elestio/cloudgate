@@ -4,6 +4,7 @@ const tools = require('../lib/tools.js');
 const memory = require('./memory');
 
 var fileMonitorStarted = false;
+var fileExistCache = {};
 
 module.exports = {
     name: "static-files",
@@ -46,8 +47,6 @@ module.exports = {
             headers: {},
         };
 
-
-
         return new Promise( async function(resolve, reject) {
 
             try {
@@ -86,7 +85,6 @@ module.exports = {
 
 
                 try {
-                    //TODO: must be moved in the router because of caching system
 
                     //handle 304 Not Modified
                     var ifmodifiedsince = reqInfos["if-modified-since"];
@@ -285,7 +283,29 @@ module.exports = {
                 //check if file exist
                 try {
                     
-                    if (fs.existsSync(fullPath)) {
+                    var fileExist = false; var fileSize = 0;
+                    if ( fileExistCache[fullPath] != null ){
+                        fileExist = true;
+                        fileSize = fileExistCache[fullPath].size;
+                    }
+                    else{
+                        var fstats = null;
+
+                        try{
+                            fstats = fs.statSync(fullPath);
+                        }
+                        catch(ex){
+                            fileExist = false;
+                        }
+
+                        if (fstats) {
+                            fileExist = true;
+                            fileSize = fstats.size;
+                            fileExistCache[fullPath] = fstats;
+                        }
+                    }
+
+                    if (fileExist) {
                         //file exists
                         //console.log("served from disk: " + fullPath);
 
@@ -307,7 +327,7 @@ module.exports = {
                         else {
 
                             //serv files directly if above 1MB, no caching
-                            const totalSize = fs.statSync(fullPath).size;
+                            const totalSize = fileSize;
                             var maxCachedSize = (1024*1024)*2; //2MB
                             if ( totalSize > maxCachedSize ) {
                                 //console.log("Piping file!");

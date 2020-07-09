@@ -1,1 +1,1 @@
-./wrk -t1 -c256 http://localhost:3000/ --latency
+./wrk -t1 -c256 http://localhost:3000/cloudgate/debug/raw --latency

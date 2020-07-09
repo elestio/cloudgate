@@ -234,13 +234,16 @@ Serve an app on port 3000 in cluster mode as a slave with **adminAPI** activated
  
 ## Benchmarks
 
-Run your server in mono or multithread with PM2 then:
+Run your server in mono or multithread like described above then
 
 Run benchmark in single core:
 `./benchmarks/single.sh`
 
 Run benchmark in multi core:
 `./benchmarks/multi.sh`
+
+PS: if you don't have WRK installed you can download the binary for linux with this command:
+`./download-WRK.sh`
 
 A special endpoint is available to benchmark the raw performance with no processing pipeline:
 http://localhost:3000/cloudgate/debug/raw

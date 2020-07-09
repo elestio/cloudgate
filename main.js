@@ -245,6 +245,7 @@ function Start(argv) {
 
     async function WelcomBanner(argv){
         setTimeout(async function(){
+
             console.log("");
             console.log("======================================================");    
             console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);

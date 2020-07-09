@@ -14,7 +14,8 @@ var _serverConfig = null;
 
 module.exports = {
     start: (app, serverConfig) => {
-        var modules = [apiFunctions, apiDB, staticFiles];
+        //var modules = [apiFunctions, apiDB, staticFiles];
+        var modules = [apiFunctions, staticFiles];
 
         if ( _serverConfig == null ){
             _serverConfig = serverConfig;
@@ -44,6 +45,8 @@ module.exports = {
             //UPDATE STATS
             memory.incr("http.requests", 1, "STATS");
             //console.log("New request on a node");
+
+
 
             try {
                 var host = req.getHeader('host');
@@ -88,7 +91,6 @@ module.exports = {
                         return;
                     }
                 }
-
 
                 var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
                 
@@ -181,7 +183,6 @@ module.exports = {
                     }
                     
                 }
-        
 
                 //var beginPipeline = process.hrtime();
 

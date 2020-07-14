@@ -10,6 +10,10 @@ const tools = require('../lib/tools.js');
 
 //In-memory cache
 var cache = {};
+
+var HLRU = require('hashlru');
+var lru = HLRU(500); //max 500 items in the LRU Cache. TODO: this should be configurable
+
 var _serverConfig = null;
 
 module.exports = {
@@ -19,6 +23,13 @@ module.exports = {
 
         if ( _serverConfig == null ){
             _serverConfig = serverConfig;
+        }
+
+        if ( serverConfig.outputcache ){
+            lru = HLRU(500);
+        }
+        else{
+            lru = HLRU(1);
         }
 
         memory.set("StartTime", (+new Date()), "STATS")
@@ -143,8 +154,10 @@ module.exports = {
                 if (reqInfos.method == "get") {
                     cacheKey = host + reqInfos.url + reqInfos.query;
                     
-                    if ( serverConfig.outputcache ){
-                        var cacheContent = memory.get(cacheKey, "ResponseCache");
+                    //if ( serverConfig.outputcache )
+                    {
+                        //var cacheContent = memory.get(cacheKey, "ResponseCache");
+                        var cacheContent = lru.get(cacheKey);
                         if (cacheContent != null) {
 
                             if ( serverConfig.debug){
@@ -223,18 +236,25 @@ module.exports = {
 
                         //keep in cache only static files response
                         //if (modules[i].name == "static-files" || modules[i].name == "api-functions" && reqInfos.method == "get") {
-                        if (modules[i].name == "static-files" && serverConfig.outputcache ) {
+                        
+                        if (modules[i].name == "static-files" ) {
 
-                            //keep in cache only if no error
-                            if ( processResult.error == null || processResult.error.trim() == "" )
+                            //if ( serverConfig.outputcache )
                             {
-                                //console.log("cache written for " + reqInfos.url);
-                                //console.log(processResult);
-                                memory.set(cacheKey, processResult, "ResponseCache");
+                                //keep in cache only if no error
+                                if ( processResult.error == null || processResult.error.trim() == "" )
+                                {
+                                    //console.log("cache written for " + reqInfos.url);
+                                    //console.log(processResult);
+                                    
+                                    //memory.set(cacheKey, processResult, "ResponseCache");
+                                    lru.set(cacheKey, processResult);
+                                }
+                                else{
+                                    //console.log( "test: " + processResult.error);
+                                }
                             }
-                            else{
-                                //console.log( "test: " + processResult.error);
-                            }
+                            
                         }
                         break;
                     }

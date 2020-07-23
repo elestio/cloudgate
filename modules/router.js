@@ -483,8 +483,8 @@ module.exports = {
                         memory.incr("websocket.data.out", result.content.length, "STATS");
                         ws.send(result.content, false, false);
 
-                        if ( reqInfos != null){
-                            tools.debugLog("WS", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                        if ( ws.reqInfos != null){
+                            tools.debugLog("WS", (result.status || 200), result.content.length, ws.reqInfos, serverConfig);
                         }
                     }
                 }

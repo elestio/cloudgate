@@ -293,7 +293,7 @@ module.exports = {
                     for (var key in processResult.headers) {
 
                         if ( key.toLowerCase() != "content-length" ){
-                            res.writeHeader(key, processResult.headers[key]);
+                            res.writeHeader(key, processResult.headers[key] + ""); //force casting the header value to string, other data types are not allowed in headers
                         }
                         
                         totalBytesSent += key.length + processResult.headers[key].length;

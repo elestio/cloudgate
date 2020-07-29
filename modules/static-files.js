@@ -362,7 +362,10 @@ module.exports = {
                         result.sourcePath = fullPath;
                     }
                     else {
-                        //console.log(finalPath);
+                        if ( memory.getObject("AdminConfig", "GLOBAL").debug == true ){
+                            console.log("Local Path not found: " + finalPath);
+                        }
+                        
                         result.processed = false;
                         result.status = 404;
                         result.details = "File not found: " + fullPath;

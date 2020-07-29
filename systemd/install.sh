@@ -56,6 +56,6 @@ echo "cloudgate is $(systemctl show -p SubState --value cloudgate)";
 echo "";
 
 echo "You can edit cloudgate config here: /etc/cloudgate/memorystate.json";
-echo "To stop cloudgate: systemctl stop cloudgate";
-echo "To start cloudgate: systemctl start cloudgate";
-echo "Your app root folder is: ${APP_ROOT}";
+echo "To start/stop cloudgate service with: 'systemctl stop cloudgate' and 'systemctl stop cloudgate'";
+echo ""
+echo "Your root app folder is: ${APP_ROOT}";

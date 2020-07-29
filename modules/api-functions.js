@@ -21,6 +21,8 @@ module.exports = {
     process: (appConfig, reqInfos, res, req, memory) => {
         return new Promise(async function(resolve, reject) {
 
+            //console.log(appConfig);
+
             var functionsList = appConfig.apiEndpoints;
             if (functionsList == null) {
                 functionsList = [];
@@ -46,9 +48,7 @@ module.exports = {
                 }
             }
 
-
             if (typeof (apiEndpoint) != 'undefined') {
-
 
                 //read headers
                 req.forEach((k, v) => {

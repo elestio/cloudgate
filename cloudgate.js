@@ -113,10 +113,6 @@ if (isMainThread) {
         }   
     }
 
-    console.log(process.env.APP_ROOT);
-    console.log(argv.r);
-    console.log(argv.rootfolder);
-    console.log(memory.get("APP_ROOT", "SETTINGS"));
     if ( process.env.APP_ROOT == null || process.env.APP_ROOT == "") {
         var paramAppRoot = argv.r || argv.rootfolder;
         if ( paramAppRoot == "" || paramAppRoot == null ) {

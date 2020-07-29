@@ -32,6 +32,7 @@ catch(ex){
 }
 
 const fs = require('fs');
+const resolve = require('path').resolve;
 
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
@@ -389,7 +390,7 @@ function Start(argv) {
             console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);
             console.log("======================================================");
             console.log("Root App Folder: " + argv.r);   
-            console.log("MemoryState: " + memoryPath);
+            console.log("MemoryState: " + resolve(memoryPath));
 
             var cpuData = await si.cpu();
             var osInfo = await si.osInfo();

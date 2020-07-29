@@ -107,6 +107,16 @@ or Install and run as a service with SystemD:
     
     ./systemd/install.sh
 
+When installed with SystemD you can load more apps in cloudgate like this:
+
+    cloudgate --memstate /etc/cloudgate/memorystate.json --loadapp /root/cloudgate/apps/Static
+    systemctl restart cloudgate
+
+Then to unload an app from your cloudgate instance:
+
+    cloudgate --memstate /etc/cloudgate/memorystate.json --unloadapp /root/cloudgate/apps/Static
+    systemctl restart cloudgate
+
 ## Run with Docker 
 
     git clone https://github.com/elestio/cloudgate.git

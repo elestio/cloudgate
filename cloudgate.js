@@ -22,6 +22,7 @@ if ( Worker == null ){
 }
 
 const fs = require('fs');
+const resolve = require('path').resolve;
 const os = require('os');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
@@ -73,8 +74,91 @@ if (argv.h || argv.help) {
     process.exit();
 }
 
+if (argv.loadapp) {
+    
+    if ( !argv.memstate ){
+        console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+        process.exit();
+    }
+
+    //Loading memorystate.json
+    var memoryPath = argv.memstate;
+    if (fs.existsSync(memoryPath)) {
+        var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+        memory.setMemory(JSON.parse(memorySTR));
+    }
 
 
+    var appPath = resolve(argv.loadapp);
+
+    console.log("loading app: " + appPath);
+    var loader = require("./loaders/app-loader.js");
+    var result = loader.load(appPath);
+    console.log(result);
+
+    //Get a new memory dump
+    var fullMemory = memory.debug();
+    //delete response cache because it's huge and temporary
+    delete fullMemory["ResponseCache"];
+    delete fullMemory["STATS"];
+    delete fullMemory["TEMP"];
+    delete fullMemory["undefined"];
+    //save to disk
+    fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8');
+
+    process.exit();
+}
+
+if (argv.unloadapp) {
+    
+    if ( !argv.memstate ){
+        console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+        process.exit();
+    }
+
+    //Loading memorystate.json
+    var memoryPath = argv.memstate;
+    if (fs.existsSync(memoryPath)) {
+        var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+        memory.setMemory(JSON.parse(memorySTR));
+    }
+
+    var appPath = resolve(argv.unloadapp);
+
+    console.log("unloading app: " + appPath);
+    
+    //find the target App in memory
+    var mainMemory = memory.debug().GLOBAL;
+    var list = Object.keys(mainMemory);
+    var targetAppConfig = null;
+    for (var i = 0; i < list.length; i++ ){
+        var root = mainMemory[list[i]].root;
+        if (root == appPath || root == appPath + "/"){
+            targetAppConfig = mainMemory[list[i]];
+            break;
+        }
+    }
+    
+    //clean appconfig cache
+    if ( targetAppConfig != null ){
+        for ( var i = 0; i < targetAppConfig.domains.length; i++){
+            memory.remove(targetAppConfig.domains[i], "GLOBAL");
+        }
+        memory.remove(targetAppConfig.mainDomain, "GLOBAL");       
+    }
+
+    //Get a new memory dump
+    var fullMemory = memory.debug();
+    //delete response cache because it's huge and temporary
+    delete fullMemory["ResponseCache"];
+    delete fullMemory["STATS"];
+    delete fullMemory["TEMP"];
+    delete fullMemory["undefined"];
+    //save to disk
+    fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8');
+
+    process.exit();
+}
 
 var nbThreads = os.cpus().length;
 var paramCores = argv.cores || argv.c;

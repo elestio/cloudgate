@@ -20,7 +20,7 @@ module.exports = {
             apiDefinition.root = fullAppPath;
 
             apiDefinition.domains.forEach(function(domainObject) {
-                memory.setObject(domainObject, apiDefinition, "GLOBAL");
+                memory.setObject(domainObject, apiDefinition, "GLOBAL");                
                 //console.log(memory.debug());
             });
 

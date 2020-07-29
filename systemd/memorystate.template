@@ -1,8 +1,8 @@
 {
     "SETTINGS": {
-        "THREADS": "",
+        "THREADS": "12",
         "PORT": "3000",
-        "APP_ROOT": "",
+        "APP_ROOT": "/var/www/cloudgate/default/",
         "OUTPUT_CACHE": "",
         "SSL": "",
         "SSL_CERT": "",
@@ -27,7 +27,7 @@
                 "*"
             ],
             "publicFolder": "./",
-            "root": "/var/www/html"
+            "root": "/var/www/cloudgate/default"
         }
     }
 }

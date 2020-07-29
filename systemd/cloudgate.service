@@ -1,14 +1,16 @@
 [Unit]
-Description=Fast web application server
+Description=Cloudgate - Fast web application server
 Documentation=https://github.com/elestio/cloudgate
 After=network.target
 StartLimitIntervalSec=0
+
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
 User=root
-ExecStart=binpath --memstate /etc/cloudgate/memorystate.json
+ExecStart=nodebin binpath --memstate /etc/cloudgate/memorystate.json
+Environment="NODE_OPTIONS=--experimental-worker"
 
 [Install]
 WantedBy=multi-user.target

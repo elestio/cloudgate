@@ -166,12 +166,11 @@ function Start(argv) {
     //load config file Settings
     if (true) {
         
-        //console.log(argv);
         //console.log(process.env.THREADS);
         //console.log(memory.get("THREADS", "SETTINGS"));
 
-        if ( argv.conf != null && argv.conf != ""){
-            var memoryPath = argv.conf;
+        if ( argv.memstate != null && argv.memstate != ""){
+            var memoryPath = argv.memstate;
             if (fs.existsSync(memoryPath)) {
                 var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
                 memory.setMemory(JSON.parse(memorySTR));
@@ -182,7 +181,7 @@ function Start(argv) {
         if ( process.env.THREADS == null || process.env.THREADS == "") {
             var paramCores = argv.c;
             if ( paramCores == "" || paramCores == null ) {
-                if ( memory.get("THREADS", "SETTINGS") != null ) {
+                if ( memory.get("THREADS", "SETTINGS") != null && memory.get("THREADS", "SETTINGS") != "" ) {
                     nbThreads = memory.get("THREADS", "SETTINGS");
                     argv.c = nbThreads;
                 }
@@ -192,16 +191,16 @@ function Start(argv) {
         if ( process.env.PORT == null || process.env.PORT == "") {
             var paramPort = argv.p || argv.port;
             if ( paramPort == "" || paramPort == null ) {
-                if ( memory.get("PORT", "SETTINGS") != null ) {
+                if ( memory.get("PORT", "SETTINGS") != null && memory.get("PORT", "SETTINGS") != "" ) {
                     argv.p = memory.get("PORT", "SETTINGS");
                 }
             }   
         }
         
         if ( process.env.APP_ROOT == null || process.env.APP_ROOT == "") {
-            var paramAppRoot = argv._;
+            var paramAppRoot = argv.r || argv.rootfolder;
             if ( paramAppRoot == "" || paramAppRoot == null ) {
-                if ( memory.get("APP_ROOT", "SETTINGS") != null ) {
+                if ( memory.get("APP_ROOT", "SETTINGS") != null && memory.get("APP_ROOT", "SETTINGS") != "" ) {
                     argv.r = memory.get("APP_ROOT", "SETTINGS");
                 }
             }   
@@ -210,7 +209,7 @@ function Start(argv) {
         if ( process.env.OUTPUT_CACHE == null || process.env.OUTPUT_CACHE == "") {
             var paramOutputCache = argv.oc || argv.outputcache;
             if ( paramOutputCache == "" || paramOutputCache == null ) {
-                if ( memory.get("OUTPUT_CACHE", "SETTINGS") != null ) {
+                if ( memory.get("OUTPUT_CACHE", "SETTINGS") != null && memory.get("OUTPUT_CACHE", "SETTINGS") != "" ) {
                     argv.oc = memory.get("OUTPUT_CACHE", "SETTINGS");
                 }
             }   
@@ -219,7 +218,7 @@ function Start(argv) {
         if ( process.env.SSL == null || process.env.SSL == "") {
             var paramSSL = argv.S || argv.ssl;
             if ( paramSSL == "" || paramSSL == null ) {
-                if ( memory.get("SSL", "SETTINGS") != null ) {
+                if ( memory.get("SSL", "SETTINGS") != null && memory.get("SSL", "SETTINGS") != "" ) {
                     argv.ssl = memory.get("SSL", "SETTINGS");
                 }
             }   
@@ -228,7 +227,7 @@ function Start(argv) {
         if ( process.env.SSL_DOMAIN == null || process.env.SSL_DOMAIN == "") {
             var paramSSLDomain = argv.ssldomain;
             if ( paramSSLDomain == "" || paramSSLDomain == null ) {
-                if ( memory.get("SSL_DOMAIN", "SETTINGS") != null ) {
+                if ( memory.get("SSL_DOMAIN", "SETTINGS") != null && memory.get("SSL_DOMAIN", "SETTINGS") != "" ) {
                     argv.ssldomain = memory.get("SSL_DOMAIN", "SETTINGS");
                 }
             }   
@@ -237,7 +236,7 @@ function Start(argv) {
         if ( process.env.SSL_PORT == null || process.env.SSL_PORT == "") {
             var paramSSLPort = argv.sslport;
             if ( paramSSLPort == "" || paramSSLPort == null ) {
-                if ( memory.get("SSL_PORT", "SETTINGS") != null ) {
+                if ( memory.get("SSL_PORT", "SETTINGS") != null && memory.get("SSL_PORT", "SETTINGS") != "" ) {
                     argv.sslport = memory.get("SSL_PORT", "SETTINGS");
                 }
             }   
@@ -246,7 +245,7 @@ function Start(argv) {
         if ( process.env.ADMIN == null || process.env.ADMIN == "") {
             var paramAdmin = argv.admin;
             if ( paramAdmin == "" || paramAdmin == null ) {
-                if ( memory.get("ADMIN", "SETTINGS") != null ) {
+                if ( memory.get("ADMIN", "SETTINGS") != null && memory.get("ADMIN", "SETTINGS") != "" ) {
                     argv.admin = memory.get("ADMIN", "SETTINGS");
                 }
             }   
@@ -255,7 +254,7 @@ function Start(argv) {
         if ( process.env.ADMIN_PATH == null || process.env.ADMIN_PATH == "") {
             var paramAdminPath = argv.adminpath;
             if ( paramAdminPath == "" || paramAdminPath == null ) {
-                if ( memory.get("ADMIN_PATH", "SETTINGS") != null ) {
+                if ( memory.get("ADMIN_PATH", "SETTINGS") != null && memory.get("ADMIN_PATH", "SETTINGS") != "" ) {
                     argv.adminpath = memory.get("ADMIN_PATH", "SETTINGS");
                 }
             }   
@@ -265,7 +264,7 @@ function Start(argv) {
         if ( process.env.ADMIN_TOKEN == null || process.env.ADMIN_TOKEN == "") {
             var paramAdminToken = argv.admintoken;
             if ( paramAdminToken == "" || paramAdminToken == null ) {
-                if ( memory.get("ADMIN_TOKEN", "SETTINGS") != null ) {
+                if ( memory.get("ADMIN_TOKEN", "SETTINGS") != null && memory.get("ADMIN_TOKEN", "SETTINGS") != "" ) {
                     argv.admintoken = memory.get("ADMIN_TOKEN", "SETTINGS");
                 }
             }   
@@ -274,7 +273,7 @@ function Start(argv) {
         if ( process.env.VERBOSE == null || process.env.VERBOSE == "") {
             var paramDebug = argv.d || argv.debug;
             if ( paramDebug == "" || paramDebug == null ) {
-                if ( memory.get("VERBOSE", "SETTINGS") != null ) {
+                if ( memory.get("VERBOSE", "SETTINGS") != null && memory.get("VERBOSE", "SETTINGS") != "" ) {
                     argv.d = memory.get("VERBOSE", "SETTINGS");
                 }
             }   
@@ -283,7 +282,7 @@ function Start(argv) {
         if ( process.env.WATCH == null || process.env.WATCH == "") {
             var paramWatch = argv.w || argv.watch;
             if ( paramWatch == "" || paramWatch == null ) {
-                if ( memory.get("WATCH", "SETTINGS") != null ) {
+                if ( memory.get("WATCH", "SETTINGS") != null && memory.get("WATCH", "SETTINGS") != "" ) {
                     argv.w = memory.get("WATCH", "SETTINGS");
                 }
             }   

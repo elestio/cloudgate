@@ -74,6 +74,60 @@ if (argv.h || argv.help) {
 }
 
 
+
+
+var nbThreads = os.cpus().length;
+var paramCores = argv.cores || argv.c;
+if ( paramCores != "" && paramCores != null ){
+    var nbCores = parseInt(paramCores);
+    if (!isNaN(nbCores) && nbCores > 0){
+        nbThreads = parseInt(paramCores);
+    }
+}
+
+if ( process.env.THREADS ){
+    if (!isNaN(process.env.THREADS) && process.env.THREADS > 0){
+        nbThreads = parseInt(process.env.THREADS);
+    }
+}
+
+
+//load config file Settings
+if (isMainThread) {
+    
+    if ( argv.memstate != null && argv.memstate != ""){
+        var memoryPath = argv.memstate;
+        
+        if (fs.existsSync(memoryPath)) {
+            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+            memory.setMemory(JSON.parse(memorySTR));
+        }
+    }
+
+    //Importance order: ENV > ARGS > Conf
+    if ( process.env.THREADS == null || process.env.THREADS == "") {
+        if ( paramCores == "" || paramCores == null ) {
+            if ( memory.get("THREADS", "SETTINGS") != null && memory.get("THREADS", "SETTINGS") != "" ) {
+                nbThreads = parseInt(memory.get("THREADS", "SETTINGS"));
+            }
+        }   
+    }
+
+    console.log(process.env.APP_ROOT);
+    console.log(argv.r);
+    console.log(argv.rootfolder);
+    console.log(memory.get("APP_ROOT", "SETTINGS"));
+    if ( process.env.APP_ROOT == null || process.env.APP_ROOT == "") {
+        var paramAppRoot = argv.r || argv.rootfolder;
+        if ( paramAppRoot == "" || paramAppRoot == null ) {
+            if ( memory.get("APP_ROOT", "SETTINGS") != null && memory.get("APP_ROOT", "SETTINGS") != "" ) {
+                argv.r = memory.get("APP_ROOT", "SETTINGS");
+            }
+        }   
+    }
+}
+
+
 if ( isMainThread ){
 
     var appPath = argv["_"][2];
@@ -117,41 +171,8 @@ else if ( argv.r != null && argv.r != ""){
 //console.log("Current Working Directory: " + process.cwd());
 
 
-var nbThreads = os.cpus().length;
-var paramCores = argv.cores || argv.c;
-if ( paramCores != "" && paramCores != null ){
-    var nbCores = parseInt(paramCores);
-    if (!isNaN(nbCores) && nbCores > 0){
-        nbThreads = parseInt(paramCores);
-    }
-}
 
-if ( process.env.THREADS ){
-    if (!isNaN(process.env.THREADS) && process.env.THREADS > 0){
-        nbThreads = parseInt(process.env.THREADS);
-    }
-}
 
-//load config file Settings
-if (isMainThread) {
-    
-    if ( argv.conf != null && argv.conf != ""){
-        var memoryPath = argv.conf;
-        if (fs.existsSync(memoryPath)) {
-            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
-            memory.setMemory(JSON.parse(memorySTR));
-        }
-    }
-
-    //Importance order: ENV > ARGS > Conf
-    if ( process.env.THREADS == null || process.env.THREADS == "") {
-        if ( paramCores == "" || paramCores == null ) {
-            if ( memory.get("THREADS", "SETTINGS") != null ) {
-                nbThreads = parseInt(memory.get("THREADS", "SETTINGS"));
-            }
-        }   
-    }
-}
 
 
 

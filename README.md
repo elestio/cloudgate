@@ -103,6 +103,9 @@ Install and run as a service with PM2:
     
     pm2 start "cloudgate ./CatchAll" --name cloudgate
 
+or Install and run as a service with SystemD: 
+    
+    ./systemd/install.sh
 
 ## Run with Docker 
 

@@ -226,7 +226,7 @@ if ( isMainThread ){
         }
         
         process.argv.push("-r");
-        process.argv.push(argv.r);
+        process.argv.push( resolve(argv.r) );
     }
 
     //console.log("Root: " + __dirname);   
@@ -240,7 +240,7 @@ if (process.env.NODE_ROOT){
     process.chdir(process.env.NODE_ROOT);
 }
 else if ( argv.rootfolder != null && argv.rootfolder != ""){
-    process.chdir(argv.rootfolder);
+    process.chdir( resolve(argv.rootfolder) );
     //console.log("changing curDIR to: " + argv.rootfolder);
 }
 else if ( argv.r != null && argv.r != ""){

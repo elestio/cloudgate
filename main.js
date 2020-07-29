@@ -113,7 +113,7 @@ function Start(argv) {
 
     var memoryPath = "./memorystate.json";
     if ( argv.memstate != null && argv.memstate != ""){
-        memoryPath = argv.memstate;
+        memoryPath = resolve(argv.memstate);
         if (fs.existsSync(memoryPath)) {
             var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
             memory.setMemory(JSON.parse(memorySTR));
@@ -288,6 +288,11 @@ function Start(argv) {
                 }
             }   
         }
+
+        if ( argv.r ){
+            argv.r = resolve(argv.r);
+        }
+        
 
         //console.log(argv);
     }

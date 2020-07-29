@@ -1,0 +1,15 @@
+[Unit]
+Description=Fast web application server
+Documentation=https://github.com/elestio/cloudgate
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=cloudgate --conf /etc/cloudgate/memorystate.json
+
+[Install]
+WantedBy=multi-user.target
+Alias=cloudgate.service

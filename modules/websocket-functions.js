@@ -33,6 +33,10 @@ module.exports = {
 
 function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, isBinary) {
 
+    if ( memory.getObject("AdminConfig", "GLOBAL").debug == true && reqInfos != null ){
+        console.log("[" + new Date().toISOString() + "] [WS] [" + subFunction + "] " + reqInfos.host + reqInfos.url + " - Query: " + reqInfos.query + " - SourceIP: " + reqInfos.ip + " - Body: " + reqInfos.body );
+    }
+
     reqInfos.isBinary = isBinary;
     if ( !isBinary ) {
         if ( msgBody != null) {

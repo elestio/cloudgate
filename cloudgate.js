@@ -21,6 +21,7 @@ if ( Worker == null ){
     return;
 }
 
+const fs = require('fs');
 const os = require('os');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
@@ -130,7 +131,28 @@ if ( process.env.THREADS ){
     }
 }
 
-//console.log(nbThreads);
+//load config file Settings
+if (isMainThread) {
+    
+    if ( argv.conf != null && argv.conf != ""){
+        var memoryPath = argv.conf;
+        if (fs.existsSync(memoryPath)) {
+            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+            memory.setMemory(JSON.parse(memorySTR));
+        }
+    }
+
+    //Importance order: ENV > ARGS > Conf
+    if ( process.env.THREADS == null || process.env.THREADS == "") {
+        if ( paramCores == "" || paramCores == null ) {
+            if ( memory.get("THREADS", "SETTINGS") != null ) {
+                nbThreads = parseInt(memory.get("THREADS", "SETTINGS"));
+            }
+        }   
+    }
+}
+
+
 
 //try to implement memory cache only in the master thread and childrens asking data to the master
 //https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/threads.md

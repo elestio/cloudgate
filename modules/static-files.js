@@ -331,7 +331,7 @@ module.exports = {
                             var maxCachedSize = (1024*1024)*2; //2MB
                             if ( totalSize > maxCachedSize ) {
                                 //console.log("Piping file!");
-                                const readStream = fs.createReadStream(fullPath);
+                                const readStream = fs.createReadStream(fullPath, { highWaterMark: 1024*1024 });
                                 tools.pipeStreamOverResponse(res, readStream, totalSize, memory);
                                 //console.log("AFTER Piping file!");
                                 result.content = null; //meaning already responded!   

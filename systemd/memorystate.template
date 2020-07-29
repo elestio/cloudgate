@@ -1,0 +1,33 @@
+{
+    "SETTINGS": {
+        "THREADS": "",
+        "PORT": "3000",
+        "APP_ROOT": "",
+        "OUTPUT_CACHE": "",
+        "SSL": "",
+        "SSL_CERT": "",
+        "SSL_KEY": "",
+        "SSL_DOMAIN": "",
+        "SSL_PORT": "443",
+        "ADMIN": "",
+        "ADMIN_PATH": "",
+        "ADMIN_TOKEN": "",
+        "VERBOSE": "",
+        "WATCH": "",
+        "MASTER": "",
+        "SLAVE": ""
+    },
+    "GLOBAL": {
+        "*": {
+            "env": "PROD",
+            "version": "1.0.0",
+            "title": "Default Static Files",
+            "description": "This is a sample app that catch all domains not configured and serve static files",
+            "domains": [
+                "*"
+            ],
+            "publicFolder": "./",
+            "root": "/var/www/html"
+        }
+    }
+}

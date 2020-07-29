@@ -127,7 +127,6 @@ ENV Variables:
 |-------------|---------------|-----------------------------------------------------|
 | THREADS     |               | Number of CPU Threads to use, default to ALL        |
 | PORT        | 3000          | TCP port to use                                     |
-| HOST        | ::            | Interface to listen to (public/local ip or * or ::) |
 | APP_ROOT    |               | folder containing your app (and appconfig.json)     |
 | NODE_ROOT   |               | path to folder containing node_modules              |
 | OUTPUT_CACHE| 0             | Enable Caching of GET requests with 1               |
@@ -259,6 +258,8 @@ cloudgate [path] [options]
     -p --port   Port to use [3000]
     
     -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.
+
+    -c number of threads to use, eg: 2 to use 2 threads, by default it will use all cores available
 
     -w --watch  Activate file change watch [default: disabled]
 

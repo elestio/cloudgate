@@ -44,8 +44,6 @@ if (fs.existsSync(memoryPath)) {
     //console.log("Memory restored from dump file!");
 }
 
-
-
 //console.log(memory.debug());
 
 //const { parentPort } = require('worker_threads');
@@ -112,8 +110,19 @@ function Start(argv) {
     const appLoader = require('./loaders/app-loader.js');
     var ifaces = os.networkInterfaces();
 
-    
+    var memoryPath = "./memorystate.json";
+    if ( argv.conf != null && argv.conf != ""){
+        memoryPath = argv.conf;
+        if (fs.existsSync(memoryPath)) {
+            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+            memory.setMemory(JSON.parse(memorySTR));
+            //console.log("Memory restored from dump file!");
 
+            //if (argv)
+
+        }
+    }
+    
     process.title = 'cloudgate';
 
     if (argv.h || argv.help) {
@@ -155,7 +164,139 @@ function Start(argv) {
         process.exit();
     }
 
-    var port = argv.p || argv.port || parseInt(process.env.PORT, 10),
+
+    //load config file Settings
+    if (true) {
+        
+        //console.log(argv);
+        //console.log(process.env.THREADS);
+        //console.log(memory.get("THREADS", "SETTINGS"));
+
+        if ( argv.conf != null && argv.conf != ""){
+            var memoryPath = argv.conf;
+            if (fs.existsSync(memoryPath)) {
+                var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+                memory.setMemory(JSON.parse(memorySTR));
+            }
+        }
+
+        //Importance order: ENV > ARGS > Conf
+        if ( process.env.THREADS == null || process.env.THREADS == "") {
+            var paramCores = argv.c;
+            if ( paramCores == "" || paramCores == null ) {
+                if ( memory.get("THREADS", "SETTINGS") != null ) {
+                    nbThreads = memory.get("THREADS", "SETTINGS");
+                    argv.c = nbThreads;
+                }
+            }   
+        }
+
+        if ( process.env.PORT == null || process.env.PORT == "") {
+            var paramPort = argv.p || argv.port;
+            if ( paramPort == "" || paramPort == null ) {
+                if ( memory.get("PORT", "SETTINGS") != null ) {
+                    argv.p = memory.get("PORT", "SETTINGS");
+                }
+            }   
+        }
+        
+        if ( process.env.APP_ROOT == null || process.env.APP_ROOT == "") {
+            var paramAppRoot = argv._;
+            if ( paramAppRoot == "" || paramAppRoot == null ) {
+                if ( memory.get("APP_ROOT", "SETTINGS") != null ) {
+                    argv.r = memory.get("APP_ROOT", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.OUTPUT_CACHE == null || process.env.OUTPUT_CACHE == "") {
+            var paramOutputCache = argv.oc || argv.outputcache;
+            if ( paramOutputCache == "" || paramOutputCache == null ) {
+                if ( memory.get("OUTPUT_CACHE", "SETTINGS") != null ) {
+                    argv.oc = memory.get("OUTPUT_CACHE", "SETTINGS");
+                }
+            }   
+        }
+    
+        if ( process.env.SSL == null || process.env.SSL == "") {
+            var paramSSL = argv.S || argv.ssl;
+            if ( paramSSL == "" || paramSSL == null ) {
+                if ( memory.get("SSL", "SETTINGS") != null ) {
+                    argv.ssl = memory.get("SSL", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.SSL_DOMAIN == null || process.env.SSL_DOMAIN == "") {
+            var paramSSLDomain = argv.ssldomain;
+            if ( paramSSLDomain == "" || paramSSLDomain == null ) {
+                if ( memory.get("SSL_DOMAIN", "SETTINGS") != null ) {
+                    argv.ssldomain = memory.get("SSL_DOMAIN", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.SSL_PORT == null || process.env.SSL_PORT == "") {
+            var paramSSLPort = argv.sslport;
+            if ( paramSSLPort == "" || paramSSLPort == null ) {
+                if ( memory.get("SSL_PORT", "SETTINGS") != null ) {
+                    argv.sslport = memory.get("SSL_PORT", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.ADMIN == null || process.env.ADMIN == "") {
+            var paramAdmin = argv.admin;
+            if ( paramAdmin == "" || paramAdmin == null ) {
+                if ( memory.get("ADMIN", "SETTINGS") != null ) {
+                    argv.admin = memory.get("ADMIN", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.ADMIN_PATH == null || process.env.ADMIN_PATH == "") {
+            var paramAdminPath = argv.adminpath;
+            if ( paramAdminPath == "" || paramAdminPath == null ) {
+                if ( memory.get("ADMIN_PATH", "SETTINGS") != null ) {
+                    argv.adminpath = memory.get("ADMIN_PATH", "SETTINGS");
+                }
+            }   
+        }
+
+      
+        if ( process.env.ADMIN_TOKEN == null || process.env.ADMIN_TOKEN == "") {
+            var paramAdminToken = argv.admintoken;
+            if ( paramAdminToken == "" || paramAdminToken == null ) {
+                if ( memory.get("ADMIN_TOKEN", "SETTINGS") != null ) {
+                    argv.admintoken = memory.get("ADMIN_TOKEN", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.VERBOSE == null || process.env.VERBOSE == "") {
+            var paramDebug = argv.d || argv.debug;
+            if ( paramDebug == "" || paramDebug == null ) {
+                if ( memory.get("VERBOSE", "SETTINGS") != null ) {
+                    argv.d = memory.get("VERBOSE", "SETTINGS");
+                }
+            }   
+        }
+        
+        if ( process.env.WATCH == null || process.env.WATCH == "") {
+            var paramWatch = argv.w || argv.watch;
+            if ( paramWatch == "" || paramWatch == null ) {
+                if ( memory.get("WATCH", "SETTINGS") != null ) {
+                    argv.w = memory.get("WATCH", "SETTINGS");
+                }
+            }   
+        }
+
+        //console.log(argv);
+    }
+
+    
+
+    var port = argv.p || argv.port || parseInt(process.env.PORT, 3000),
         host = argv.a || process.env.HOST || '::',
         outputcache = argv.oc == '1' || argv.outputcache == '1' || process.env.OUTPUT_CACHE == '1',
         ssl = argv.S  == '1' || argv.ssl  == '1' || process.env.SSL == '1',
@@ -251,6 +392,7 @@ function Start(argv) {
             console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);
             console.log("======================================================");
             console.log("Root App Folder: " + argv.r);   
+            console.log("MemoryState: " + memoryPath);
 
             var cpuData = await si.cpu();
             var osInfo = await si.osInfo();
@@ -266,6 +408,26 @@ function Start(argv) {
             }
             console.log("CPU: " + cpuData.manufacturer + " | " + cpuData.brand );
             console.log("Multithreading: "+ multiThreading +" | Threads: " + argv.nbThreads );
+
+            console.log("======================================================");
+
+            var port = argv.p || argv.port || parseInt(process.env.PORT, 3000) || 3000;
+
+            Object.keys(ifaces).forEach(function(dev) {
+                ifaces[dev].forEach(function(details) {
+                    if (!details.address.startsWith("fe80::")) 
+                    {
+                        if (details.family === 'IPv4') 
+                        {
+                            console.log("Listening on: http://" + details.address + ":" + port );    
+                        }
+                        else if (details.address.toString() != "::1") {
+                            console.log("Listening on: http://[" + details.address + "]:" + port );    
+                        }
+                    }
+                });
+            });
+
             console.log("======================================================");
             
         }, 200);

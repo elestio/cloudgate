@@ -111,15 +111,12 @@ function Start(argv) {
     var ifaces = os.networkInterfaces();
 
     var memoryPath = "./memorystate.json";
-    if ( argv.conf != null && argv.conf != ""){
-        memoryPath = argv.conf;
+    if ( argv.memstate != null && argv.memstate != ""){
+        memoryPath = argv.memstate;
         if (fs.existsSync(memoryPath)) {
             var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
             memory.setMemory(JSON.parse(memorySTR));
             //console.log("Memory restored from dump file!");
-
-            //if (argv)
-
         }
     }
     
@@ -131,6 +128,7 @@ function Start(argv) {
             'USAGE: cloudgate [path] [options]',
             '',
             '[GENERAL]',
+            '  --memstate [path] path pointing to your memorystate.json, optional',
             '  -r --rootfolder [path] root folder for your app',
             '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
             '  -p --port [port]    Port to use [8080]',

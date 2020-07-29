@@ -39,6 +39,7 @@ if (argv.h || argv.help) {
         'USAGE: cloudgate [path] [options]',
         '',
         '[GENERAL]',
+        '  --memstate [path] path pointing to your memorystate.json, optional',
         '  -r --rootfolder [path] root folder for your app',
         '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
         '  -p --port [port]    Port to use [8080]',

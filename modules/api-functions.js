@@ -373,6 +373,11 @@ module.exports = {
                         });
                     }
                     else {
+
+                        if ( !isTypedArray(response) && !isString(response) && !isArrayBuffer(response) ){
+                            response = response + ""; //cast to string
+                        }
+
                         resolve({
                             status: (response.status || 200),
                             processed: true,
@@ -428,4 +433,16 @@ module.exports = {
         });
 
     }
+}
+
+
+function isTypedArray(a) { return !!(a.buffer instanceof ArrayBuffer && a.BYTES_PER_ELEMENT); }
+
+function isString(x) {
+  return Object.prototype.toString.call(x) === "[object String]"
+}
+
+const hasArrayBuffer = typeof ArrayBuffer === 'function';
+function isArrayBuffer(value) {
+  return hasArrayBuffer && (value instanceof ArrayBuffer || toString.call(value) === '[object ArrayBuffer]');
 }

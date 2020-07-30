@@ -8,7 +8,7 @@ var fileExistCache = {};
 
 module.exports = {
     name: "static-files",
-    process: (appConfig, reqInfos, res, req, memory, serverConfig) => {
+    process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
 
         var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
         var curURL = reqInfos.url.split('?')[0];
@@ -167,6 +167,7 @@ module.exports = {
 
                         //update stats
                         memory.incr("http.data.out", totalSize, "STATS");
+                        //sharedmem.incInteger("http.data.out", totalSize);
                         
                         var maxCachedSize = (1024*1024)*2; //2MB
                         if ( totalSize > maxCachedSize ) {

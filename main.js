@@ -541,7 +541,7 @@ function Start(argv) {
             if ( options.https.sslcert != null ){
                 //SSL Cert provided
                 //Start the SSL Server
-                var sslApp = require('./coregate').SSLApp({
+                var sslApp = require('uWebSockets.js').SSLApp({
                     key_file_name: options.https.sslkey,
                     cert_file_name: options.https.sslcert
                 });
@@ -572,7 +572,7 @@ function Start(argv) {
                         certInfos = resp;
 
                         //start the SSL Server
-                        var sslApp = require('./coregate').SSLApp({
+                        var sslApp = require('uWebSockets.js').SSLApp({
                             key_file_name: certInfos.privateKeyPath,
                             cert_file_name: certInfos.fullchain
                         });
@@ -597,7 +597,7 @@ function Start(argv) {
         }
 
         const tools = require('./lib/tools.js');
-        var app = require('./coregate').App();
+        var app = require('uWebSockets.js').App();
 
         //REST API sample / test
         //require('./lib/debug')(app, options.root);

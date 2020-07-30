@@ -205,7 +205,7 @@ module.exports = {
 
                     //var begin = process.hrtime();
                     var module = modules[i];
-                    var result = await module.process(appConfig, reqInfos, res, req, memory, serverConfig);
+                    var result = await module.process(appConfig, reqInfos, res, req, memory, serverConfig, app);
                     //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                     //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
 
@@ -367,12 +367,8 @@ module.exports = {
             idleTimeout: 60*60*24*1, //1 day
 
             /* Handlers */
-            open: async (ws, req) => {
-                //Code to execute each time a new websocket is established (eg: authentication, count connected users, ...)
+            upgrade: async (res, req, context) => {
 
-                //UPDATE STATS
-                memory.incr("websocket.connected", 1, "STATS");
-                memory.incr("websocket.requests", 1, "STATS");
 
                 var host = req.getHeader('host');
                 var subDomain = host.split('.')[0];
@@ -384,7 +380,7 @@ module.exports = {
                     url: req.getUrl(),
                     query: req.getQuery(),
                     method: req.getMethod(),
-                    ip: tools.getIP(req, ws),
+                    ip: tools.getIP(req, res),
                     headers: {},
                 }
 
@@ -411,8 +407,6 @@ module.exports = {
                 req.forEach((k, v) => {
                     reqInfos.headers[k] = v;
                 });
-                ws.reqInfos = reqInfos;
-                ws.req = req;
 
                 var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
                 //handle *
@@ -429,21 +423,55 @@ module.exports = {
 
                 if (typeof (appConfig) == 'undefined' || appConfig == null) {
                     tools.debugLog("WS", 404, 0, ws.reqInfos, serverConfig);
-                    ws.send(`{"error": "No app configured", "vhost": "${subDomain + "." + domain}"}`, false, false);
-                    ws.close();
+                    res.end(`{"error": "No app configured", "vhost": "${subDomain + "." + domain}"}`);
+                    return;
                 }
 
-                ws.appConfig = appConfig;
+                res.upgrade({
+                    url: req.getUrl(),
+                    reqInfos: reqInfos,
+                    appConfig: appConfig,
+                    req: req
+                },
+                req.getHeader('sec-websocket-key'),
+                req.getHeader('sec-websocket-protocol'),
+                req.getHeader('sec-websocket-extensions'),
+                context);
 
                 //handle cloudgate commands (control + replication)
-                
                 if ( _serverConfig && _serverConfig.adminEnabled == "1" ){
-                    
                     if ( reqInfos.url == _serverConfig.adminpath){
-                        
-                        var result = await cloudgateWebsocket.open(appConfig, reqInfos, ws, req, memory);
+                        var result = await cloudgateWebsocket.upgrade(appConfig, reqInfos, null, req, memory);
                         if ( result.content != null ){
-                            tools.debugLog("CloudGateWS", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                            tools.debugLog("CloudGateWS-UPGRADE", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                            req.end(result.content);
+                        }
+                        return;
+                    }
+                }
+
+                //handle normal apps
+                var result = await websocketFunctions.upgrade(appConfig, reqInfos, null, req, memory);
+                if ( result.content != null ){
+                    tools.debugLog("WS-UPGRADE", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                    req.end(result.content);
+                }
+
+            },
+            open: async (ws) => {
+                //Code to execute each time a new websocket is established (eg: authentication, count connected users, ...)
+
+                //UPDATE STATS
+                memory.incr("websocket.connected", 1, "STATS");
+                memory.incr("websocket.requests", 1, "STATS");
+
+                
+                //handle cloudgate commands (control + replication)
+                if ( _serverConfig && _serverConfig.adminEnabled == "1" ){
+                    if ( ws.reqInfos.url == _serverConfig.adminpath){
+                        var result = await cloudgateWebsocket.open(ws.appConfig, ws.reqInfos, ws, ws.req, memory);
+                        if ( result.content != null ){
+                            tools.debugLog("CloudGateWS", (result.status || 200), result.content.length, ws.reqInfos, serverConfig);
                             ws.send(result.content, false, false);
                         }
                         return;
@@ -451,13 +479,12 @@ module.exports = {
                 }
 
                 //handle normal apps
-                var result = await websocketFunctions.open(appConfig, reqInfos, ws, req, memory);
+                var result = await websocketFunctions.open(ws.appConfig, ws.reqInfos, ws, ws.req, memory);
                 if ( result.content != null ){
-                    tools.debugLog("WS", (result.status || 200), result.content.length, reqInfos, serverConfig);
+                    tools.debugLog("WS", (result.status || 200), result.content.length, ws.reqInfos, serverConfig);
                     ws.send(result.content, false, false);
                 }
                 
-
             },
             message: async (ws, message, isBinary) => {
 

@@ -11,6 +11,7 @@ const si = require('systeminformation');
 
 const tools = require('../lib/tools.js');
 const memory = require('../modules/memory');
+var sharedmem = require("../modules/shared-memory");
 const appLoader = require('../loaders/app-loader.js');
 const cloudgatePubSub = require('../modules/cloudgate-pubsub.js');
 
@@ -31,6 +32,14 @@ catch(ex){
 
 module.exports = {
     name: "cloudgate-websocket",
+    upgrade: (appConfig, reqInfos, res, req, memory, msgBody, isBinary) => {
+        return Executor(appConfig, reqInfos, res, req, memory, "upgrade", msgBody, isBinary,
+            function (event, ctx, callback){
+                //console.log("open websocket");
+
+            }
+        );
+    },
     open: (appConfig, reqInfos, res, req, memory, msgBody, isBinary) => {
         return Executor(appConfig, reqInfos, res, req, memory, "open", msgBody, isBinary,
             function (event, ctx, callback){
@@ -521,6 +530,7 @@ function SendRespObj(resp, res, memory) {
     var strResp = JSON.stringify(resp);
     res.send(strResp);  
     memory.incr("websocket.data.out", strResp.length, "STATS");
+    //sharedmem.incInteger("websocket.data.out", strResp.length);
 
     //TODO: we need a better implementation here with full logging of this for security reasons
     /*

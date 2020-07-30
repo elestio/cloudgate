@@ -19,6 +19,9 @@ module.exports = {
             });
         });
     },
+    upgrade: (appConfig, reqInfos, res, req, memory) => {
+        return Executor(appConfig, reqInfos, res, req, memory, "upgrade");
+    },
     open: (appConfig, reqInfos, res, req, memory) => {
         return Executor(appConfig, reqInfos, res, req, memory, "open");
     },
@@ -78,7 +81,7 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                 }
             }
 
-            if (typeof (apiEndpoint) != 'undefined') {
+            if (typeof (apiEndpoint) != 'undefined' && apiEndpoint[subFunction] != null ) {
                 var functionIndexFile = apiEndpoint[subFunction].split('.')[0];
                 var functionHandlerFunction = apiEndpoint[subFunction].split('.')[1];
                 // TODO : check path doesn't crash

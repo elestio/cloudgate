@@ -16,9 +16,11 @@ const axios = Axios.create({
 var functionsCache = {};
 var proxyCache = {};
 
+var sharedmem = require("./shared-memory");
+
 module.exports = {
     name: "api-functions",
-    process: (appConfig, reqInfos, res, req, memory) => {
+    process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
         return new Promise(async function(resolve, reject) {
 
             //console.log(appConfig);
@@ -330,7 +332,7 @@ module.exports = {
                     query: reqInfos.query,
                     queryStringParameters: qs.parse(reqInfos.query),
                     body: reqInfos.body,
-                    headers: reqInfos.headers,
+                    headers: reqInfos.headers
                 };
 
                 var ctx = {
@@ -388,14 +390,9 @@ module.exports = {
 
                 };
 
-
-
-
-
-
                 var result = null;
-
                 try {
+                    event.sharedmem = sharedmem;
                     result = await curFunction[functionHandlerFunction](event, ctx, callback);
                     resolve({
                         status: (result.statusCode || 200),

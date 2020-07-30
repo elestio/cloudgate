@@ -198,7 +198,6 @@ module.exports = {
                 }
 
                 //var beginPipeline = process.hrtime();
-
                 var hasBeenProcessed = false;
                 var processResult = null;
                 for (var i = 0; i < modules.length; i++) {

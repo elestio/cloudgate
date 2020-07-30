@@ -170,7 +170,6 @@ module.exports = {
 
                     //TODO: clear only the app reponse cache and not for the whole server and all apps!
                     memory.clear("ResponseCache");
-
                     memory.set("mustSaveConfig", 1, "TEMP");
                     
                     //clean appconfig cache

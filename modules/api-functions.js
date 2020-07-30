@@ -23,8 +23,6 @@ module.exports = {
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
         return new Promise(async function(resolve, reject) {
 
-            //console.log(appConfig);
-
             var functionsList = appConfig.apiEndpoints;
             if (functionsList == null) {
                 functionsList = [];
@@ -49,6 +47,8 @@ module.exports = {
                     }
                 }
             }
+
+            //console.log(appConfig);
 
             if (typeof (apiEndpoint) != 'undefined') {
 

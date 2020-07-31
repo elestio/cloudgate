@@ -22,6 +22,7 @@ if ( Worker == null ){
 }
 
 const fs = require('fs');
+const path = require('path')
 
 const resolve = require('path').resolve;
 const os = require('os');
@@ -128,10 +129,22 @@ if (argv.create) {
             console.log("Invalid choice selected, operation aborted");
             process.exit();
         }
+
+        //Domain to listen to
+        promptMSG = "Virtual host name, Eg: www.example.com, leave empty to catch all\n";
+        var domain = await tools.readLineAsync(promptMSG);
+        if ( domain == "" ){
+            domain = "*";
+        } 
+        //console.log("Virtual host: " + resp);
         
         //copy template to target path
         shell.cp('-R', './apps/' + selectedTemplate + "/*", targetPath);
         console.log("Your new app have been created in path: " + targetPath);
+
+        //change the domain in the appconfig.json
+        shell.exec('sed -i "s#*#' + domain + '#g" ' + targetPath + path.sep + "appconfig.json");
+        
 
         process.exit();
     })();

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "title": "Cloudgate Remote Shell",
   "description": "This is a sample app showing how to use the websocket remote shell",
-  "domains": ["*", "localhost"], 
+  "domains": ["*"], 
   "publicFolder": "./public",
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",

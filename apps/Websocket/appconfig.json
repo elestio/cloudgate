@@ -4,7 +4,7 @@
   "title": "Cloudgate App 1",
   "description": "This is a sample cloudgate app",
   "mainDomain": "websocket-demo-1.elest.io",
-  "domains": ["*", "cloudgate.appdrag.org"], 
+  "domains": ["*"], 
   "publicFolder": "./public",
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",

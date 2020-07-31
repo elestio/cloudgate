@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "title": "Serverless App",
   "description": "This is a sample Serverless app hosted on AWS S3/Lambda",
-  "domains": ["127.0.0.1", "mydomain.com", "www.mydomain.com"], 
+  "domains": ["*"], 
   "publicFolder": "FILL_YOUR_S3_PUBLIC_FOLDER",
   "AWS":{
       "region": "us-east-1",

@@ -21,5 +21,19 @@
       "src" : "./API/tests/",
       "handler": "full.handler"
     }
+  },
+  "websocketEndpoints": {
+    "/echo" : {
+      "src" : "./API/websocket/",
+      "open": "Echo.open",
+      "message": "Echo.message",
+      "close": "Echo.close"
+    },
+    "/chat" : {
+      "src" : "./API/websocket/",
+      "open": "Chat.open",
+      "message": "Chat.message",
+      "close": "Chat.close"
+    }
   }
 }

@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    </head>
+    <body>
+<input id='txtInput' type='text' placeholder='Type a message...'/> 
+<button onclick='SendMessage()'>SEND</button>
+
+<div id='content' style='margin-top: 10px; height:  width: 95%; color: black; padding: 15px;'> </div>
+    
+<script>
+
+        var input = document.getElementById("txtInput");
+        // Execute a function when the user releases a key on the keyboard
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                // Cancel the default action, if needed
+                event.preventDefault();
+                SendMessage()
+            }
+        });
+
+        function addZero(x, n) {
+            while (x.toString().length < n) {
+                x = "0" + x;
+            }
+            return x;
+        }
+                 
+		function connect() {
+            var protocolPrefix = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+            var rootURL = protocolPrefix + '//' + location.host;
+            var ws = new WebSocket(rootURL + '/chat');
+            var nbConnectRetry = 5;
+            globalWS = ws;
+            ws.onopen = function() {
+                nbConnectRetry = 0;
+            };
+
+            ws.onmessage = function(e) {
+                console.log('Message:', e.data);
+
+                var curNow = new Date();
+                var curTime = curNow.toTimeString().split(' ')[0] + "." + addZero(curNow.getMilliseconds(), 3);
+                var new_html = '<span class="line">' + curTime + ": " + sanitizeHTML(e.data) + '</span>';
+                var new_elem = document.createElement('div');
+                new_elem.innerHTML = new_html;
+
+                var content = document.getElementById('content');
+                content.appendChild(new_elem);
+            };
+
+            ws.onclose = function(e) {
+                console.log('Socket is closed. Reconnect will be attempted in ' + nbConnectRetry + ' seconds.', e.reason);
+                setTimeout(function() {
+                connect();
+                }, 1000*nbConnectRetry); //backoff mechanism
+            };
+
+            ws.onerror = function(err) {
+                console.error('Socket encountered error: ', err.message, 'Closing socket');
+                ws.close();
+
+                nbConnectRetry += 1;
+            };
+        }
+
+        connect();
+
+
+        function SendMessage(){
+            var txt = document.getElementById('txtInput').value;
+            Send(txt);
+            document.getElementById('txtInput').value = "";
+        }
+
+		
+        function Send(txt) {
+            
+            if ( globalWS.readyState != 1 ){
+                //websocket is closed, skip it ... (or queue it?)
+                return;
+            }
+            globalWS.send( encodeURIComponent(txt) );
+        }
+
+        var sanitizeHTML = function (str) {
+            var temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        };
+
+	</script>
+
+    </body>
+</html>

@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "title": "Sample App 2",
   "description": "This is a static files sample",
-  "domains": ["localhost", "example.com", "www.example.com", "test.brand.io"], 
+  "domains": ["localhost", "example.com", "www.example.com"], 
   "publicFolder": "./public"
 }

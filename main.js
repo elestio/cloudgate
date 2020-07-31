@@ -160,8 +160,8 @@ function Start(argv) {
             '',
             '[APPS]',
             '--list                  return an array of loaded apps path',
-            '--loadapp     [path]    Load the app located in the target path, the folder must contain appconfig.json',
-            '--unloadapp   [path]    Unload the app located in the target path',
+            '--load     [path]    Load the app located in the target path, the folder must contain appconfig.json',
+            '--unload   [path]    Unload the app located in the target path',
             '--create      [path]    Create a new app based on a template in the target path'
 
         ].join('\n'));

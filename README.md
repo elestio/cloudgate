@@ -109,13 +109,24 @@ or Install and run as a service with SystemD:
 
 When installed with SystemD you can load more apps in cloudgate like this:
 
-    cloudgate --memstate /etc/cloudgate/memorystate.json --loadapp /root/cloudgate/apps/Static
+    cloudgate --memstate /etc/cloudgate/memorystate.json --load /root/cloudgate/apps/Static
     systemctl restart cloudgate
 
 Then to unload an app from your cloudgate instance:
 
-    cloudgate --memstate /etc/cloudgate/memorystate.json --unloadapp /root/cloudgate/apps/Static
+    cloudgate --memstate /etc/cloudgate/memorystate.json --unload /root/cloudgate/apps/Static
     systemctl restart cloudgate
+
+To get the list of loaded apps from your cloudgate instance:
+
+    cloudgate --memstate /etc/cloudgate/memorystate.json --list
+    systemctl restart cloudgate
+
+To create a new app from a template:
+
+    cloudgate --memstate /etc/cloudgate/memorystate.json --create /path/to/create/
+
+Once the app is created you can go to the new folder, edit your app then load it with the --load command described above
 
 ## Run with Docker 
 

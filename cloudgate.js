@@ -110,7 +110,7 @@ if (argv.create) {
     //prompt the user to select a template
     (async () => {
         var promptMSG = `Select a template: `;
-        for (var i = 1; i < templates.length -1; i++){
+        for (var i = 0; i < templates.length; i++){
             promptMSG += "\n" + i + ") " + templates[i];
         }
         promptMSG += "\nType your choice and press Enter\n";
@@ -120,6 +120,9 @@ if (argv.create) {
         try{
             var choiceID = parseInt(resp);
             selectedTemplate = templates[choiceID];
+            if ( selectedTemplate == null ){
+                throw "Invalid_choice";
+            }
         }
         catch(ex){
             console.log("Invalid choice selected, operation aborted");
@@ -151,7 +154,7 @@ if (argv.load) {
     }
 
 
-    var appPath = resolve(argv.loadapp);
+    var appPath = resolve(argv.load);
 
     console.log("loading app: " + appPath);
     var loader = require("./loaders/app-loader.js");
@@ -185,7 +188,7 @@ if (argv.unload) {
         memory.setMemory(JSON.parse(memorySTR));
     }
 
-    var appPath = resolve(argv.unloadapp);
+    var appPath = resolve(argv.unload);
 
     console.log("unloading app: " + appPath);
     

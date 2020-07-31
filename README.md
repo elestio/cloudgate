@@ -266,39 +266,34 @@ cloudgate [path] [options]
  
 **options:**
 
+    [GENERAL]
     -r [path] root folder for your app, this impact the chdir and from where your code is loaded when doing require()
-
     -p --port   Port to use [3000]
-    
     -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.
-
     -c number of threads to use, eg: 2 to use 2 threads, by default it will use all cores available
-
     -w --watch  Activate file change watch [default: disabled]
-
     -d --debug  Activate the console logs for debugging
     
+    [ADMIN]
     --admin 1   Enable Admin Remote API (default: disabled)
-    
     --adminpath /CloudGateAdmin    Declare the virtual path of the admin api
-    
     --admintoken XXXXXXXX   The admin token to use for authentication of the REST API & Websocket
     
+    [SSL]
     --ssl   Enable https.
-    
     --sslport   SSL Port (default: 443)
-    
     --ssldomain     Domain name on which you want to activate ssl (eg: test.com)
-
     --sslcert  optional path to your SSL cert. E.g: /etc/letsencrypt/live/yourdomain.com/cert.pem
-    
     --sslkey  optional path to your SSL key. E.g: /etc/letsencrypt/live/yourdomain.com/privkey.pem
 
+    [CLUSTER]
     --master [Public IP, Local IP or *]:[Port]@[Token]   Declare this host as the master, Eg.: *:8081@000110b2-fb48-435c-a5b3-fce08c7f49da
-    
     --salve [Master IP or Domain]:[Port]@[Token]   Declare this host as a slave connecting to a master, eg: --slave 192.168.0.100:8081@000110b2-fb48-435c-a5b3-fce08c7f49da
     
-
+    [APPS]
+    --list                  return an array of loaded apps path
+    --loadapp     [path]    Load the app located in the target path, the folder must contain appconfig.json
+    --unloadapp   [path]    Unload the app located in the target path
 
 --------------
 

@@ -154,9 +154,14 @@ function Start(argv) {
             '',
             '[CLUSTER]',
             '  --master     Declare this host as the master',
-            '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master'
+            '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master',
             //'  -C --cert    Path to ssl cert file (default: cert.pem).',
             //'  -K --key     Path to ssl key file (default: key.pem).',
+            '',
+            '[APPS]',
+            '--list                  return an array of loaded apps path',
+            '--loadapp     [path]    Load the app located in the target path, the folder must contain appconfig.json',
+            '--unloadapp   [path]    Unload the app located in the target path'
 
         ].join('\n'));
         
@@ -292,12 +297,7 @@ function Start(argv) {
         if ( argv.r ){
             argv.r = resolve(argv.r);
         }
-        
-
-        //console.log(argv);
     }
-
-    
 
     var port = argv.p || argv.port || parseInt(process.env.PORT, 3000),
         host = argv.a || process.env.HOST || '::',
@@ -760,6 +760,7 @@ async function StartGatePub(argv){
         var clusterMasterPort = port;  
 
         if ( clusterIsMaster ){
+            console.log("Starting Cloudgate Cluster Master");
             memory.set("ClusterStarted", true, "TEMP");
             cloudgatePubSub.startServer(clusterMasterHost, clusterMasterPort, memory, token); //host is the interface on which we are listening as gatemaster
         }
@@ -767,6 +768,7 @@ async function StartGatePub(argv){
 
         //in all case start the client if the cluster is activated 
         setTimeout(function(){
+            console.log("Starting Cloudgate Cluster client");
             cloudgatePubSub.startClient(clusterMasterHost, clusterMasterPort, memory, token); //clusterMasterHost is the remote GateMaster to which we are connecting to
         }, 200);
 

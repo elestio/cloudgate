@@ -3,7 +3,7 @@
   "bin": "cloudgate.js",
   "version": "1.0.42",
   "description": "CloudGate is a fast web application server for Node.js",
-  "main": "coregate.js",
+  "main": "cloudgate.js",
   "scripts": {
     "example": "node cloudgate.js ./apps/CatchAll -p 3000"
   },

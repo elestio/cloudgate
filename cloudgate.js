@@ -65,16 +65,21 @@ if (argv.h || argv.help) {
         '',
         '[CLUSTER]',
         '  --master     Declare this host as the master',
-        '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master'
+        '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master',
         //'  -C --cert    Path to ssl cert file (default: cert.pem).',
         //'  -K --key     Path to ssl key file (default: key.pem).',
+        '',
+        '[APPS]',
+        '--list               return an array of loaded apps path',
+        '--load     [path]    Load the app located in the target path, the folder must contain appconfig.json',
+        '--unload   [path]    Unload the app located in the target path'
 
     ].join('\n'));
     
     process.exit();
 }
 
-if (argv.loadapp) {
+if (argv.load) {
     
     if ( !argv.memstate ){
         console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
@@ -109,7 +114,7 @@ if (argv.loadapp) {
     process.exit();
 }
 
-if (argv.unloadapp) {
+if (argv.unload) {
     
     if ( !argv.memstate ){
         console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
@@ -156,6 +161,33 @@ if (argv.unloadapp) {
     delete fullMemory["undefined"];
     //save to disk
     fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8');
+
+    process.exit();
+}
+
+if (argv.list) {
+    
+    if ( !argv.memstate ){
+        console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+        process.exit();
+    }
+
+    //Loading memorystate.json
+    var memoryPath = argv.memstate;
+    if (fs.existsSync(memoryPath)) {
+        var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+        memory.setMemory(JSON.parse(memorySTR));
+    }
+
+    var mainMemory = memory.debug().GLOBAL;
+    var list = Object.keys(mainMemory);
+    var finalList = [];
+    for (var i = 0; i < list.length; i++ ){
+        if ( mainMemory[list[i]].root != null ){
+            finalList.push(mainMemory[list[i]].root);
+        }
+    }
+    console.log(finalList);
 
     process.exit();
 }

@@ -22,10 +22,13 @@ if ( Worker == null ){
 }
 
 const fs = require('fs');
+
 const resolve = require('path').resolve;
 const os = require('os');
+const tools = require('./lib/tools.js');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
+var shell = require('shelljs');
 
 var argv = require('optimist')(process.argv)
 .boolean('cors')
@@ -70,13 +73,67 @@ if (argv.h || argv.help) {
         //'  -K --key     Path to ssl key file (default: key.pem).',
         '',
         '[APPS]',
-        '--list               return an array of loaded apps path',
+        '--list               Return an array of loaded apps path',
         '--load     [path]    Load the app located in the target path, the folder must contain appconfig.json',
-        '--unload   [path]    Unload the app located in the target path'
+        '--unload   [path]    Unload the app located in the target path',
+        '--create   [path]    Create a new app based on a template in the target path'
 
     ].join('\n'));
     
     process.exit();
+}
+
+if (argv.create) {
+    
+    var targetPath = argv.create;
+    //check if the folder exist to avoid accidental overwrite
+    if (fs.existsSync(targetPath) && !(tools.isDirEmpty(targetPath))) {
+        console.log("This folder already exist and contains files, to avoid overwriting please provide a new path to be created");
+        process.exit();
+    }
+
+    if (targetPath == true) {
+        console.log("You must provide a target path where your new app will be created");
+        process.exit();
+    }
+
+    //convert to absolute path
+    targetPath = resolve(targetPath);
+
+    //create the new folder
+    console.log("Creating folder: " + targetPath);
+    shell.mkdir('-p', targetPath);
+
+    //ask the user which template to use    
+    var templates = tools.GetDirectoriesArray("./apps/");
+
+    //prompt the user to select a template
+    (async () => {
+        var promptMSG = `Select a template: `;
+        for (var i = 1; i < templates.length -1; i++){
+            promptMSG += "\n" + i + ") " + templates[i];
+        }
+        promptMSG += "\nType your choice and press Enter\n";
+        var resp = await tools.readLineAsync(promptMSG);
+        
+        var selectedTemplate = "";
+        try{
+            var choiceID = parseInt(resp);
+            selectedTemplate = templates[choiceID];
+        }
+        catch(ex){
+            console.log("Invalid choice selected, operation aborted");
+            process.exit();
+        }
+        
+        //copy template to target path
+        shell.cp('-R', './apps/' + selectedTemplate + "/*", targetPath);
+        console.log("Your new app have been created in path: " + targetPath);
+
+        process.exit();
+    })();
+   
+    return;
 }
 
 if (argv.load) {

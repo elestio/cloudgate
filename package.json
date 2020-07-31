@@ -1,7 +1,7 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "optimist": "^0.6.1",
     "request": "^2.88.2",
     "serverless-http": "^2.3.2",
+    "shelljs": "^0.8.4",
     "systeminformation": "^4.23.5",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#binaries",
     "uuid": "^7.0.3",

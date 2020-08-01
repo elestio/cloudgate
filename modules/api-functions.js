@@ -188,19 +188,15 @@ module.exports = {
                                     }
                                 }
                                 
-
                                 return;
                             })
                             .catch(function(error) {
-                                //console.log(error);
                                 res.writeStatus("500")
                                 res.end(error.message);
                                 return;
                             });
 
                         return;
-
-
 
                     }
                     catch (ex) {

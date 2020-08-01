@@ -137,15 +137,28 @@ if (argv.create) {
             domain = "*";
         } 
         //console.log("Virtual host: " + resp);
+
+        var reverseURL = "";
+        if ( selectedTemplate == "ReverseProxy" ){
+            promptMSG = "Url of your target service to reverse proxy, Eg: https://www.google.com/\n";
+            reverseURL = await tools.readLineAsync(promptMSG);
+            if ( reverseURL == "" ){
+                reverseURL = "https://www.google.com/";
+            } 
+        }
         
         //copy template to target path
         shell.cp('-R', './apps/' + selectedTemplate + "/*", targetPath);
         console.log("Your new app have been created in path: " + targetPath);
 
         //change the domain in the appconfig.json
-        shell.exec('sed -i "s#*#' + domain + '#g" ' + targetPath + path.sep + "appconfig.json");
-        
+        tools.ReplaceInFile('["*"]', '["' + domain + '"]', targetPath + path.sep + "appconfig.json");
 
+        //if we are using the reverse proxy template, set the reverse url
+        if ( reverseURL != "" ){
+            tools.ReplaceInFile('https://www.google.com/', reverseURL, targetPath + path.sep + "appconfig.json");
+        }
+        
         process.exit();
     })();
    

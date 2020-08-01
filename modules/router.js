@@ -19,7 +19,7 @@ var _serverConfig = null;
 module.exports = {
     start: (app, serverConfig) => {
         //var modules = [apiFunctions, apiDB, staticFiles];
-        var modules = [apiFunctions, staticFiles];
+        var modules = [apiFunctions, apiDB, staticFiles];
 
         if ( _serverConfig == null ){
             _serverConfig = serverConfig;

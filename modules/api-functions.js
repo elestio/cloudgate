@@ -17,6 +17,7 @@ var functionsCache = {};
 var proxyCache = {};
 
 var sharedmem = require("./shared-memory");
+const apiDB = require('./api-db');
 
 module.exports = {
     name: "api-functions",
@@ -385,10 +386,12 @@ module.exports = {
 
 
                 };
-
+                
                 var result = null;
                 try {
-                    event.sharedmem = sharedmem;
+                    ctx.sharedmem = sharedmem;
+                    ctx.apiDB = apiDB;
+                    ctx.appConfig = appConfig;
                     result = await curFunction[functionHandlerFunction](event, ctx, callback);
                     resolve({
                         status: (result.statusCode || 200),

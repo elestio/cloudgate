@@ -1,6 +1,6 @@
 exports.handler = async (event, context, callback) => {
     
-    var sharedmem = event.sharedmem;
+    var sharedmem = context.sharedmem;
 
     var response = "";
     response = "<b>Hello, World! From Sample</b><br/><br/>\r\n\r\n";

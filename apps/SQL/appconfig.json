@@ -1,0 +1,28 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "SQL Sample app",
+  "description": "This is a sample app using SQL",
+  "domains": ["*"], 
+  "publicFolder": "./public",
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "redirect404toIndex": false,
+  "apiEndpoints": {
+    "/demo1" : {
+      "src": "./API/",
+      "handler": "demo.handler"
+    }
+  },
+  "db": {
+    "MYSQL": {
+      "host" : "127.0.0.1",
+      "port" : 3306,
+      "database": "YOUR_DB_NAME",
+      "user": "MYSQL_USER",
+      "password": "MYSQL_PASSWORD",
+      "apiToken" : "A_RANDOM_STRING_GUID",
+      "apiEndpoint" : "/dbapi"
+    }
+  }
+}

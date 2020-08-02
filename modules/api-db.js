@@ -109,18 +109,26 @@ module.exports = {
             SQL = "SELECT 'NO SQL QUERY PROVIDED ...' as status"
         }
 
-        //console.log("SQL: " + SQL);
-        var rows = await ExecuteQuery(appConfig, SQL);
-        result.headers["Content-Type"] = "application/json;charset=utf-8;";
-        result.headers['Content-Encoding'] = 'gzip';
-        result.content = tools.GzipContent(JSON.stringify(rows));
+        try{
+            //console.log("SQL: " + SQL);
+            var rows = await ExecuteQuery(appConfig, SQL);
+            result.headers["Content-Type"] = "application/json;charset=utf-8;";
+            result.headers['Content-Encoding'] = 'gzip';
+            result.content = tools.GzipContent(JSON.stringify(rows));
 
-        const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
-        var durationMS = (nanoSeconds/1000000);
-        result.headers['processTime'] = durationMS.toFixed(2) + "ms";
+            const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+            var durationMS = (nanoSeconds/1000000);
+            result.headers['processTime'] = durationMS.toFixed(2) + "ms";
 
-        resolve(result);
-        return;
+            resolve(result);
+            return;
+        }
+        catch(ex){
+            result.content = "Error: " + ex.message;
+            resolve(result);
+            return;
+        }
+        
     }
     catch (ex) {
 

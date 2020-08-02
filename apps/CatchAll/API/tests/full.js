@@ -1,4 +1,6 @@
 exports.handler = async (event, context, callback) => {
+
+    var beginPipeline = process.hrtime();
     
     var sharedmem = context.sharedmem;
 
@@ -14,13 +16,10 @@ exports.handler = async (event, context, callback) => {
     response += "Body: " + event.body + "<br/>\r\n";
 
     sharedmem.incInteger("test-counter", 1);
-    response += "sharedmem: " + sharedmem.getInteger("test-counter") + "<br/>\r\n";
-
-    response += "sharedmem getStringKeys: " + sharedmem.getStringKeys() + "<br/>\r\n";
-    
+    response += "sharedmem: " + sharedmem.getInteger("test-counter") + "<br/>\r\n";   
     /*
     response += "sharedmem getIntegerKeys: " + sharedmem.getIntegerKeys() + "<br/>\r\n";
-    
+    response += "sharedmem getStringKeys: " + sharedmem.getStringKeys() + "<br/>\r\n";
 
     response += "http.requests: " + sharedmem.getInteger("http.requests") + "<br/>\r\n";
     response += "http.data.in: " + sharedmem.getInteger("http.data.in") + "<br/>\r\n";
@@ -30,11 +29,14 @@ exports.handler = async (event, context, callback) => {
     response += "websocket.data.out: " + sharedmem.getInteger("websocket.data.out") + "<br/>\r\n";
     */
 
+    const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+    var durationMS = (nanoSeconds/1000000);
+
     callback(null, {
         status: 200,
         content: response, 
         headers:{
-            "my-custom-header": "1234567890"
+            "processTime": durationMS
         }
     });
 

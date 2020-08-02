@@ -2,3 +2,4 @@ node_modules
 core
 benchmarks/wrk
 memorystate.json
+DB/MYSQL/data

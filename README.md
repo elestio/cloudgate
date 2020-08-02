@@ -25,7 +25,7 @@ Motivations:
 - Less moving parts, simplify infrastructure
 - Extreme performances exploration
 
-
+&nbsp;
 ## Requirements
 
 - Linux, Windows or Mac OS
@@ -35,29 +35,54 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 
     export NODE_OPTIONS=--experimental-worker
 
+&nbsp;
 
 ## Installation
 
-Install globally:  
+### Install globally:  
 
     npm i @elestio/cloudgate -g
 
-Then you can clone samples: 
+&nbsp;
+
+### Linux: Install as a service with SystemD
     
-    git clone https://github.com/elestio/cloudgate-samples.git
+    ./systemd/install.sh
+
+[Check here](#run-as-a-service) for more details about usage
+
+&nbsp;
+
+### Docker: Install as a service with Docker
+    apt install -y docker.io
+    docker build -t cloudgate .
+    docker run -p 80:3000 -d cloudgate --restart always
+
+[Check here](#run-with-docker ) for more details about docker
+
+&nbsp;
+
+### MySQL: Run MySQL in docker (optional)
+    ./DB/MYSQL/startMYSQL.sh
+
+
+&nbsp;
+## Run samples
+
+Clone this repo including samples: 
+    
+    git clone https://github.com/elestio/cloudgate.git
 
 Enter the cloned folder then install dependencies:  
     
-    cd cloudgate-samples
+    cd cloudgate
     npm install
 
 Your are now ready to run the samples below
-
-## Run samples
  
 run a sample app on the default port (3000): 
 
-    cloudgate ./CatchAll
+    cloudgate ./apps/CatchAll
 
 Then open the site in your browser: http://127.0.0.1:3000/
 
@@ -69,20 +94,22 @@ Note2: You can use relative or absolute path to point to your app folder
 
 Start an app on port 80 with **adminAPI** activated:
 
-    sudo cloudgate -p80 ./CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
+    sudo cloudgate -p80 ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
 
 Here sudo is required if you are not root to bind port 80
 
 
 Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
     
-    sudo cloudgate ./Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com
+    sudo cloudgate ./apps/Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com
 
+
+&nbsp;
  ## Reverse Proxy
 
 Check our Reverse proxy example, this will proxy the web trafic from port 80 to the target configured in ./ReverseProxy/appconfig.json
     
-    sudo cloudgate ./ReverseProxy -p80
+    sudo cloudgate ./apps/ReverseProxy -p80
 
 Here is ther relevant part of the appconfig.json
 
@@ -97,13 +124,10 @@ Here is ther relevant part of the appconfig.json
 
 This rule capture /* and proxy it to the url indicated in the src attribute
 
+&nbsp;
  ## Run as a service
 
-Install and run as a service with PM2: 
-    
-    pm2 start "cloudgate ./CatchAll" --name cloudgate
-
-or Install and run as a service with SystemD: 
+Install and run as a service with SystemD: 
     
     ./systemd/install.sh
 
@@ -128,6 +152,7 @@ To create a new app from a template:
 
 Once the app is created you can go to the new folder, edit your app then load it with the --load command described above
 
+&nbsp;
 ## Run with Docker 
 
     git clone https://github.com/elestio/cloudgate.git
@@ -168,6 +193,7 @@ ENV Variables:
 | SLAVE       |               | [Master IP]:[Port]@[Token]                          |
 
 
+&nbsp;
 ## AdminAPI 
 
 
@@ -233,28 +259,28 @@ unload an App:
 **The API is described in postman/cloudgate.postman_collection.json**
 
   
-
+&nbsp;
 ## Remote Shell
 
 Check the sample app RemoteShell for more details about using Websocket to control your instance
 You can also try it with this command: 
 
-    cloudgate -p3000 ./CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
+    cloudgate -p3000 ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
 
 Then open your browser on: http://127.0.0.1:3000/wsAdmin.html?token=12345A000G
 
-
+&nbsp;
 ## EXPERIMENTAL: Cluster mode
 
 Serve an app on port 3000 in cluster mode as the master with **adminAPI** activated: 
 
-    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --master 0.0.0.0:8081@A_Random_Secret_Token_Here
+    cloudgate ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --master 0.0.0.0:8081@A_Random_Secret_Token_Here
 
 Serve an app on port 3000 in cluster mode as a slave with **adminAPI** activated: 
 
-    cloudgate ./CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --slave 0.0.0.0:8081@A_Random_Secret_Token_Here
+    cloudgate ./apps/CatchAll -p 3000 --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G --slave 0.0.0.0:8081@A_Random_Secret_Token_Here
 
- 
+&nbsp;
 ## Benchmarks
 
 Run your server in mono or multithread like described above then
@@ -271,6 +297,7 @@ PS: if you don't have WRK installed you can download the binary for linux with t
 A special endpoint is available to benchmark the raw performance with no processing pipeline:
 http://localhost:3000/cloudgate/debug/raw
 
+&nbsp;
 ## CLI usage
 
 cloudgate [path] [options]
@@ -328,9 +355,9 @@ In this example we are requesting several domains, you can notice that 127.0.0.1
 
 **publicFolder**: is a string containing the path of the public folder of your app, it must be relative to the folder of your app
 
-## Options in appconfig.json
 
- 
+&nbsp;
+## Options in appconfig.json
 
 Here is the full list of configuration options supported in appconfig.json:
   
@@ -386,18 +413,12 @@ In the third apiEndpoint we are using a wildcard (*) so all path starting the th
      }
 
   
+  &nbsp;
   ## TODO
-
-   1) finish multinodes infra
-   2) MUST improve serving large files (currently 4-8GB/s .... vs 28GB/s on nginx!)
-
  
  - [ ] Add a rate limiter
- - [ ] Install as a service
-              https://github.com/coreybutler/node-linux
-              https://github.com/coreybutler/node-windows
-              https://github.com/coreybutler/node-mac
- - [ ] Managed MySQL
+ - [ ] Cluster communication improvements
+ - [X] Managed MySQL
  - [ ] Managed PostgreSQL
  - [ ] Managed Redis
  - [ ] Managed MongoDB

@@ -1,5 +1,6 @@
 var fs = require('fs');
 const memory = require('../modules/memory');
+const sharedmem = require('../modules/shared-memory');
 const staticFiles = require('../modules/static-files');
 const apiFunctions = require('../modules/api-functions.js');
 const websocketFunctions = require('../modules/websocket-functions.js');
@@ -57,8 +58,6 @@ module.exports = {
             memory.incr("http.requests", 1, "STATS");
             //console.log("New request on a node");
 
-
-
             try {
                 var host = req.getHeader('host');
                 var subDomain = host.split('.')[0];
@@ -104,15 +103,48 @@ module.exports = {
                 }
 
                 var appConfig = memory.getObject(subDomain + "." + domain, "GLOBAL");
+
+                //TOO SLOW BECAUSE OF JSON.parse
+                /*
+                var appConfigJSON = sharedmem.getString("/domains/" + subDomain + "." + domain);
+                if ( appConfigJSON != null && appConfigJSON != ""){
+                    appConfig = JSON.parse(appConfigJSON);
+                }
+                else{
+                    appConfig = null;
+                }
+                */
                 
                 //handle *
                 if (appConfig == null) {
                     appConfig = memory.getObject("*", "GLOBAL"); //avoid constant call to redis
+                    
+                    //TOO SLOW BECAUSE OF JSON.parse
+                    /*
+                    appConfigJSON = sharedmem.getString("/domains/*");
+                    if ( appConfigJSON != null && appConfigJSON != ""){
+                        //appConfig = JSON.parse(appConfigJSON);
+                    }
+                    else{
+                        appConfig = null;
+                    }
+                    */
                 }
 
                 //handle *.XXXXX.xxx
                 if (appConfig == null) {
                     appConfig = memory.getObject("*." + domain, "GLOBAL"); //avoid constant call to redis
+                    
+                    //TOO SLOW BECAUSE OF JSON.parse
+                    /*
+                    appConfigJSON = sharedmem.getString("/domains/*." + domain);
+                    if ( appConfigJSON != null && appConfigJSON != ""){
+                        //appConfig = JSON.parse(appConfigJSON);
+                    }
+                    else{
+                        appConfig = null;
+                    }
+                    */
                 }
                 
                 if (typeof (appConfig) == 'undefined' || appConfig == null) {

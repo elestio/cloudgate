@@ -1,4 +1,5 @@
 const memory = require('../modules/memory');
+const sharedmem = require('../modules/shared-memory');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid')
 
@@ -20,7 +21,8 @@ module.exports = {
             apiDefinition.root = fullAppPath;
 
             apiDefinition.domains.forEach(function(domainObject) {
-                memory.setObject(domainObject, apiDefinition, "GLOBAL");                
+                memory.setObject(domainObject, apiDefinition, "GLOBAL");
+                //sharedmem.setString("/domains/" + domainObject, JSON.stringify(apiDefinition));
                 //console.log(memory.debug());
             });
 

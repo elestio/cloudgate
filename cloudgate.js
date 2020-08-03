@@ -153,7 +153,7 @@ if (argv.create) {
         console.log("Your new app have been created in path: " + targetPath);
 
         //change the domain in the appconfig.json
-        tools.ReplaceInFile('["*"]', '["' + domain + '"]', targetPath + path.sep + "appconfig.json");
+        tools.ReplaceInFile('"*"', '"' + domain + '"', targetPath + path.sep + "appconfig.json");
 
         //if we are using the reverse proxy template, set the reverse url
         if ( reverseURL != "" ){
@@ -207,6 +207,30 @@ if (argv.load) {
             let rawdata = fs.readFileSync(appconfigPath, 'UTF8');
             //console.log(rawdata);
             let appconfigObj = JSON.parse(rawdata);
+
+            //check if no domain configure
+            if (appconfigObj.domains == null || appconfigObj.domains.length == 0){
+                console.log("No domains configured in your appconfig.json");
+                console.log("Operation aborted, unable to load this app");
+                process.exit(0);
+            }
+
+            //check if registered domains are not overlapping existing apps. Block if it's the case.
+            for (var i = 0; i < appconfigObj.domains.length; i++){
+                var curDomain = appconfigObj.domains[i];
+
+                var testDomain = memory.getObject(curDomain, "GLOBAL");
+                if ( testDomain != null && (testDomain.root != appPath) && (testDomain.root + "/" != appPath) && (testDomain.root != appPath + "/") ){
+
+                    console.log("Another app (" + testDomain.root + ") is already using the domain '" + curDomain + "'");
+                    console.log("Either unload that other app with: cloudgate --memstate " + argv.memstate + " --unload " + testDomain.root);
+                    console.log("or change your domain in the new app you want to load: nano " + appconfigPath);
+                    console.log("Operation aborted, unable to load this app");
+                    process.exit(0);
+                }
+
+            }
+
 
             if ( appconfigObj.db != null && appconfigObj.db.MYSQL != null )
             {

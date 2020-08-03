@@ -6,7 +6,7 @@ main() {
     #IF the data folder is not empty, root password will be the old one ...
     if emptydir $DBPATH
     then
-        echo "Data dir is empty! OK :)";
+        echo "Data dir is empty!";
         GenerateNewConfig;
     else 
         echo "directory is not empty, keeping previous configuration and data (config.json)" ;

@@ -3,3 +3,5 @@ core
 benchmarks/wrk
 memorystate.json
 DB/MYSQL/data
+DB/MYSQL/mysql-docker-cli.sh
+DB/MYSQL/config.json

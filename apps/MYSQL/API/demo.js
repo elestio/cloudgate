@@ -3,7 +3,7 @@ exports.handler = async (event, context, callback) => {
     var beginPipeline = process.hrtime();
 
     var apiDB = context.apiDB;
-    var rows = await apiDB.ExecuteQuery(context.appConfig, "SELECT * FROM ReferencesDetails LIMIT 1")
+    var rows = await apiDB.ExecuteQuery(context.appConfig, "SELECT * FROM Products")
     
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);

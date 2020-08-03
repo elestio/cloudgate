@@ -58,7 +58,7 @@ if you are on Node 10, you can activate multi-threading by executing this in you
     docker build -t cloudgate .
     docker run -p 80:3000 -d cloudgate --restart always
 
-[Check here](#run-with-docker ) for more details about docker
+[Check here](#run-with-docker ) for more details about usage with docker
 
 &nbsp;
 

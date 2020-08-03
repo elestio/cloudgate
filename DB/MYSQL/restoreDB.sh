@@ -1,9 +1,9 @@
 if [ -z "$1" ]
 then
-      echo "You must pass 3 arguments: DBUSER, DBPASSWORD, DBNAME";
-      echo "Eg: ./restoreDB.sh MyUser MyPassword MyDB";
+      echo "You must pass 4 arguments: DBUSER, DBPASSWORD, DBNAME, PATH";
+      echo "Eg: ./restoreDB.sh MyUser MyPassword MyDB backup.sql";
 else
-      cat $3.sql | docker exec -i mysql80 /usr/bin/mysql --user=$1 --password=$2 $3
+      cat $4 | docker exec -i mysql80 /usr/bin/mysql --user=$1 --password=$2 $3
 fi
 
 

@@ -167,6 +167,8 @@ if (argv.create) {
 
 if (argv.load) {
     
+    var appPath = resolve(argv.load);
+
     if ( !argv.memstate ){
         console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
         process.exit();
@@ -179,8 +181,13 @@ if (argv.load) {
         memory.setMemory(JSON.parse(memorySTR));
     }
 
+    
+    //check if the app root is already in use
 
-    var appPath = resolve(argv.load);
+    //check if domain is already in use
+
+    //check if the app contains a DB and if it's already created or not
+   
 
     console.log("loading app: " + appPath);
     var loader = require("./loaders/app-loader.js");

@@ -1,67 +1,94 @@
-##DB STORAGE
-DBPATH=$PWD/data
-read -p "Storage folder [${DBPATH}]: " DBPATH
-DBPATH=${DBPATH:-$DBPATH}
-echo $DBPATH
-mkdir -p $DBPATH
 
-##INTERFACE
-read -p "NETWORK INTERFACE TO LISTEN TO [172.17.0.1]: " NETFACE
-NETFACE=${NETFACE:-172.17.0.1}
-echo $NETFACE
+main() {
+    
+    PomptUser;
 
-##PORT
-read -p "PORT TO LISTEN TO [3306]: " NETPORT
-NETPORT=${NETPORT:-3306}
-echo $NETPORT
+    #IF the data folder is not empty, root password will be the old one ...
+    if emptydir $DBPATH
+    then
+        echo "Data dir is empty! OK :)";
+        GenerateNewConfig;
+    else 
+        echo "directory is not empty, keeping previous configuration and data (config.json)" ;
+    fi
 
-##DBUSER
-read -p "MYSQL_USER [DBU_APPID]: " DBUSER
-DBUSER=${DBUSER:-DBU_APPID}
-echo $DBUSER
+    InstallOrCleanDocker;
+    startContainer;
+}
 
-##DBPASSWORD
-randomUUID=$(uuidgen);
-read -p "MYSQL_PASSWORD [${randomUUID}]: " DBPASSWORD
-DBPASSWORD=${DBPASSWORD:-${randomUUID}}
-echo $DBPASSWORD
+function PomptUser {
+    echo "Press enter to use the default value"
 
-##DBUSER
-read -p "MYSQL_DATABASE [MYAPP]: " MYSQL_DATABASE
-MYSQL_DATABASE=${MYSQL_DATABASE:-MYAPP}
-echo $MYSQL_DATABASE
+    ##INTERFACE
+    read -p "NETWORK INTERFACE TO LISTEN TO [172.17.0.1]: " NETFACE
+    NETFACE=${NETFACE:-172.17.0.1}
+    echo $NETFACE
 
-if [ -x "$(command -v docker)" ]; then
-    echo "Docker is already installed";
-else
-    echo "Installing docker ...";
-    apt install docker.io -y;
-fi
+    ##PORT
+    read -p "PORT TO LISTEN TO [3306]: " NETPORT
+    NETPORT=${NETPORT:-3306}
+    echo $NETPORT
 
-echo "";
-echo "Cleaning previous mysql80 container";
-docker stop mysql80
-docker rm mysql80
-
-echo "";
-echo "Starting new mysql80 container"
-docker run --name=mysql80 \
-   --publish $NETFACE:3306:$NETPORT \
-   -e MYSQL_USER=$DBUSER -e MYSQL_PASSWORD=$DBPASSWORD -e MYSQL_DATABASE=$MYSQL_DATABASE \
-   -v $DBPATH:/var/lib/mysql \
-   -d mysql/mysql-server:8.0
+    ##DB STORAGE
+    DBPATH=$PWD/data
+    read -p "Storage folder [${DBPATH}]: " dbp
+    DBPATH=${dbp:-$DBPATH}
+    echo $DBPATH
+    mkdir -p $DBPATH
+}
 
 
-docker logs mysql80;
+function GenerateNewConfig {
+    #generate a random root password
+    rootPassword=$(uuidgen);
 
-echo "DONE";
+    echo "MYSQL_ROOT_PASSWORD=$rootPassword";
 
-echo "";
-echo "You can now connect to the mysql cli like this: ";
-echo "mysql --host=$NETFACE --port=$NETPORT --user=$DBUSER --password=$DBPASSWORD $MYSQL_DATABASE";
+    #write json config
+    echo "{\"path\": \"$DBPATH\", \"host\": \"$NETFACE\", \"port\": \"$NETPORT\", \"rootPassword\": \"$rootPassword\"}" > config.json;
 
-echo "";
-echo "You can also backup & restore your DB with: ";
-echo "./backup.sh";
-echo "and";
-echo "./restore.sh";
+    #write cli helper
+    echo "docker exec -it mysql80 mysql --host=$NETFACE --port=$NETPORT --user=root --password=$rootPassword" > mysql-docker-cli.sh;
+    chmod +x mysql-docker-cli.sh;
+}
+
+function startContainer {
+    echo "";
+    echo "Starting new mysql80 container"
+
+    docker run --name=mysql80 \
+    --publish $NETFACE:3306:$NETPORT \
+    -e MYSQL_ROOT_PASSWORD=$rootPassword \
+    -e MYSQL_ROOT_HOST=172.17.0.1 \
+    -v $DBPATH:/var/lib/mysql \
+    -d mysql/mysql-server:8.0 --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+    sleep 3;
+    docker logs mysql80;
+
+    echo "";
+    echo "You can now connect to the mysql cli like this: ./mysql-docker-cli.sh";
+}
+
+
+function emptydir {
+  ! { ls -1qA "/$1/" | grep -q . ; }
+}
+
+
+function InstallOrCleanDocker {
+    #INSTALL DOCKER or clean previous container
+    if [ -x "$(command -v docker)" ]; then
+        echo "";
+        echo "Cleaning previous mysql80 container ... Please wait ...";
+        docker stop mysql80
+        docker rm mysql80
+    else
+        echo "";
+        echo "Installing docker ...";
+        apt install docker.io -y;
+    fi
+}
+
+
+main "$@"; exit

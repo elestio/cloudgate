@@ -30,6 +30,7 @@ const tools = require('./lib/tools.js');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
 var shell = require('shelljs');
+const { v4: uuidv4 } = require('uuid')
 
 var argv = require('optimist')(process.argv)
 .boolean('cors')
@@ -169,42 +170,184 @@ if (argv.load) {
     
     var appPath = resolve(argv.load);
 
-    if ( !argv.memstate ){
-        console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+    (async () => {
+
+        if ( !argv.memstate ){
+            console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+            process.exit();
+        }
+
+        //Loading memorystate.json
+        var memoryPath = argv.memstate;
+        if (fs.existsSync(memoryPath)) {
+            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+            memory.setMemory(JSON.parse(memorySTR));
+        }
+
+        
+        //check if the app root is already in use
+
+        //check if domain is already in use
+
+
+        //check if the app contains a DB and if it's already created or not
+        var appconfigPath = path.join(appPath, "appconfig.json");
+        if ( appPath.indexOf("appconfig.json") > -1 ){
+            appconfigPath = appPath;
+        }
+
+        var sqlConfigPath = "DB/MYSQL/config.json";
+        var sqlConfig = null;
+        if (fs.existsSync(sqlConfigPath)) {
+            let rawdata = fs.readFileSync(sqlConfigPath);
+            sqlConfig = JSON.parse(rawdata);
+        }
+        
+        if (fs.existsSync(appconfigPath)) {
+            let rawdata = fs.readFileSync(appconfigPath, 'UTF8');
+            //console.log(rawdata);
+            let appconfigObj = JSON.parse(rawdata);
+
+            if ( appconfigObj.db != null && appconfigObj.db.MYSQL != null )
+            {
+                var dbName = appconfigObj.db.MYSQL.database;
+                if ( dbName == null || dbName == ""){
+                    console.log("Skipping DB creation since no database is defined in appconfig.json");
+                }
+                else{
+
+                    //DB is needed, check if MySQL is installed
+                    if (sqlConfig == null && appconfigObj.db.MYSQL.host.toUpperCase() == "AUTO"){
+                        console.log("Operation aborted, this app require a managed mysql instance to be loaded");
+                        console.log("MySQL docker is not configured on this server, go to your cloudgate folder then go to subfolder DB/MYSQL and run: ./startMYSQL.sh");
+                        process.exit();
+                    }
+
+                    //check if db is already created
+                    var mysql = require('mysql');
+                    var cpool = null;
+
+                    if ( appconfigObj.db.MYSQL.host.toUpperCase() == "AUTO" ){
+                        //we must create a user then restore the DB
+                        cpool = mysql.createPool({
+                            connectionLimit : 2,
+                            host     : sqlConfig.host,
+                            port     : sqlConfig.port,
+                            user     : "root",
+                            password : sqlConfig.rootPassword
+                        });
+                    }
+                    else{
+                        //we must check if the DB exist, if not restore the DB
+                        cpool = mysql.createPool({
+                            connectionLimit : 2,
+                            host     : appconfigObj.db.MYSQL.host,
+                            port     : appconfigObj.db.MYSQL.port,
+                            user     : appconfigObj.db.MYSQL.user,
+                            password : appconfigObj.db.MYSQL.password
+                        });
+                    }
+
+
+                    var dbName = appconfigObj.db.MYSQL.database.replace(/\'/g, "''");
+                    var query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "';";
+                    var result = await ExecuteQuery(cpool, query);
+                    
+                    if (result.length == 0){
+                        
+                        //create a new user and a new DB
+                        var newUser = dbName;
+                        var newPassword = uuidv4();
+  
+                        var opresult = null;
+                        console.log("Creating new DB:");
+                        opresult = await ExecuteQuery(cpool, `CREATE DATABASE ${dbName};`);
+                        if (opresult.sqlMessage != null){
+                            console.log("Error while creating the database");
+                            console.log(opresult.sqlMessage);
+                            process.exit(0);
+                        }
+                        else{ console.log("OK"); }
+
+                        console.log("Creating a new user for the DB:");
+                        opresult = await ExecuteQuery(cpool, `CREATE USER '${newUser}'@'%' IDENTIFIED BY '${newPassword}';`);
+                        if (opresult.sqlMessage != null){
+                            console.log("Error while creating a new user");
+                            console.log(opresult.sqlMessage);
+                            process.exit(0);
+                        }
+                        else{ console.log("OK"); }
+                        
+                        console.log("Granting permissions on the new user:");
+                        opresult = await ExecuteQuery(cpool, `GRANT ALL PRIVILEGES ON ${dbName}.* TO '${newUser}'@'%';`);
+                        if (opresult.sqlMessage != null){
+                            console.log("Error while creating a new user");
+                            console.log(opresult.sqlMessage);
+                            process.exit(0);
+                        }
+                        else{ console.log("OK"); }
+                        
+                        await ExecuteQuery(cpool, `flush privileges;`);
+
+                        //update appconfig.json
+                        appconfigObj.db.MYSQL.host = sqlConfig.host;
+                        appconfigObj.db.MYSQL.port = sqlConfig.port;
+                        appconfigObj.db.MYSQL.user = dbName;
+                        appconfigObj.db.MYSQL.password = newPassword;
+
+                        if ( appconfigObj.db.MYSQL.apiToken == "AUTO" ){
+                            appconfigObj.db.MYSQL.apiToken = uuidv4();
+                        }
+                        
+                        //write new appconfig
+                        fs.writeFileSync(appconfigPath, JSON.stringify(appconfigObj, null, 4), 'utf-8');
+                        
+                        //restore DB dump
+                        if ( appconfigObj.db.MYSQL.dump != null && appconfigObj.db.MYSQL.dump != "" ){
+                            console.log("Restoring DB dump");
+                            var responseExec = shell.exec("cat " + path.join(appPath, appconfigObj.db.MYSQL.dump) + " | docker exec -i mysql80 /usr/bin/mysql --user=" + appconfigObj.db.MYSQL.user + " --password=" + appconfigObj.db.MYSQL.password + " " + dbName);
+                            //console.log(responseExec);
+                            console.log("Done");
+                        }
+
+                    }
+                    else{
+                        console.log("DB already exist");
+                    }
+
+                }
+            }
+            else{
+                console.log("No DB is required for this app");
+            }
+        }
+        else{
+            console.log("Unable to load app in: " + appPath);
+            console.log('There is no appconfig.json in the provided app path');
+            process.exit();
+        }
+
+        
+        console.log("loading app: " + appPath);
+        var loader = require("./loaders/app-loader.js");
+        var result = loader.load(appPath);
+        console.log(result);
+
+        //Get a new memory dump
+        var fullMemory = memory.debug();
+        //delete response cache because it's huge and temporary
+        delete fullMemory["ResponseCache"];
+        delete fullMemory["STATS"];
+        delete fullMemory["TEMP"];
+        delete fullMemory["undefined"];
+        //save to disk
+        fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8');
+
         process.exit();
-    }
 
-    //Loading memorystate.json
-    var memoryPath = argv.memstate;
-    if (fs.existsSync(memoryPath)) {
-        var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
-        memory.setMemory(JSON.parse(memorySTR));
-    }
+    })();
 
-    
-    //check if the app root is already in use
-
-    //check if domain is already in use
-
-    //check if the app contains a DB and if it's already created or not
-   
-
-    console.log("loading app: " + appPath);
-    var loader = require("./loaders/app-loader.js");
-    var result = loader.load(appPath);
-    console.log(result);
-
-    //Get a new memory dump
-    var fullMemory = memory.debug();
-    //delete response cache because it's huge and temporary
-    delete fullMemory["ResponseCache"];
-    delete fullMemory["STATS"];
-    delete fullMemory["TEMP"];
-    delete fullMemory["undefined"];
-    //save to disk
-    fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8');
-
-    process.exit();
+    return;
 }
 
 if (argv.unload) {
@@ -482,4 +625,19 @@ function HandleMessage(msg){
 function HandleError(err){
     console.log("err received from a child worker");
     console.log(err);
+}
+
+
+function ExecuteQuery(cpool, query) {
+  return new Promise(function(resolve, reject) {
+
+      cpool.query(query, function(error, results, fields) {
+          if (error) {
+              resolve(error);
+          }
+          else{
+              resolve(results);
+          }
+      });
+  });
 }

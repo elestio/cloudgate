@@ -169,27 +169,27 @@ if (argv.create) {
 if (argv.load) {
     
     var appPath = resolve(argv.load);
+    if ( !appPath.endsWith("/") ){
+        appPath += "/";
+    }
+    else if ( appPath.endsWith("/") ){
+
+    }
+
+    if ( !argv.memstate ){
+        console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
+        process.exit();
+    }
+
+    //Loading memorystate.json
+    var memoryPath = argv.memstate;
+    if (fs.existsSync(memoryPath)) {
+        var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
+        memory.setMemory(JSON.parse(memorySTR));
+    }
 
     (async () => {
-
-        if ( !argv.memstate ){
-            console.log("To load/unload apps you must provide the path to your memorystate.json. Eg: --memstate /etc/cloudgate/memorystate.json ");
-            process.exit();
-        }
-
-        //Loading memorystate.json
-        var memoryPath = argv.memstate;
-        if (fs.existsSync(memoryPath)) {
-            var memorySTR = fs.readFileSync(memoryPath, { encoding: 'utf8' });
-            memory.setMemory(JSON.parse(memorySTR));
-        }
-
-        
-        //check if the app root is already in use
-
-        //check if domain is already in use
-
-
+       
         //check if the app contains a DB and if it's already created or not
         var appconfigPath = path.join(appPath, "appconfig.json");
         if ( appPath.indexOf("appconfig.json") > -1 ){
@@ -336,13 +336,13 @@ if (argv.load) {
 
                     }
                     else{
-                        console.log("DB already exist");
+                        console.log("DB & DB User already exist, skipping creation");
                     }
 
                 }
             }
             else{
-                console.log("No DB is required for this app");
+                //console.log("No DB is required for this app");
             }
         }
         else{

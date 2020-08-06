@@ -4,6 +4,8 @@ var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
+var sharedmem = require("./shared-memory");
+const apiDB = require('./api-db');
 
 var functionsCache = {};
 
@@ -195,6 +197,10 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
 
 
                 };
+
+                ctx.sharedmem = sharedmem;
+                ctx.apiDB = apiDB;
+                ctx.appConfig = appConfig;
 
                 var result = curFunction[functionHandlerFunction](event, ctx, callback);
                 if (result) {

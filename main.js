@@ -403,7 +403,7 @@ function Start(argv) {
             var memoryInfo = await si.mem();
 
             console.log("Platform: " + os.platform() + " | " + osInfo.arch + " | " + osInfo.distro + " | " + osInfo.release);
-            console.log("Total Mem: " + (memoryInfo.total/1024/1024/1024).toFixed(2) + "GB | Free: " + (memoryInfo.free/1024/1024/1024).toFixed(2) + "GB | Used: " + (memoryInfo.used/1024/1024/1024).toFixed(2) + "GB");
+            console.log("Total Mem: " + (memoryInfo.total/1024/1024/1024).toFixed(2) + "GB | Available: " + (memoryInfo.available/1024/1024/1024).toFixed(2) + "GB");
             
 
             var multiThreading = "No";

@@ -72,6 +72,8 @@ module.exports = {
                     req: req,
                 }
 
+                //TODO: Ratelimiter based on IP, using sharedmem incr
+
                 //handle cloudgate commands (control + replication)
                 if ( serverConfig && serverConfig.adminEnabled == "1" ){
                     if ( reqInfos.url == serverConfig.adminpath){

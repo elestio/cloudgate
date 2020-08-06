@@ -15,6 +15,7 @@ function getConnection(appConfig) {
       user     : appConfig.db.MYSQL.user,
       password : appConfig.db.MYSQL.password,
       database : appConfig.db.MYSQL.database,
+      multipleStatements: true
     });
   }
   return connections[keyConnection];

@@ -29,6 +29,7 @@ Motivations:
 ## Requirements
 
 - Linux, Windows or Mac OS
+- git
 - Node 10+ for single-threaded mode, Node 12+ for multi-threaded mode
 
 if you are on Node 10, you can activate multi-threading by executing this in your terminal:
@@ -41,7 +42,7 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 
 ### Install globally:  
 
-    npm i @elestio/cloudgate -g
+    npm i @elestio/cloudgate -g --ignore-scripts
 
 &nbsp;
 

@@ -225,7 +225,7 @@ module.exports = {
                     });
                 } else {
                     if (apiEndpoint.type !== 'nodejs12.x') {
-                        let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`);
+                        let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
                         console.log(sqlRequest);
                         apiDB.ExecuteQuery(appConfig, sqlRequest);
                         return;

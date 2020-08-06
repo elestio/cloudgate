@@ -29,12 +29,12 @@ module.exports = {
                 functionsList = [];
             }
 
-            var endpointTarget = reqInfos.url.split('?')[0];
+            var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
             var apiEndpoint = functionsList[endpointTarget];
 
             //if not found, check if we have a rule with a wildcard (*) matching
-
+            console.log('api-function debut');
             if (functionsList[endpointTarget] == null) {
                 var routes = Object.keys(functionsList);
                 for (var i = 0; i < routes.length; i++) {
@@ -217,6 +217,22 @@ module.exports = {
                 var functionIndexFile = apiEndpoint.handler.split('.')[0];
                 var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
                 // TODO : check path doesn't crash
+                let supportedTypes = ['nodejs12.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
+                console.log(apiEndpoint.type);
+                if (!supportedTypes.includes(apiEndpoint.type)) {
+                    console.log('not supported');
+                    resolve({
+                        status: "415",
+                        processed: true,
+                        content: 'Python is not supported on Cloudgate'
+                    });
+                } else {
+                    if (apiEndpoint.type !== 'nodejs12.x') {
+                        console.log('ici');
+                        apiDB.ExecuteQuery(appConfig, reqInfos, res, req, memory, serverConfig, app);
+                        return;
+                    }
+                }
                 var functionPath = "";
                 if (appConfig.root.startsWith("./")) {
                     functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
@@ -392,6 +408,16 @@ module.exports = {
                     ctx.sharedmem = sharedmem;
                     ctx.apiDB = apiDB;
                     ctx.appConfig = appConfig;
+                    let forbiddenEnvVars = ['PATH','LS_COLORS','SSH_CONNECTION','LESSCLOSE','LANG','USER','PWD','HOME','SSH_CLIENT','SSH_TTY','MAIL','TERM','SHELL','NVM_BIN','SHLVL','LOGNAME','PATH','NVM_INC','XDG_SESSION_ID','XDG_RUNTIME_DIR','_']
+                    if (apiEndpoint.envVars) {
+                        Object.keys(apiEndpoint.envVars).forEach(envVar => {
+                            if (forbiddenEnvVars.includes(envVar)) {
+                                return;
+                            }
+                            process.env[envVar] = apiEndpoint.envVars[envVar];
+                            console.log(process.env[envVar]);
+                        });
+                    }
                     result = await curFunction[functionHandlerFunction](event, ctx, callback);
                     resolve({
                         status: (result.statusCode || 200),

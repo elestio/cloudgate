@@ -34,7 +34,6 @@ module.exports = {
             var apiEndpoint = functionsList[endpointTarget];
 
             //if not found, check if we have a rule with a wildcard (*) matching
-            console.log('api-function debut');
             if (functionsList[endpointTarget] == null) {
                 var routes = Object.keys(functionsList);
                 for (var i = 0; i < routes.length; i++) {
@@ -218,18 +217,17 @@ module.exports = {
                 var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
                 // TODO : check path doesn't crash
                 let supportedTypes = ['nodejs12.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
-                console.log(apiEndpoint.type);
                 if (!supportedTypes.includes(apiEndpoint.type)) {
-                    console.log('not supported');
                     resolve({
                         status: "415",
                         processed: true,
-                        content: 'Python is not supported on Cloudgate'
+                        content: `${apiEndpoint.type} is not supported on Cloudgate`
                     });
                 } else {
                     if (apiEndpoint.type !== 'nodejs12.x') {
-                        console.log('ici');
-                        apiDB.ExecuteQuery(appConfig, reqInfos, res, req, memory, serverConfig, app);
+                        let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`);
+                        console.log(sqlRequest);
+                        apiDB.ExecuteQuery(appConfig, sqlRequest);
                         return;
                     }
                 }
@@ -415,7 +413,6 @@ module.exports = {
                                 return;
                             }
                             process.env[envVar] = apiEndpoint.envVars[envVar];
-                            console.log(process.env[envVar]);
                         });
                     }
                     result = await curFunction[functionHandlerFunction](event, ctx, callback);

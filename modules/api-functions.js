@@ -227,7 +227,12 @@ module.exports = {
                     if (apiEndpoint.type !== 'nodejs12.x') {
                         let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
                         console.log(sqlRequest);
-                        apiDB.ExecuteQuery(appConfig, sqlRequest);
+                        let rows = apiDB.ExecuteQuery(appConfig, sqlRequest);
+                        resolve({
+                            processed: true,
+                            content: rows,
+                            status: 200
+                        })
                         return;
                     }
                 }

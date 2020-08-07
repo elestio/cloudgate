@@ -15,13 +15,13 @@ exports.handler = async (event, context, callback) => {
     response += "Query: " + event.query + "<br/>\r\n";
     response += "Body: " + event.body + "<br/>\r\n";
 
-    sharedmem.setString("test1", "123", "MyCollection1");
-    sharedmem.setString("test1", "456", "MyCollection2");
-    sharedmem.setString("test1", "789", "MyCollection3");
+    //sharedmem.setString("test1", "123", "MyCollection1");
+    //sharedmem.setString("test1", "456", "MyCollection2");
+    //sharedmem.setString("test1", "789", "MyCollection3");
     
-    response += "sharedmem - test1 in MyCollection1: " + sharedmem.getString("test1", "MyCollection1") + "<br/>\r\n";   
-    response += "sharedmem - test1 in MyCollection2: " + sharedmem.getString("test1", "MyCollection2") + "<br/>\r\n";   
-    response += "sharedmem - test1 in MyCollection3: " + sharedmem.getString("test1", "MyCollection3") + "<br/>\r\n";   
+    //response += "sharedmem - test1 in MyCollection1: " + sharedmem.getString("test1", "MyCollection1") + "<br/>\r\n";   
+    //response += "sharedmem - test1 in MyCollection2: " + sharedmem.getString("test1", "MyCollection2") + "<br/>\r\n";   
+    //response += "sharedmem - test1 in MyCollection3: " + sharedmem.getString("test1", "MyCollection3") + "<br/>\r\n";   
 
     sharedmem.incInteger("test-counter", 1);
     response += "sharedmem: " + sharedmem.getInteger("test-counter") + "<br/>\r\n";   

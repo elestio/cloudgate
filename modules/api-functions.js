@@ -23,7 +23,6 @@ module.exports = {
     name: "api-functions",
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
         return new Promise(async function(resolve, reject) {
-
             var functionsList = appConfig.apiEndpoints;
             if (functionsList == null) {
                 functionsList = [];
@@ -229,9 +228,72 @@ module.exports = {
                         processed: true,
                         content: `${apiEndpoint.type} is not supported on Cloudgate`
                     });
+                    return;
                 } else {
-                    if (apiEndpoint.type !== 'nodejs12.x') {
+                    if (apiEndpoint.method !== reqInfos.method.toUpperCase()) {
+                        resolve({
+                            processed: true,
+                            status: '404',
+                            content: `Cannot ${reqInfos.method.toUpperCase()} ${apiEndpoint.src}`,
+                        })
+                        return;
+                    }
+                    let contentType = reqInfos.headers['content-type'];
+                    let finalQueryObj = {};
+                    if (reqInfos.method === 'get') {
+                        finalQueryObj = parseURLEncParams(reqInfos.query);
+                    } else {
+                        if (Object.keys(bodyParserTool).includes(contentType)) {
+                            finalQueryObj = bodyParserTool[contentType](reqInfos.body);
+                        } else {
+                            finalQueryObj = parseAppJsonBody(reqInfos.body);
+                        }
+                    }
+                    if (apiEndpoint.isPrivate) {
+                        if (!finalQueryObj.apiKey) {
+                            resolve({
+                                processed: true,
+                                status: 430,
+                                content: 'No apiKey received. Forbidden'
+                            });
+                            return;
+                        } else {
+                            if (finalQueryObj.apiKey !== appConfig.globalEnv.APIKEY) {
+                                resolve({
+                                    processed: true,
+                                    status: 430,
+                                    content: 'Wrong apiKey received. Forbidden'
+                                });
+                                return;
+                            }
+                        }
+                        delete finalQueryObj.apiKey;
+                    }
+                    if (!apiEndpoint.type.includes('nodejs')) {
                         let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
+                        if (apiEndpoint.type.slice(0,3) === 'SQL') {
+                            let findParam = sqlRequest.split(' ');
+                            findParam = findParam.filter((val) => {
+                                if (val[0] === '@') {
+                                     return val;
+                                }
+                            });
+                            findParam.forEach((param, index) => {
+                                param = param.replace('@PARAM_', "");
+                                if (finalQueryObj[param]) {
+                                    sqlRequest = sqlRequest.replace(`@PARAM_${param}`, finalQueryObj[param]);
+                                    findParam.splice(index, 1);
+                                };
+                            });
+                            if (findParam.length > 0) {
+                                resolve({
+                                    processed: true,
+                                    status: 400,
+                                    content: `Parameters : ${findParam.join()} not given.`
+                                });
+                                return;
+                            }
+                        }
                         let rows = apiDB.ExecuteQuery(appConfig, sqlRequest);
                         resolve({
                             processed: true,
@@ -474,4 +536,27 @@ function isString(x) {
 const hasArrayBuffer = typeof ArrayBuffer === 'function';
 function isArrayBuffer(value) {
   return hasArrayBuffer && (value instanceof ArrayBuffer || toString.call(value) === '[object ArrayBuffer]');
+}
+
+
+const parseURLEncParams = (body)  => {
+    body = new URLSearchParams(body);
+    let finalBody = {};
+    for (const[key, value] of body) {
+        finalBody[key] = value;
+    }
+    return finalBody;
+}
+
+const parseAppJsonBody = (body) =>  {
+    try {
+        body = JSON.parse(body);
+    } catch (err) {
+        body = {};
+    }
+    return body;
+}
+const bodyParserTool = {
+    'application/json': parseAppJsonBody,
+    'application/x-www-form-urlencoded': parseURLEncParams
 }

@@ -215,6 +215,12 @@ module.exports = {
 
                 var functionIndexFile = apiEndpoint.handler.split('.')[0];
                 var functionHandlerFunction = apiEndpoint.handler.split('.')[1];
+
+                //undefined function type == nodejs
+                if ( apiEndpoint.type == null ){
+                    apiEndpoint.type = "nodejs12.x";
+                }
+
                 // TODO : check path doesn't crash
                 let supportedTypes = ['nodejs12.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
                 if (!supportedTypes.includes(apiEndpoint.type)) {

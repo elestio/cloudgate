@@ -230,7 +230,7 @@ module.exports = {
                     });
                     return;
                 } else {
-                    if (apiEndpoint.method !== reqInfos.method.toUpperCase()) {
+                    if (apiEndpoint.method !== reqInfos.method.toUpperCase() && apiEndpoint.method != null) {
                         resolve({
                             processed: true,
                             status: '404',

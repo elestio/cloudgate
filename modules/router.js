@@ -477,8 +477,17 @@ module.exports = {
                         var result = await cloudgateWebsocket.upgrade(appConfig, reqInfos, null, req, memory);
                         if ( result.content != null ){
                             tools.debugLog("CloudGateWS-UPGRADE", (result.status || 200), result.content.length, reqInfos, serverConfig);
-                            req.end(result.content);
+                            if ( req != null ){
+                                //res.end(result.content);
+                            }
                         }
+                        return;
+                    }
+                }
+                else {
+                    if ( reqInfos.url == _serverConfig.adminpath){
+                        //Admin API is not enabled
+                        console.log("Admin API is not enabled");
                         return;
                     }
                 }
@@ -487,7 +496,9 @@ module.exports = {
                 var result = await websocketFunctions.upgrade(appConfig, reqInfos, null, req, memory);
                 if ( result.content != null ){
                     tools.debugLog("WS-UPGRADE", (result.status || 200), result.content.length, reqInfos, serverConfig);
-                    req.end(result.content);
+                    if ( req != null ){
+                        //res.end(result.content);
+                    }
                 }
 
             },
@@ -497,7 +508,6 @@ module.exports = {
                 //UPDATE STATS
                 memory.incr("websocket.connected", 1, "STATS");
                 memory.incr("websocket.requests", 1, "STATS");
-
                 
                 //handle cloudgate commands (control + replication)
                 if ( _serverConfig && _serverConfig.adminEnabled == "1" ){
@@ -507,6 +517,14 @@ module.exports = {
                             tools.debugLog("CloudGateWS", (result.status || 200), result.content.length, ws.reqInfos, serverConfig);
                             ws.send(result.content, false, false);
                         }
+                        return;
+                    }
+                }
+                else {
+                    if ( ws.reqInfos.url == _serverConfig.adminpath){
+                        //Admin API is not enabled
+                        console.log("Admin API is not enabled");
+                        ws.send("Admin API is not enabled", false, false);
                         return;
                     }
                 }

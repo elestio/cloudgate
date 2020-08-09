@@ -17,7 +17,7 @@ module.exports = {
       sharedmem.unlock();
       return tmp;
   },
-  setInteger: function(key, collection){
+  setInteger: function(key, value, collection){
       sharedmem.lock();
       sharedmem.setInteger(key, value, collection);
       sharedmem.unlock();

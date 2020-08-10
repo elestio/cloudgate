@@ -13,7 +13,7 @@ module.exports = {
   },
   getInteger: function(key, collection){
       sharedmem.lock();
-      var tmp = sharedmem.getInteger(key + "", collection + "");
+      var tmp = parseInt(sharedmem.getInteger(key + "", collection + ""));
       sharedmem.unlock();
       return tmp;
   },

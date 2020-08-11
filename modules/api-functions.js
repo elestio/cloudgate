@@ -4,6 +4,7 @@ var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
+var multiparty = require('multiparty');
 
 const https = require('https');
 const Axios = require('axios');
@@ -546,7 +547,7 @@ const parseURLEncParams = (body)  => {
         finalBody[key] = value;
     }
     return finalBody;
-}
+};
 
 const parseAppJsonBody = (body) =>  {
     try {
@@ -555,8 +556,21 @@ const parseAppJsonBody = (body) =>  {
         body = {};
     }
     return body;
+};
+
+const parseFormData = (body) => {
+    return Promise((resolve, reject) => {
+        let form = new multiparty.Form();
+        form.parse(body, (err, fields, files) => {
+            Object.keys(fields).forEach((value) => {
+                console.log(value);
+            })
+        });
+    })
 }
+
 const bodyParserTool = {
     'application/json': parseAppJsonBody,
-    'application/x-www-form-urlencoded': parseURLEncParams
+    'application/x-www-form-urlencoded': parseURLEncParams,
+    'multipart/form-data': parseFormData,
 }

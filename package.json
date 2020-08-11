@@ -24,6 +24,7 @@
     "hashlru": "^2.3.0",
     "ioredis": "^4.16.0",
     "mime": "^2.4.4",
+    "multiparty": "^4.2.2",
     "mysql": "^2.18.1",
     "optimist": "^0.6.1",
     "request": "^2.88.2",

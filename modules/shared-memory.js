@@ -19,12 +19,12 @@ module.exports = {
   },
   setInteger: function(key, value, collection){
       sharedmem.lock();
-      sharedmem.setInteger(key + "", value + "", collection + "");
+      sharedmem.setInteger(key + "", value, collection + "");
       sharedmem.unlock();
   },
   incInteger: function(key, value, collection){
       sharedmem.lock();
-      sharedmem.incInteger(key + "", value + "", collection + "");
+      sharedmem.incInteger(key + "", value, collection + "");
       sharedmem.unlock();
   },
   getStringKeys: function(collection){

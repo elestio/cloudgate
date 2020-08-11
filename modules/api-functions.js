@@ -231,7 +231,7 @@ module.exports = {
                     });
                     return;
                 } else {
-                    if (apiEndpoint.method !== reqInfos.method.toUpperCase()) {
+                    if (apiEndpoint.method !== reqInfos.method.toUpperCase() && apiEndpoint.method != null) {
                         resolve({
                             processed: true,
                             status: '404',
@@ -282,7 +282,8 @@ module.exports = {
                             findParam.forEach((param, index) => {
                                 param = param.replace('@PARAM_', "");
                                 if (finalQueryObj[param]) {
-                                    sqlRequest = sqlRequest.replace(`@PARAM_${param}`, finalQueryObj[param]);
+                                    var val = finalQueryObj[param].replace(/\'/g, "''"); //SQL Injection prevention
+                                    sqlRequest = sqlRequest.replace(`@PARAM_${param}`, val);
                                     findParam.splice(index, 1);
                                 };
                             });

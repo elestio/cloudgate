@@ -1,3 +1,7 @@
+exports.upgrade = (event, context, callback) => {
+    //This step happens before the websocket open
+    //There you get the request informations in "event"
+};
 
 exports.open = (event, context, callback) => {
     //Say hello or send a message to the client, increment number of connected users, ...

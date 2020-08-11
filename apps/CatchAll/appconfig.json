@@ -25,6 +25,7 @@
   "websocketEndpoints": {
     "/echo" : {
       "src" : "./API/websocket/",
+      "upgrade": "Echo.upgrade",
       "open": "Echo.open",
       "message": "Echo.message",
       "close": "Echo.close"

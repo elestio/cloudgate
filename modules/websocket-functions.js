@@ -181,12 +181,22 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                             processed: true
                         });
                     }
-                    else if (typeof response == "object") {
-                        resolve({
-                            processed: true,
-                            headers: response.headers,
-                            content: response.content
-                        });
+                    else if (typeof response === "object") {
+
+                        if ( Buffer.isBuffer(response.content) ){
+                            resolve({
+                                processed: true,
+                                headers: response.headers,
+                                content: response.content
+                            });
+                        }
+                        else{
+                            resolve({
+                                processed: true,
+                                headers: response.headers,
+                                content: JSON.stringify(response.content)
+                            });
+                        }
                     }
                     else {
                         resolve({
@@ -213,8 +223,11 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                 return;
             }
             // No matching endpoint
-            resolve({
-                processed: false
+            //resolve({ processed: false });
+            resolve({ 
+                processed: true, 
+                status: "404",
+                content: JSON.stringify({"status" : "error", "body": "No websocket endpoint is matching this route: " + endpointTarget })
             });
         });
 }

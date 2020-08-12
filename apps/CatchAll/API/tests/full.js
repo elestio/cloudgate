@@ -23,6 +23,9 @@ exports.handler = async (event, context, callback) => {
     //response += "sharedmem - test1 in MyCollection2: " + sharedmem.getString("test1", "MyCollection2") + "<br/>\r\n";   
     //response += "sharedmem - test1 in MyCollection3: " + sharedmem.getString("test1", "MyCollection3") + "<br/>\r\n";   
 
+    //sharedmem.setInteger("test789", 789, "MyCollection3");
+    //response += "sharedmem - test1 in MyCollection3: " + sharedmem.getInteger("test789", "MyCollection3") + "<br/>\r\n";   
+
     sharedmem.incInteger("test-counter", 1, "global");
     response += "sharedmem: " + sharedmem.getInteger("test-counter", "global") + "<br/>\r\n";   
     

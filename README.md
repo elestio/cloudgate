@@ -41,7 +41,7 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 ## Installation
 
 ### Install globally:  
-
+    apt install git
     npm i @elestio/cloudgate -g --ignore-scripts
 
 &nbsp;
@@ -165,7 +165,7 @@ then make some changes in **Dockerfile** if needed then build the docker image
 
 To **run it once** interactively:
 
-    docker run -it cloudgate
+    docker run -it -p 80:3000 cloudgate
 
 To **run as a service** in docker:
     

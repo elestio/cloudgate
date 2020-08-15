@@ -2,6 +2,7 @@ node_modules
 core
 benchmarks/wrk
 memorystate.json
+binaries/
 DB/MYSQL/data
 DB/MYSQL/mysql-docker-cli.sh
 DB/MYSQL/config.json

@@ -510,11 +510,13 @@ if ( isMainThread ){
 
     //if no root path is passed, let's build it based on provided app Path
     if ( argv.r == null) {
-        if ( appPath.startsWith(".") ){
+        
+        if ( !appPath.startsWith("/") ){
             argv.r = require("path").join(__dirname, appPath);
         }
         else{
-            argv.r = appPath;
+            //argv.r = appPath;
+            argv.r = "./";
         }
         
         process.argv.push("-r");
@@ -531,10 +533,10 @@ if ( isMainThread ){
 if (process.env.NODE_ROOT){
     process.chdir(process.env.NODE_ROOT);
 }
-else if ( argv.rootfolder != null && argv.rootfolder != ""){
+/*else if ( argv.rootfolder != null && argv.rootfolder != ""){
     process.chdir( resolve(argv.rootfolder) );
     //console.log("changing curDIR to: " + argv.rootfolder);
-}
+}*/
 else if ( argv.r != null && argv.r != ""){
     process.chdir(argv.r);
     //console.log("changing curDIR to: " + argv.r);

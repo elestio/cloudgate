@@ -438,8 +438,8 @@ function Start(argv) {
     }
 
     async function listen(port) {
-        var options = {
-            root: argv.app_root,
+            var options = {
+            root: argv.app_root || argv.r,
             admin: argv.admin,
             adminpath: argv.adminpath,
             admintoken: argv.admintoken,
@@ -455,6 +455,8 @@ function Start(argv) {
             username: argv.username || process.env.NODE_HTTP_SERVER_USERNAME,
             password: argv.password || process.env.NODE_HTTP_SERVER_PASSWORD
         };
+
+        //console.log(options)
 
         if (options.root == null) {
             if ( argv.r != null ){
@@ -559,12 +561,14 @@ function Start(argv) {
                 try {
 
                     var Letsencrypt = require('./lib/letsencrypt');
-                    var certPath = options.root + "CERTS/";
+                    var certPath = path.join(options.root, "CERTS/");
                     var isProd = true;
 
                     //find root folder
-                    var publicFolder = options.root[0] + "/public/"; //todo: replace with the real public folder from appconfig.json
-                    
+                    //console.log(options)
+                    var publicFolder = path.join(options.root, "/public/"); //todo: replace with the real public folder from appconfig.json
+                    //console.log(publicFolder)
+
                     await Letsencrypt(certPath, publicFolder);
                     //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
 
@@ -584,6 +588,20 @@ function Start(argv) {
                                 console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                             }
                         });
+
+                        sslApp.missingServerName((hostname) => {
+                            console.log("Hello! We are missing server name <" + hostname + ">");
+                            
+                            //TODO: check if option is activated for auto ssl, for all domains or for a list of predefined domains
+                            /*
+                            sslApp.addServerName("vms2.terasp.net", {
+                                key_file_name: '/etc/letsencrypt/live/vms2.terasp.net/privkey.pem',
+                                cert_file_name: '/etc/letsencrypt/live/vms2.terasp.net/fullchain.pem',
+                                passphrase: ''
+                            });
+                            */
+                        })
+                        
                     });
 
 
@@ -594,6 +612,8 @@ function Start(argv) {
                     console.trace();
                 }                
             }
+
+            
 
         }
 
@@ -608,10 +628,13 @@ function Start(argv) {
 
         //console.log(options.root);
 
+        /*
         options.root.forEach(function(configPath) {
             appLoader.load(configPath, serverConfig);
         });
+        */
 
+        appLoader.load( options.root, serverConfig);
 
 
         var publicFolder = "";

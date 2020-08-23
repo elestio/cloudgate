@@ -38,5 +38,11 @@ module.exports = {
       var tmp = sharedmem.getIntegerKeys(collection + "");
       sharedmem.unlock();
       return tmp;
+  },
+  lock: function(){
+      sharedmem.lock(); //this will lock the whole application until unlock is called
+  },
+  unlock: function(){
+      sharedmem.unlock();
   }
 }

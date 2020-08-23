@@ -35,7 +35,10 @@ const fs = require('fs');
 const resolve = require('path').resolve;
 
 const memory = require('./modules/memory');
+const sharedmem = require('./modules/shared-memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
+
+var globalSSLApp = null;
 
 //Load memory from dump if present
 var memoryPath = "./memorystate.json";
@@ -60,6 +63,17 @@ if (parentPort != null) {
             //console.log("Msg discarded because coming from this host!")
             return;
         }
+
+
+        
+        if ( msg.type == "CG_SSL_ADD" ){
+            
+            console.log("SSL Cert propagation to thread " + threadId);
+            //globalSSLApp.addServerName(msg.hostname, msg.sslOpts);
+            
+            //console.log(msg);
+        }
+
 
         var obj = msg;
         if ( obj.a == "MemSet" ){
@@ -558,63 +572,155 @@ function Start(argv) {
             }
             else{
                 //Need to generate / renew the cert
-                try {
+                if ( sharedmem.getInteger(options.https.ssldomain, "SSLGeneration") != 1 ){
+                        sharedmem.setInteger(options.https.ssldomain, 1, "SSLGeneration");
 
-                    var Letsencrypt = require('./lib/letsencrypt');
-                    var certPath = path.join(options.root, "CERTS/");
-                    var isProd = true;
+                        //generate the cert and start TLS/SSL
+                        await DoStartTLSServer(options, serverConfig);
+                }
+                else{
 
-                    //find root folder
-                    //console.log(options)
-                    var publicFolder = path.join(options.root, "/public/"); //todo: replace with the real public folder from appconfig.json
-                    //console.log(publicFolder)
-
-                    await Letsencrypt(certPath, publicFolder);
-                    //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
-
-                    var certInfos = null;
-                    Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder).then(function(resp) {
-                        certInfos = resp;
-
-                        //start the SSL Server
-                        var sslApp = require('uWebSockets.js').SSLApp({
-                            key_file_name: certInfos.privateKeyPath,
-                            cert_file_name: certInfos.fullchain
-                        });
-
-                        router.start(sslApp, serverConfig);
-                        sslApp.listen(host, options.https.sslport, (listenSocket) => {
-                            if (listenSocket) {
-                                console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
-                            }
-                        });
-
-                        sslApp.missingServerName((hostname) => {
-                            console.log("Hello! We are missing server name <" + hostname + ">");
-                            
-                            //TODO: check if option is activated for auto ssl, for all domains or for a list of predefined domains
-                            /*
-                            sslApp.addServerName("vms2.terasp.net", {
-                                key_file_name: '/etc/letsencrypt/live/vms2.terasp.net/privkey.pem',
-                                cert_file_name: '/etc/letsencrypt/live/vms2.terasp.net/fullchain.pem',
-                                passphrase: ''
-                            });
-                            */
-                        })
-                        
-                    });
-
+                    //Already in progress in another thread
+                    //let's do this in 30 sec
+                    //setTimeout( async function()
+                    //{
+                        //generate the cert and start TLS/SSL
+                        await DoStartTLSServer(options, serverConfig);
+                    //}, 1*1000);
 
                 }
-                catch (ex) {
-                    console.log("Unable to generate certificate or start SSL Server ...");
-                    console.log(ex);
-                    console.trace();
-                }                
+
+                          
             }
 
             
 
+        }
+
+
+        async function DoStartTLSServer(options, serverConfig){
+            try {
+
+                            var Letsencrypt = require('./lib/letsencrypt');
+                            var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
+                            var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
+                            var isProd = true;
+
+                            //console.log(certPath);
+                            //return;
+
+                            //find root folder
+                            //console.log(options)
+                            var publicFolder = path.join(options.root, "/public/"); //todo: replace with the real public folder from appconfig.json
+                            //console.log(publicFolder)
+
+                            await Letsencrypt(certPath, publicFolder);
+                            //var certInfos = await Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "z51biz@gmail.com", certPath, publicFolder);
+
+                            var certInfos = null;
+                            //todo: use user email
+                            Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
+                                certInfos = resp;
+
+                                //start the SSL Server
+                                var sslApp = require('uWebSockets.js').SSLApp({
+                                    key_file_name: certInfos.privateKeyPath,
+                                    cert_file_name: certInfos.fullchain
+                                });
+
+                                router.start(sslApp, serverConfig);
+                                sslApp.listen(host, options.https.sslport, (listenSocket) => {
+                                    if (listenSocket) {
+                                        console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                                    }
+                                });
+                                globalSSLApp = sslApp;
+                               
+
+                                sslApp.missingServerName((hostname) => {
+                                                                       
+                                    //Check if domain is declared by an appconfig (loaded app)
+                                    var appConfig = memory.getObject(hostname, "GLOBAL");
+                                   
+                                    //handle *
+                                    if (appConfig == null) {
+                                        appConfig = memory.getObject("*", "GLOBAL");
+                                    }
+
+                                    //handle *.XXXXX.xxx
+                                    var subDomain = hostname.split('.')[0];
+                                    var domain = hostname.substring(hostname.indexOf('.') + 1);
+                                    if (appConfig == null) {
+                                        appConfig = memory.getObject("*." + domain, "GLOBAL"); //avoid constant call to redis
+                                    }
+
+
+                                    //generate a certificate ONLY if the domain was declared in an appconfig
+                                    if (appConfig == null){
+                                        console.log("Domain: " + hostname + " is not declared in appconfig.json, skipping SSL cert generation/loading");
+                                        return;
+                                    }
+                                    
+                                    //start generation process only if not already started
+                                    if ( sharedmem.getInteger(hostname, "SSLGeneration") != 1 )
+                                    {
+                                        sharedmem.setInteger(hostname, 1, "SSLGeneration");
+
+                                        console.log("Hello! We are missing server name <" + hostname + ">");
+
+                                        //TODO: add new domain routing in memstate, to which app should it point?
+                                        console.log('Generating a new cert for: ' + hostname);
+                                        certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
+                                        console.log(certPath);
+
+                                        var certInfos = null;
+                                        //todo: use user email
+                                        Letsencrypt.GenerateCert(isProd, hostname, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
+                                            certInfos = resp;
+                                            
+                                            var sslOpts = {
+                                                key_file_name: certInfos.privateKeyPath,
+                                                cert_file_name: certInfos.fullchain,
+                                                passphrase: ''
+                                            };
+
+                                            sslApp.addServerName(hostname, sslOpts);
+
+
+                     
+                                            //send a copy to other threads
+                                            //in fact not needed at all ...
+                                            /*
+                                            if ( parentPort != null ){
+
+                                                setTimeout(function(){
+                                                    var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
+                                                    var obj = { type: "CG_SSL_ADD", hostname: hostname, sslOpts: sslOpts, source: clusteredProcessIdentifier };
+                                                    parentPort.postMessage(obj);
+                                                }, 1*1000);
+                                                
+                                            }
+                                            */
+
+                                            sharedmem.setInteger(hostname, 0, "SSLGeneration");
+
+                                        });
+                                    }
+                                    else{
+                                        //retry in 30 sec
+                                        DoStartTLSServer(options, serverConfig);
+                                    }
+                                    
+                                })
+                                
+                            });
+
+                        }
+                        catch (ex) {
+                            console.log("Unable to generate certificate or start SSL Server ...");
+                            console.log(ex);
+                            console.trace();
+                        }  
         }
 
         const tools = require('./lib/tools.js');

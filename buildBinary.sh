@@ -28,9 +28,9 @@ cd ./binaries;
 pkg /tmp/cloudgatebin/ --options max_old_space_size=4096 --targets node14-linux-x64;
 
 #Copy uWS binaries for Node 14
-cp ../node_modules/uWebSockets.js/uws_win32_x64_83.node .
+#cp ../node_modules/uWebSockets.js/uws_win32_x64_83.node .
 #cp ../node_modules/uWebSockets.js/uws_darwin_x64_83.node .
-#cp ../node_modules/uWebSockets.js/uws_linux_x64_83.node .
+cp ../node_modules/uWebSockets.js/uws_linux_x64_83.node .
 
 #create tar.gz
-tar -czvf cloudgate-linux.tar.gz cloudgate-linux uws_linux_x64_83.node
+tar -czvf cloudgate-linux.tar.gz cloudgate uws_linux_x64_83.node

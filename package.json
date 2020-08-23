@@ -26,6 +26,7 @@
     "mime": "^2.4.4",
     "multiparty": "^4.2.2",
     "mysql": "^2.18.1",
+    "node-forge": "^0.9.1",
     "optimist": "^0.6.1",
     "request": "^2.88.2",
     "serverless-http": "^2.3.2",

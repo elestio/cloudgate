@@ -666,12 +666,12 @@ function Start(argv) {
                                     {
                                         sharedmem.setInteger(hostname, 1, "SSLGeneration");
 
-                                        console.log("Hello! We are missing server name <" + hostname + ">");
+                                        //console.log("Hello! We are missing server name <" + hostname + ">");
 
                                         //TODO: add new domain routing in memstate, to which app should it point?
-                                        console.log('Generating a new cert for: ' + hostname);
+                                        //console.log('Generating a new cert for: ' + hostname);
                                         certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
-                                        console.log(certPath);
+                                        //console.log(certPath);
 
                                         var certInfos = null;
                                         //todo: use user email
@@ -708,7 +708,10 @@ function Start(argv) {
                                     }
                                     else{
                                         //retry in 30 sec
-                                        DoStartTLSServer(options, serverConfig);
+                                        setTimeout(function(){
+                                            DoStartTLSServer(options, serverConfig);
+                                        }, 15*1000);
+                                        
                                     }
                                     
                                 })

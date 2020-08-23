@@ -78,6 +78,10 @@ This version include Node.js V14 and all the dependencies in the binary, so it c
     cloudgate --create /path/to/create 
 
 you will then be able to choose a template app that will be created in the target folder provided
+Once your project is created you can run it like this:
+
+    cloudgate -r /path/to/create 
+
 
 &nbsp;
 ## Run samples from source

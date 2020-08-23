@@ -107,7 +107,7 @@ if (argv.create) {
     shell.mkdir('-p', targetPath);
 
     //ask the user which template to use    
-    var templates = tools.GetDirectoriesArray("./apps/");
+    var templates = tools.GetDirectoriesArray(__dirname + "/apps/");
 
     //prompt the user to select a template
     (async () => {
@@ -149,7 +149,7 @@ if (argv.create) {
         }
         
         //copy template to target path
-        shell.cp('-R', './apps/' + selectedTemplate + "/*", targetPath);
+        shell.cp('-R', __dirname +'/apps/' + selectedTemplate + "/*", targetPath);
         console.log("Your new app have been created in path: " + targetPath);
 
         //change the domain in the appconfig.json

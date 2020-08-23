@@ -40,7 +40,13 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 
 ## Installation
 
-### Install globally:  
+### Linux one line installer: latest binary (no requirements, recommended)
+
+    wget -c https://cloudgate.terasp.net/CDN/cloudgate-linux.tar.gz && tar -xzf cloudgate-linux.tar.gz -C /bin
+
+This version include Node.js V14 and all the dependencies in the binary, so it can run on any linux x64 without requirements
+
+### Install with nodejs / npm:  
     apt install git
     npm i @elestio/cloudgate -g --ignore-scripts
 
@@ -66,9 +72,15 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 ### MySQL: Run MySQL in docker (optional)
     ./DB/MYSQL/startMYSQL.sh
 
-
 &nbsp;
 ## Run samples
+
+    cloudgate --create /path/to/create 
+
+you will then be able to choose a template app that will be created in the target folder provided
+
+&nbsp;
+## Run samples from source
 
 Clone this repo including samples: 
     

@@ -620,9 +620,9 @@ function Start(argv) {
                             var certInfos = null;
                             //todo: use user email
 
-                            if ( sharedmem.getInteger(hostname, "SSLGeneration") != 1 )
+                            if ( sharedmem.getInteger(options.https.ssldomain, "SSLGeneration") != 1 )
                             {
-                                sharedmem.setInteger(hostname, 1, "SSLGeneration");
+                                sharedmem.setInteger(options.https.ssldomain, 1, "SSLGeneration");
                             }
                             else{
                                 //retry in 15 sec
@@ -648,6 +648,8 @@ function Start(argv) {
                                     }
                                 });
                                 globalSSLApp = sslApp;
+
+                                sharedmem.setInteger(options.https.ssldomain, 0, "SSLGeneration");
                                
 
                                 sslApp.missingServerName((hostname) => {

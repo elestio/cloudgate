@@ -26,7 +26,31 @@ Motivations:
 - Extreme performances exploration
 
 &nbsp;
-## Requirements
+
+
+## Quickstart for Linux (Binary version)
+### Linux one line installer: stable binary (no requirements, recommended)
+
+    wget -c https://cloudgate.terasp.net/CDN/cloudgate-linux.tar.gz && tar -xzf cloudgate-linux.tar.gz -C /bin
+
+**This version includes Node.js V14 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
+&nbsp;
+&nbsp;
+
+
+you can then create a new app with:
+
+    cloudgate --create /path/to/create
+
+and run your app with
+
+    cloudgate -r /path/to/create
+
+
+&nbsp;
+
+
+## Requirements to install from source
 
 - Linux, Windows or Mac OS
 - git
@@ -37,14 +61,6 @@ if you are on Node 10, you can activate multi-threading by executing this in you
     export NODE_OPTIONS=--experimental-worker
 
 &nbsp;
-
-## Installation
-
-### Linux one line installer: latest binary (no requirements, recommended)
-
-    wget -c https://cloudgate.terasp.net/CDN/cloudgate-linux.tar.gz && tar -xzf cloudgate-linux.tar.gz -C /bin
-
-This version include Node.js V14 and all the dependencies in the binary, so it can run on any linux x64 without requirements
 
 ### Install with nodejs / npm:  
     apt install git

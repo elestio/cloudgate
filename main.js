@@ -572,25 +572,7 @@ function Start(argv) {
             }
             else{
                 //Need to generate / renew the cert
-                if ( sharedmem.getInteger(options.https.ssldomain, "SSLGeneration") != 1 ){
-                        sharedmem.setInteger(options.https.ssldomain, 1, "SSLGeneration");
-
-                        //generate the cert and start TLS/SSL
-                        await DoStartTLSServer(options, serverConfig);
-                }
-                else{
-
-                    //Already in progress in another thread
-                    //let's do this in 30 sec
-                    //setTimeout( async function()
-                    //{
-                        //generate the cert and start TLS/SSL
-                        await DoStartTLSServer(options, serverConfig);
-                    //}, 1*1000);
-
-                }
-
-                          
+                await DoStartTLSServer(options, serverConfig);                          
             }
 
             
@@ -600,6 +582,19 @@ function Start(argv) {
 
         async function DoStartTLSServer(options, serverConfig){
             try {
+
+                            //check if not already running in another thread
+                            if ( sharedmem.getInteger(options.https.ssldomain, "SSLGeneration") != 1 )
+                            {
+                                sharedmem.setInteger(options.https.ssldomain, 1, "SSLGeneration");
+                            }
+                            else{
+                                //retry in 5 sec
+                                setTimeout(function(){
+                                    DoStartTLSServer(options, serverConfig);
+                                }, 5*1000);
+                                
+                            }
 
                             var Letsencrypt = require('./lib/letsencrypt');
                             var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
@@ -620,17 +615,7 @@ function Start(argv) {
                             var certInfos = null;
                             //todo: use user email
 
-                            if ( sharedmem.getInteger(options.https.ssldomain, "SSLGeneration") != 1 )
-                            {
-                                sharedmem.setInteger(options.https.ssldomain, 1, "SSLGeneration");
-                            }
-                            else{
-                                //retry in 15 sec
-                                setTimeout(function(){
-                                    DoStartTLSServer(options, serverConfig);
-                                }, 15*1000);
-                                
-                            }
+                            
 
                             Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
                                 certInfos = resp;

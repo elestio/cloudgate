@@ -619,6 +619,19 @@ function Start(argv) {
 
                             var certInfos = null;
                             //todo: use user email
+
+                            if ( sharedmem.getInteger(hostname, "SSLGeneration") != 1 )
+                            {
+                                sharedmem.setInteger(hostname, 1, "SSLGeneration");
+                            }
+                            else{
+                                //retry in 15 sec
+                                setTimeout(function(){
+                                    DoStartTLSServer(options, serverConfig);
+                                }, 15*1000);
+                                
+                            }
+
                             Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
                                 certInfos = resp;
 
@@ -707,10 +720,8 @@ function Start(argv) {
                                         });
                                     }
                                     else{
-                                        //retry in 30 sec
-                                        setTimeout(function(){
-                                            DoStartTLSServer(options, serverConfig);
-                                        }, 15*1000);
+                                        //retry in 15 sec
+                                        
                                         
                                     }
                                     

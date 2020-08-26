@@ -712,10 +712,10 @@ function Start(argv) {
                                 });
                             }
                             else{
-                                //retry in 5 sec
+                                //retry in 250ms
                                 setTimeout(function(){
                                     DoStartTLSServer(options, serverConfig);
-                                }, 5*1000);
+                                }, 250);
                                 
                             }
 

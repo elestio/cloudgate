@@ -624,7 +624,7 @@ function Start(argv) {
                                     router.start(sslApp, serverConfig);
                                     sslApp.listen(host, options.https.sslport, (listenSocket) => {
                                         if (listenSocket) {
-                                            console.log('Listening to port ' + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                                            console.log('Listening to https://' + options.https.ssldomain + ":" + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                                         }
                                     });
                                     globalSSLApp = sslApp;

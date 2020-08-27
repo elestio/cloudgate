@@ -10,22 +10,22 @@ then
     npm install -g pkg
 fi
 
-rm -rf /tmp/cloudgatebin/
-mkdir -p /tmp/cloudgatebin/
-cp -r * /tmp/cloudgatebin/
-rm -rf /tmp/cloudgatebin/DB/
-rm -rf /tmp/cloudgatebin/binaries/
-rm -rf /tmp/cloudgatebin/benchmarks/
-rm -rf /tmp/cloudgatebin/apps/CatchAll/CERTS/
-rm -rf /tmp/cloudgatebin/node_modules/uWebSockets.js/*.node
+rm -rf /tmp/cloudgate/
+mkdir -p /tmp/cloudgate/
+cp -r * /tmp/cloudgate/
+rm -rf /tmp/cloudgate/DB/
+rm -rf /tmp/cloudgate/binaries/
+rm -rf /tmp/cloudgate/benchmarks/
+rm -rf /tmp/cloudgate/apps/CatchAll/CERTS/
+rm -rf /tmp/cloudgate/node_modules/uWebSockets.js/*.node
 
-rm -rf ./binaries
+rm -rf ./binaries/*
 mkdir -p ./binaries;
 cd ./binaries;
 
 #package cloudgate as binaries for win/osx/linux
-#pkg /tmp/cloudgatebin/ --options max_old_space_size=4096 --targets node14-linux-x64,node14-win-x64,node14-macos-x64;
-pkg /tmp/cloudgatebin/ --options max_old_space_size=4096 --targets node14-linux-x64;
+#pkg /tmp/cloudgate/ --options max_old_space_size=4096 --targets node14-linux-x64,node14-win-x64,node14-macos-x64;
+pkg /tmp/cloudgate/ --options max_old_space_size=4096 --targets node14-linux-x64;
 
 #Copy uWS binaries for Node 14
 #cp ../node_modules/uWebSockets.js/uws_win32_x64_83.node .

@@ -1,5 +1,6 @@
 const memory = require('../modules/memory');
 const sharedmem = require('../modules/shared-memory');
+const tools = require('../lib/tools.js');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid')
 
@@ -11,8 +12,18 @@ module.exports = {
         }
         var configPath = fullAppPath + "appconfig.json";
 
+        //handle apps included in the binary of cloudgate
+        if ( fullAppPath.startsWith('/snapshot') ){
+            var includedAppPath = fullAppPath.replace("/snapshot/cloudgate/", "../");
+            configPath = require("path").resolve(__dirname, includedAppPath, "appconfig.json");
+        }
+                
+        //console.log(__dirname);
+        //var fullAppsPath = require("path").resolve(__dirname, "..", "./apps/");
+        //console.log(fullAppsPath);
         //console.log("Path: " + configPath);
         //console.log("exist: " + fs.existsSync(configPath));
+        
 
         if (fs.existsSync(configPath)) {
             //console.log("\nLoading app from " + configPath + "\n");

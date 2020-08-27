@@ -51,6 +51,9 @@ module.exports = {
 
             try {
 
+                //console.log(rootFolder);
+                //console.log(finalPath);
+                
                 //Poison Null Bytes protection
                 //Poison null bytes are a way to trick your code into seeing another filename than the one that will actually be opened. This can in many cases be used to circumvent directory traversal protections, to trick servers into delivering files with wrong file types and to circumvent restrictions on the file names that may be used
                 if (finalPath.indexOf('\0') !== -1) {
@@ -364,7 +367,8 @@ module.exports = {
                     }
                     else {
                         if ( memory.getObject("AdminConfig", "GLOBAL").debug == true ){
-                            console.log("Local Path not found: " + finalPath);
+                            //console.log("Local Path not found: " + finalPath);
+                            console.log("full path not found: " + fullPath);
                         }
                         
                         result.processed = false;

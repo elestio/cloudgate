@@ -484,6 +484,8 @@ function Start(argv) {
             }
             else{
                 options.root = ["."];
+                //options.root = __dirname;
+                //console.log(options.root);
             }
         }
 

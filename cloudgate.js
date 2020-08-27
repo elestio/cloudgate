@@ -537,9 +537,9 @@ if (process.env.NODE_ROOT){
     process.chdir( resolve(argv.rootfolder) );
     //console.log("changing curDIR to: " + argv.rootfolder);
 }*/
-else if ( argv.r != null && argv.r != ""){
-    process.chdir(argv.r);
+else if ( argv.r != null && argv.r != "" && !argv.r.startsWith("/snapshot")){
     //console.log("changing curDIR to: " + argv.r);
+    process.chdir(argv.r);
 }
 
 //console.log("Current Working Directory: " + process.cwd());

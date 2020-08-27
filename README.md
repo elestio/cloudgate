@@ -31,7 +31,7 @@ Motivations:
 ## Quickstart for Linux (Binary version)
 ### Linux one line installer: stable binary (no requirements, recommended)
 
-    wget -c https://cloudgate.terasp.net/CDN/cloudgate-linux.tar.gz && tar -xzf cloudgate-linux.tar.gz -C /bin
+    wget -c https://cloudgate.terasp.net/CDN/cloudgate-linux.tar.gz && tar -xzf cloudgate-linux.tar.gz -C /bin && rm cloudgate-linux.tar.gz
 
 **This version includes Node.js V14 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
 &nbsp;
@@ -46,9 +46,7 @@ and run your app with
 
     cloudgate -r /path/to/create
 
-
 &nbsp;
-
 
 ## Requirements to install from source
 
@@ -136,6 +134,33 @@ Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
     
     sudo cloudgate ./apps/Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com
 
+
+
+## Bundling your app inside cloudgate binary
+
+In some occasions it can be usefull to bundle the source code of your app inside cloudgate binary:
+- Make a commercial version of your application without sources
+- Make a demo/evaluation/trial version of your app without sources
+- No need to install Node.js and npm to run the packaged application
+
+To bundle your app inside cloudgate first you need to setup your dev env like this:
+    
+    git clone https://github.com/elestio/cloudgate.git
+    cd cloudgate
+    npm install
+
+Then copy your app source code inside `/apps/` folder, you can also duplicate a folder inside apps and customize it to your needs 
+and finally run this to build your binary:
+
+    ./buildBinary.sh
+
+You binary will be generated in: `/binaries/`, you can try your binary including your app source code with:
+
+    cd binaries
+    ./cloudgate -r /snapshot/cloudgate/apps/CatchAll/
+
+Of course you should replace CatchAll by your own app folder.
+&nbsp;
 
 &nbsp;
  ## Reverse Proxy

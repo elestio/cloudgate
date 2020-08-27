@@ -336,6 +336,9 @@ function Start(argv) {
         app_root = argv._ || process.env.APP_ROOT,
         node_root = argv.r || argv.rootfolder || process.env.NODE_ROOT,
         logger;
+      
+        
+        
 
     if (!argv.s && !argv.silent) {
         logger = {

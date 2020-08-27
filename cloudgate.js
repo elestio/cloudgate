@@ -509,7 +509,7 @@ if ( isMainThread ){
     //console.log(appPath)
 
     //if no root path is passed, let's build it based on provided app Path
-    if ( argv.r == null) {
+    if ( argv.r == null) {       
         
         if ( !appPath.startsWith("/") ){
             argv.r = require("path").join(__dirname, appPath);

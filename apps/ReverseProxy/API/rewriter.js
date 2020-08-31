@@ -17,6 +17,25 @@ exports.handler = async (event, context, callback) => {
     
     //Example to inject a script on the page just before closing html tag
     //response = response.replace(/<\/html>/g, "<script src='https://yourdomain.com/inject.js'></script></html>");
+
+    //Advanced dom manipulations with cheerio
+    const cheerio = require('cheerio');
+    const $ = cheerio.load(response);
+
+    //Change the home page logo
+    $("#hplogo").attr("src", "https://image.flaticon.com/icons/svg/3306/3306571.svg");
+    $("#hplogo").attr("height", "90px");
+    $("#hplogo").attr("srcset", "");
+
+    //Change the result page logo
+    $("#logo img").attr("src", "https://image.flaticon.com/icons/svg/3306/3306571.svg");
+    $("#logo img").attr("height", "50px");
+
+    //remove confidentiality rules banner
+    $("#taw").remove();
+    $("#cnsh").remove();
+
+    response = $.html();
        
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);

@@ -474,7 +474,13 @@ In the third apiEndpoint we are using a wildcard (*) so all path starting the th
   &nbsp;
   ## TODO
  
+ - [ ] Improve installation as a global service + add/remove apps
+ - [ ] Web UI for setup/management (config, visual firewall, ...)
+ - [ ] logs (syslog, file log)
  - [ ] Add a rate limiter
+ - [ ] Add job queue (certificates renewal)
+ - [ ] Shared storage for certificates (S3 or NFS)
+ - [ ] Refactoring / Cleaning
  - [ ] Cluster communication improvements
  - [X] Managed MySQL
  - [ ] Managed PostgreSQL

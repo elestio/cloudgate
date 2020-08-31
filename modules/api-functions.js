@@ -40,7 +40,7 @@ module.exports = {
                     var curRoute = routes[i];
                     if (curRoute.indexOf('*') > -1) {
                         var prefix = curRoute.split('*')[0];
-                        if (endpointTarget.startsWith(prefix)) {
+                        if (endpointTarget.startsWith(prefix) && reqInfos.url.indexOf(".well-known/acme-challenge") == -1) {
                             apiEndpoint = functionsList[curRoute];
                             matchingPrefix = prefix;
                         }
@@ -114,19 +114,17 @@ module.exports = {
                             headers: reqInfos.headers,
                             responseType: 'stream'
                         };
+
                         if (reqInfos.body != null) {
                             optAxios.data = reqInfos.body;
                         }
 
-
-                        //TODO: fix issue when proxying google.com!
                         if ( memory.getObject("AdminConfig", "GLOBAL").debug == true ){
                             console.log("Fetching remote url: " + finalUrl);
                             console.log(reqInfos.query);
                             console.log(optAxios);
-                        }
+                        }      
                         
-
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
 
@@ -138,12 +136,9 @@ module.exports = {
                                 //console.log(response.request.headers);
                                 //console.log(response.headers);
                                 //console.log(response.status);
-
                                 
                                 try 
                                 {
-
-
                                     for (var key in response.headers) {
                                         if (key.toUpperCase() != 'CONTENT-LENGTH' && key.toUpperCase() != 'TRANSFER-ENCODING' && key.toUpperCase() != 'X-FRAME-OPTIONS') 
                                         {
@@ -153,6 +148,7 @@ module.exports = {
                                     }
 
                                     //disable various securities of the remote host
+                                    //CORS
                                     res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
                                     res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
                                     res.writeHeader("access-control-allow-origin", "*" );
@@ -162,22 +158,78 @@ module.exports = {
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
                                     //return;
 
-                                    //console.log("TEST 00000");
+                                    var respContentType = response.headers["content-type"];
+                                    //console.log("response ctype: " + respContentType);
+                                    
+                                    //do rewriting (TODO: should call a backend function defined in appconfig.json)
+                                    if ( respContentType.indexOf("text/html") > -1 || respContentType.indexOf("text/css") > -1 || respContentType.indexOf("text/javascript") > -1 )
+                                    {
+                                        //text content, rewrite is possible
+                                        var finalContent = await tools.streamToString(stream);
 
-                                    stream.on('data', (chunk) => {
-                                        //console.log("Chunk received: " + chunk.length);
-                                        //console.log(typeof chunk);
-                                        //console.log(chunk);
-                                        if (!res.aborted) {
-                                            res.write(chunk);
+                                        //we can also inject some JS or CSS in the finalContent
+                                        //finalContent = finalContent.replace(/Google/g, "Zulu");
+                                        //finalContent = finalContent.replace(/<\/html>/g, "<script src='https://yourdomain.com/inject.js'></script></html>");
+
+                                        //console.log("Before postProcessor");
+                                        //console.log(apiEndpoint);
+
+                                        var postProcessor = null;
+                                        if (apiEndpoint.postProcessor != null) {
+                                            postProcessor = apiEndpoint.postProcessor;
+
+                                            curFunction = require( require("path").join(appConfig.root, postProcessor ) );
+                                            functionHandlerFunction = apiEndpoint.handler.split('.')[1];
+                
+                                            var path = reqInfos.url;
+                                            if ( curRoute != null && curRoute.endsWith('/*')) {
+                                                path = reqInfos.url.substring(curRoute.length - 3);
+                                            }
+                                            var event = {
+                                                httpMethod: reqInfos.method.toUpperCase(),
+                                                method: reqInfos.method.toUpperCase(),
+                                                url: path,
+                                                path: path,
+                                                ip: reqInfos.ip,
+                                                query: reqInfos.query,
+                                                queryStringParameters: qs.parse(reqInfos.query),
+                                                body: finalContent,
+                                                headers: response.headers
+                                            };
+
+                                            //console.log("Executing postProcessor");
+                                            var result = await ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
+                                            //res.end(result.content);
+
+                                            //todo handle headers from rewriter
                                         }
-                                    });
-                                    stream.on('end', () => {
-                                        //console.log("end of chunks!");
-                                        if (!res.aborted) {
-                                            res.end();
+                                        else{
+                                            //no preProcessor defined
+                                            res.end(finalContent);
                                         }
-                                    });
+                                        
+                                    }
+                                    else{
+                                        //binary content, no rewrite
+                                        stream.on('data', (chunk) => {
+                                            //console.log("Chunk received: " + chunk.length);
+                                            //console.log(typeof chunk);
+                                            //console.log(chunk);
+                                            if (!res.aborted) {
+                                                res.write(chunk);
+                                            }
+                                        });
+                                        stream.on('end', () => {
+                                            //console.log("end of chunks!");
+                                            if (!res.aborted) {
+                                                res.end();
+                                            }
+                                        });
+                                    }
+                                    
+                                    
+
+
                                 }
                                 catch (ex) 
                                 {
@@ -305,6 +357,7 @@ module.exports = {
                         return;
                     }
                 }
+
                 var functionPath = "";
                 if (appConfig.root.startsWith("./")) {
                     functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
@@ -419,105 +472,10 @@ module.exports = {
                     body: reqInfos.body,
                     headers: reqInfos.headers
                 };
-
-                var ctx = {
-                    succeed: function(result) {
-                        //console.log(result)
-                    },
-                    fail: function(error) {
-                        console.log(error);
-                    }
-                };
-                var callback = function(err, response) {
-
-                    if (err != null) {
-                        console.log(err);
-                    } else {
-                        //console.log(response);
-                    }
-
-                    //prevent a crash if the cloud function don't return anything
-                    if (response == null){
-                        response = {"content": "No content returned by the cloud function ..."};
-                    }
-
-                    if ( response.headers == null ){
-                        response.headers = {};
-                    }
-
-                    if ( response != null && response.headers != null ){
-                        response.headers["Access-Control-Allow-Origin"] = "*";
-                        response.headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT";
-                        response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
-                    }
-
-                    if (typeof response == "object") {
-                        resolve({
-                            status: (response.status || 200),
-                            processed: true,
-                            headers: response.headers,
-                            content: response.content
-                        });
-                    }
-                    else {
-
-                        if ( !isTypedArray(response) && !isString(response) && !isArrayBuffer(response) ){
-                            response = response + ""; //cast to string
-                        }
-
-                        resolve({
-                            status: (response.status || 200),
-                            processed: true,
-                            content: response
-                        });
-                    }
-
-
-                };
                 
-                var result = null;
-                try {
-                    ctx.sharedmem = sharedmem;
-                    ctx.apiDB = apiDB;
-                    ctx.appConfig = appConfig;
-                    let forbiddenEnvVars = ['PATH','LS_COLORS','SSH_CONNECTION','LESSCLOSE','LANG','USER','PWD','HOME','SSH_CLIENT','SSH_TTY','MAIL','TERM','SHELL','NVM_BIN','SHLVL','LOGNAME','PATH','NVM_INC','XDG_SESSION_ID','XDG_RUNTIME_DIR','_']
-                    if (apiEndpoint.envVars) {
-                        Object.keys(apiEndpoint.envVars).forEach(envVar => {
-                            if (forbiddenEnvVars.includes(envVar)) {
-                                return;
-                            }
-                            process.env[envVar] = apiEndpoint.envVars[envVar];
-                        });
-                    }
-                    result = await curFunction[functionHandlerFunction](event, ctx, callback);
-                    resolve({
-                        status: (result.statusCode || 200),
-                        processed: true,
-                        headers: result.headers,
-                        content: result.body
-                    });
-                }
-                catch (ex) {
-                    resolve({
-                        processed: true,
-                        headers: {
-                            "Access-Control-Allow-Origin": "*",
-                            "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
-                            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-                        },
-                        content: ex.message + "\nTrace: " + ex.stack
-                    });
-                    return;
-                }
+                //EXECUTE FUNCTION
+                ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
 
-                if (result) {
-                    if (result.then) {
-                        result.then(ctx.succeed, ctx.fail);
-                    } else {
-                        ctx.succeed(result);
-                    }
-                }
-                return;
             }
             // No matching endpoint
             resolve({
@@ -526,6 +484,111 @@ module.exports = {
         });
 
     }
+}
+
+
+let forbiddenEnvVars = ['PATH','LS_COLORS','SSH_CONNECTION','LESSCLOSE','LANG','USER','PWD','HOME','SSH_CLIENT','SSH_TTY','MAIL','TERM','SHELL','NVM_BIN','SHLVL','LOGNAME','PATH','NVM_INC','XDG_SESSION_ID','XDG_RUNTIME_DIR','_']
+
+async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig){
+
+    var ctx = {
+        succeed: function(result) {
+            //console.log(result)
+        },
+        fail: function(error) {
+            console.log(error);
+        }
+    };
+    var callback = function(err, response) {
+
+        if (err != null) {
+            console.log(err);
+        } else {
+            //console.log(response);
+        }
+
+        //prevent a crash if the cloud function don't return anything
+        if (response == null){
+            response = {"content": "No content returned by the cloud function ..."};
+        }
+
+        if ( response.headers == null ){
+            response.headers = {};
+        }
+
+        if ( response != null && response.headers != null ){
+            response.headers["Access-Control-Allow-Origin"] = "*";
+            response.headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT";
+            response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+        }
+
+        if (typeof response == "object") {
+            resolve({
+                status: (response.status || 200),
+                processed: true,
+                headers: response.headers,
+                content: response.content
+            });
+        }
+        else {
+
+            if ( !isTypedArray(response) && !isString(response) && !isArrayBuffer(response) ){
+                response = response + ""; //cast to string
+            }
+
+            resolve({
+                status: (response.status || 200),
+                processed: true,
+                content: response
+            });
+        }
+
+
+    };
+
+    var result = null;
+    try {
+        ctx.sharedmem = sharedmem;
+        ctx.apiDB = apiDB;
+        ctx.appConfig = appConfig;
+        if (apiEndpoint.envVars) {
+            Object.keys(apiEndpoint.envVars).forEach(envVar => {
+                if (forbiddenEnvVars.includes(envVar)) {
+                    return;
+                }
+                process.env[envVar] = apiEndpoint.envVars[envVar];
+            });
+        }
+        result = await curFunction[functionHandlerFunction](event, ctx, callback);
+        resolve({
+            status: (result.statusCode || 200),
+            processed: true,
+            headers: result.headers,
+            content: result.body
+        });
+    }
+    catch (ex) {
+        resolve({
+            processed: true,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
+                "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+            },
+            content: ex.message + "\nTrace: " + ex.stack
+        });
+        return;
+    }
+
+    if (result) {
+        if (result.then) {
+            result.then(ctx.succeed, ctx.fail);
+        } else {
+            ctx.succeed(result);
+        }
+    }
+    return;
+
 }
 
 

@@ -15,7 +15,8 @@
     "/*" : {
       "skipPrefix": false,
       "src": "https://www.google.com/",
-      "http2": false
+      "postProcessor": "./API/rewriter.js",
+      "handler": "rewriter.handler"
     }
   }
 }

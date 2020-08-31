@@ -9,4 +9,5 @@ DB/MYSQL/config.json
 apps/test-project/
 apps/Livedash
 apps/CatchAll/CERTS/
+apps/ReverseProxy/CERTS/
 apps/gpt3

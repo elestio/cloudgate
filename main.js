@@ -614,9 +614,7 @@ function Start(argv) {
 
                                 var certInfos = null;
                                 //todo: use user email
-
                                 
-
                                 Letsencrypt.GenerateCert(isProd, options.https.ssldomain, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
                                     certInfos = resp;
 

@@ -128,13 +128,20 @@ Start an app on port 80 with **adminAPI** activated:
     sudo cloudgate -p80 ./apps/CatchAll --admin 1 --adminpath /CloudGateAdmin --admintoken 12345A000G
 
 Here sudo is required if you are not root to bind port 80
-
+&nbsp;
 
 Start an app on port 80 and also on port 443 with **AutoSSL/letsencrypt**:
     
     sudo cloudgate ./apps/Static -p80 --ssl --sslport 443 --ssldomain www.mydomain.com
 
+some parameters can be omitted:
 
+    sudo cloudgate ./apps/Static --ssldomain www.mydomain.com
+
+Cloudgate will assume that if you indicate an ssldomain ssl is required, will be served on default port 443 and port 80 will be used because we need it to generate an ssl certificate with letsencrypt
+
+&nbsp;
+&nbsp;
 
 ## Bundling your app inside cloudgate binary
 

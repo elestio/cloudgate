@@ -324,7 +324,7 @@ function Start(argv) {
         ssldomain = argv.ssldomain || process.env.SSL_DOMAIN,
         sslcert = argv.sslcert || process.env.SSL_CERT,
         sslkey = argv.sslkey || process.env.SSL_KEY,
-        sslport = argv.sslport || process.env.SSL_PORT,
+        sslport = argv.sslport || process.env.SSL_PORT || 443,
         admin = argv.admin || process.env.ADMIN,
         adminpath = argv.adminpath || process.env.ADMIN_PATH,
         admintoken = argv.admintoken || process.env.ADMIN_TOKEN,
@@ -337,7 +337,13 @@ function Start(argv) {
         node_root = argv.r || argv.rootfolder || process.env.NODE_ROOT,
         logger;
       
-        
+    if ( ssldomain != null && ssldomain != "" ) {
+        ssl = true;
+        if ( argv.p == null && argv.port == null ){
+            port = 80; //we need port 80 to be able to generate a letsencrypt cert
+            argv.p = port;
+        }
+    }    
         
 
     if (!argv.s && !argv.silent) {

@@ -458,6 +458,10 @@ function Start(argv) {
                 });
             });
 
+            if ( ssldomain != "" && ssldomain != null ){
+                console.log("Listening on: https://" + ssldomain + ":" + 443 );
+            }
+
             console.log("======================================================");
             
         }, 200);
@@ -633,7 +637,7 @@ function Start(argv) {
                                     router.start(sslApp, serverConfig);
                                     sslApp.listen(host, options.https.sslport, (listenSocket) => {
                                         if (listenSocket) {
-                                            console.log('Listening to https://' + options.https.ssldomain + ":" + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                                            //console.log('Listening to https://' + options.https.ssldomain + ":" + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                                         }
                                     });
                                     globalSSLApp = sslApp;
@@ -721,6 +725,7 @@ function Start(argv) {
                                 });
                             }
                             else{
+
                                 //retry in 250ms
                                 setTimeout(function(){
                                     DoStartTLSServer(options, serverConfig);

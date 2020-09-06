@@ -603,7 +603,11 @@ module.exports = {
         })
 
         //multithread communication
-        var parentPort = require('worker_threads').parentPort;
+        var parentPort = null;
+        try{
+            parentPort = require('worker_threads').parentPort;
+        } catch(ex){}
+        
         if (parentPort != null) {
             parentPort.on('message', (msg) => {
 

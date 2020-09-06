@@ -37,6 +37,7 @@ const resolve = require('path').resolve;
 const memory = require('./modules/memory');
 const sharedmem = require('./modules/shared-memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
+const tools = require('./lib/tools.js');
 
 var globalSSLApp = null;
 
@@ -137,52 +138,12 @@ function Start(argv) {
     
     process.title = 'cloudgate';
 
-    if (argv.h || argv.help) {
-        console.log([
-            '',
-            'USAGE: cloudgate [path] [options]',
-            '',
-            '[GENERAL]',
-            '  --memstate [path] path pointing to your memorystate.json, optional',
-            '  -r --rootfolder [path] root folder for your app',
-            '  -c --cores [nbCores]    Number of CPU cores to use (default: ALL cores), Eg.: --cores 4',
-            '  -p --port [port]    Port to use [8080]',
-            '  -oc --outputcache [0 or 1] Default is 0, disabled. When enabled this will cache all GET requests until file is changed on disk.',
-            '  -h --help          Print this list and exit.',
-            '  -v --version       Print the version and exit.',
-            '  -w --watch   Activate file change watch to auto invalidate cache [default: disabled]',
-            '  -d --debug    Activate the console logs for debugging',
-            //'  -a           Address to use [0.0.0.0]', //when used we can't get the visitor ip!
-            '',
-            '[SSL]',
-            '  -S --ssl     Enable https.',
-            '  --sslport    SSL Port (default: 443)',
-            '  --ssldomain  Domain name on which you want to activate ssl (eg: test.com)',
-            '  --sslcert  optional path to your SSL cert. E.g: /etc/letsencrypt/live/yourdomain.com/cert.pem',
-            '  --sslkey  optional path to your SSL key. E.g: /etc/letsencrypt/live/yourdomain.com/privkey.pem',
-            '',
-            '[ADMIN]',
-            '  --admin 1    Enable Admin Remote API (default: disabled)',
-            '  --adminpath /cgadmin    Declare the virtual path of the admin api',
-            '  --admintoken XXXXXXXX    The admin token to use for authentication of the REST API & Websocket',
-            '',
-            '[CLUSTER]',
-            '  --master     Declare this host as the master',
-            '  --salve [Master IP or Domain]:[Port]@[Token]     Declare this host as a slave connecting to a master',
-            //'  -C --cert    Path to ssl cert file (default: cert.pem).',
-            //'  -K --key     Path to ssl key file (default: key.pem).',
-            '',
-            '[APPS]',
-            '--list                  return an array of loaded apps path',
-            '--load     [path]    Load the app located in the target path, the folder must contain appconfig.json',
-            '--unload   [path]    Unload the app located in the target path',
-            '--create      [path]    Create a new app based on a template in the target path'
+    tools.ProcessCommandLine(argv);
 
-        ].join('\n'));
-        
-        process.exit();
+    if (argv.create || argv.load || argv.unload || argv.list)
+    {
+        return;
     }
-
 
     //load config file Settings
     if (true) {
@@ -741,7 +702,6 @@ function Start(argv) {
                         }  
         }
 
-        const tools = require('./lib/tools.js');
         var app = require('uWebSockets.js').App();
 
         //REST API sample / test

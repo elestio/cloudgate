@@ -481,14 +481,15 @@ In the third apiEndpoint we are using a wildcard (*) so all path starting the th
   &nbsp;
   ## TODO
  
- - [ ] Add a rate limiter
+ - [ ] Add a rate limiter (REST+WS)
  - [ ] Add job queue (certificates renewal)
  - [ ] Shared storage for certificates (S3 or NFS)
  - [ ] Improve installation as a global service + add/remove apps
- - [ ] Web UI for setup/management (config, visual firewall, load apps from github url ...)
  - [ ] logs (syslog, file log)
  - [ ] Refactoring / Cleaning
- - [ ] Cluster communication improvements (sync apps loaded)
+ - [ ] Stats (in / out / nbCalls per route / per app, cpu, ram, more live metrics to watch and understand what is going on)
+ - [ ] Web UI for setup/management (Manage loaded apps, load apps from local hd, load from github url, Live Monitoring, visual firewall, ...)
+ - [ ] Cluster communication improvements (sync)
  - [X] Managed MySQL
  - [ ] Managed PostgreSQL
  - [ ] Managed Redis

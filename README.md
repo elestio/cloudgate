@@ -52,7 +52,7 @@ and run your app with
 
 - Linux, Windows or Mac OS
 - git
-- Node 10+ for single-threaded mode, Node 12+ for multi-threaded mode
+- Node versions 10.x / 12.x / 14.x
 
 if you are on Node 10, you can activate multi-threading by executing this in your terminal:
 

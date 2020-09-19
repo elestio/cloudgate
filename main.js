@@ -537,7 +537,8 @@ function Start(argv) {
             if ( options.https.sslcert != null ){
                 //SSL Cert provided
                 //Start the SSL Server
-                var sslApp = require('uWebSockets.js').SSLApp({
+                var coregate = require('./coregate.js'); coregate._cfg("silent");
+                var sslApp = coregate.SSLApp({
                     key_file_name: options.https.sslkey,
                     cert_file_name: options.https.sslcert
                 });
@@ -590,11 +591,12 @@ function Start(argv) {
                                     certInfos = resp;
 
                                     //start the SSL Server
-                                    var sslApp = require('uWebSockets.js').SSLApp({
+                                    var coregate = require('./coregate.js'); coregate._cfg("silent");
+                                    var sslApp = coregate.SSLApp({
                                         key_file_name: certInfos.privateKeyPath,
                                         cert_file_name: certInfos.fullchain
                                     });
-
+                            
                                     router.start(sslApp, serverConfig);
                                     sslApp.listen(host, options.https.sslport, (listenSocket) => {
                                         if (listenSocket) {
@@ -702,7 +704,8 @@ function Start(argv) {
                         }  
         }
 
-        var app = require('uWebSockets.js').App();
+        var coregate = require('./coregate.js'); coregate._cfg("silent");
+        var app = coregate.App();
 
         //REST API sample / test
         //require('./lib/debug')(app, options.root);

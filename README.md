@@ -481,6 +481,7 @@ In the third apiEndpoint we are using a wildcard (*) so all path starting the th
   &nbsp;
   ## TODO
  
+ - [ ] Handle uploads correctly in cloud functions (router.js, api-functions.js)
  - [ ] Add a rate limiter (REST+WS)
  - [ ] Add job queue (certificates renewal)
  - [ ] Shared storage for certificates (S3 or NFS)

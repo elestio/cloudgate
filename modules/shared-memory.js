@@ -1,4 +1,4 @@
-const sharedmem = require('uWebSockets.js');
+const sharedmem = require('../coregate.js');
 module.exports = {
   getString: function(key, collection){
       sharedmem.lock();

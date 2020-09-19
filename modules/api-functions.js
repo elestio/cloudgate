@@ -477,10 +477,12 @@ module.exports = {
                 ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
 
             }
-            // No matching endpoint
-            resolve({
-                processed: false
-            });
+            else{
+                // No matching endpoint
+                resolve({
+                    processed: false
+                });
+            }
         });
 
     }

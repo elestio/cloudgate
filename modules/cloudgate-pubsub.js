@@ -19,8 +19,8 @@ const tools = require('../lib/tools.js');
 const WebSocket = require('ws');
 var wsClient = null;
 
-var cloudgateMaster = require('uWebSockets.js').App();
-
+var coregate = require('../coregate.js'); coregate._cfg("silent");
+var cloudgateMaster = coregate.App();
 module.exports = {
     startServer: function(host, port, memory, token) {
 

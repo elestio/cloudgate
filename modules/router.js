@@ -324,14 +324,17 @@ module.exports = {
 
                     res.writeStatus("" + (processResult.status || 200));
                     for (var key in processResult.headers) {
-
                         if ( key.toLowerCase() != "content-length" ){
                             res.writeHeader(key, processResult.headers[key] + ""); //force casting the header value to string, other data types are not allowed in headers
                         }
-                        
                         totalBytesSent += key.length + processResult.headers[key].length;
                     }
 
+                    //Add HSTS to reach A+ on SSL Labs test
+                    if ( serverConfig.isSSL == true ){
+                        res.writeHeader("strict-transport-security", "max-age=31536000; includeSubDomains;");
+                    }
+                    
                     if (processResult.content != null && processResult.content != "") {
                         if (typeof processResult.content === 'object') {
                             //res.write(processResult.content);

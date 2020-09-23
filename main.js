@@ -543,6 +543,7 @@ function Start(argv) {
                     cert_file_name: options.https.sslcert
                 });
 
+                serverConfig.isSSL = true;
                 router.start(sslApp, serverConfig);
                 sslApp.listen(host, options.https.sslport, (listenSocket) => {
                     if (listenSocket) {
@@ -616,6 +617,7 @@ function Start(argv) {
                             dh_params_file_name: dhParamsPath
                         });
                 
+                        serverConfig.isSSL = true;
                         router.start(sslApp, serverConfig);
                         sslApp.listen(host, options.https.sslport, (listenSocket) => {
                             if (listenSocket) {

@@ -16,6 +16,7 @@
     "@root/pem": "^1.0.4",
     "acme": "^3.0.3",
     "acme-http-01-webroot": "^3.0.0",
+    "asn1.js": "^5.4.1",
     "aws-sdk": "^2.656.0",
     "axios": "^0.19.2",
     "chokidar": "^3.3.1",

@@ -331,8 +331,15 @@ module.exports = {
                     }
 
                     //Add HSTS to reach A+ on SSL Labs test
-                    if ( serverConfig.isSSL == true ){
+                    if ( appConfig.HSTS == true ){
                         res.writeHeader("strict-transport-security", "max-age=31536000; includeSubDomains;");
+                    }
+
+                    //CORS
+                    if ( appConfig.CORS != null && appConfig.CORS["access-control-allow-origin"] != null) {
+                        res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
+                        res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
+                        res.writeHeader("access-control-allow-origin", appConfig.CORS["access-control-allow-origin"] );
                     }
                     
                     if (processResult.content != null && processResult.content != "") {

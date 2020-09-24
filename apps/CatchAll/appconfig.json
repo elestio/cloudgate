@@ -8,6 +8,10 @@
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
+  "HSTS": false,
+  "CORS": {
+      "access-control-allow-origin": "*"
+  },
   "apiEndpoints": {
     "/tests/simple" : {
       "src": "./API/tests/",

@@ -146,14 +146,7 @@ module.exports = {
                                             res.writeHeader(key, value);
                                         }
                                     }
-
-                                    //disable various securities of the remote host
-                                    //CORS
-                                    res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
-                                    res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
-                                    res.writeHeader("access-control-allow-origin", "*" );
-
-
+                                    
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
                                     //return;

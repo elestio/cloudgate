@@ -432,6 +432,16 @@ Here is the full list of configuration options supported in appconfig.json:
 
 **TypeFS**: Define the source of public files, can be defined to LOCAL or S3, default value is LOCAL
 
+**HSTS**: Define if the server should add an HSTS header for TLS/SSL, default: false
+    
+    "HSTS": true,
+
+**CORS**: Define if the server should add CORS headers to allow an origin, usage example:
+
+    "CORS": {
+        "access-control-allow-origin": "*"
+    },
+
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
   
 **apiEndpoints**: object containing list of defined endpoints.

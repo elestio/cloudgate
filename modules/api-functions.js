@@ -31,7 +31,8 @@ module.exports = {
 
             var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
-            var apiEndpoint = functionsList[`${endpointTarget.replace('/api', "")}`];
+            var cleanPath = endpointTarget.replace('/api', "");
+            var apiEndpoint = functionsList[cleanPath];
 
             //if not found, check if we have a rule with a wildcard (*) matching
             if (functionsList[endpointTarget] == null) {
@@ -511,7 +512,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         if (err != null) {
             console.log(err);
         } else {
-            console.log(response);
+            // console.log(response);
         }
 
         //prevent a crash if the cloud function don't return anything

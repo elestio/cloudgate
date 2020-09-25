@@ -31,7 +31,7 @@ module.exports = {
 
             var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
-            var apiEndpoint = functionsList[endpointTarget];
+            var apiEndpoint = functionsList[`${endpointTarget.replace('/api', "")}`];
 
             //if not found, check if we have a rule with a wildcard (*) matching
             if (functionsList[endpointTarget] == null) {
@@ -285,7 +285,7 @@ module.exports = {
                         return;
                     }
                     let contentType = reqInfos.headers['content-type'];
-                    let finalQueryObj = {};
+                    var finalQueryObj = {};
                     if (reqInfos.method === 'get') {
                         finalQueryObj = parseURLEncParams(reqInfos.query);
                     } else {
@@ -436,6 +436,18 @@ module.exports = {
                 }
 
                 try {
+                    if (appConfig.globalEnv) {
+                        process.env.APPID = appConfig.globalEnv.APPID
+                        process.env.APIKEY = appConfig.globalEnv.APIKEY
+                    }
+                    if (apiEndpoint.envVars) {
+                        Object.keys(apiEndpoint.envVars).forEach(envVar => {
+                            if (forbiddenEnvVars.includes(envVar)) {
+                                return;
+                            }
+                            process.env[envVar] = apiEndpoint.envVars[envVar];
+                        });
+                    }
                     curFunction = require(functionPath);
                 }
                 catch (ex) {
@@ -465,7 +477,7 @@ module.exports = {
                     body: reqInfos.body,
                     headers: reqInfos.headers
                 };
-                
+                event[event.httpMethod] = finalQueryObj;
                 //EXECUTE FUNCTION
                 ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
 
@@ -499,7 +511,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         if (err != null) {
             console.log(err);
         } else {
-            //console.log(response);
+            console.log(response);
         }
 
         //prevent a crash if the cloud function don't return anything
@@ -530,7 +542,6 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             if ( !isTypedArray(response) && !isString(response) && !isArrayBuffer(response) ){
                 response = response + ""; //cast to string
             }
-
             resolve({
                 status: (response.status || 200),
                 processed: true,
@@ -546,21 +557,8 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
-        if (apiEndpoint.envVars) {
-            Object.keys(apiEndpoint.envVars).forEach(envVar => {
-                if (forbiddenEnvVars.includes(envVar)) {
-                    return;
-                }
-                process.env[envVar] = apiEndpoint.envVars[envVar];
-            });
-        }
+
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
-        resolve({
-            status: (result.statusCode || 200),
-            processed: true,
-            headers: result.headers,
-            content: result.body
-        });
     }
     catch (ex) {
         resolve({
@@ -618,14 +616,8 @@ const parseAppJsonBody = (body) =>  {
 };
 
 const parseFormData = (body) => {
-    return Promise((resolve, reject) => {
-        let form = new multiparty.Form();
-        form.parse(body, (err, fields, files) => {
-            Object.keys(fields).forEach((value) => {
-                console.log(value);
-            })
-        });
-    })
+    //TODO: Deal with form-data
+    //TODO: Check file extension and see if app accepts it
 }
 
 const bodyParserTool = {

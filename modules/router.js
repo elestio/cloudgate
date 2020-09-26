@@ -19,6 +19,13 @@ var _serverConfig = null;
 
 module.exports = {
     start: (app, serverConfig) => {
+
+        // We start a timer for every app, resetting the rateLimiter
+        app.callsThisSecond = 0;
+        setInterval(() => {
+            app.callsThisSecond = 0;
+        }, 1000);
+
         //var modules = [apiFunctions, apiDB, staticFiles];
         var modules = [apiFunctions, apiDB, staticFiles];
 
@@ -161,7 +168,15 @@ module.exports = {
                     return;
                 }
 
-             
+                // Implements a basic rate limiter
+                if (app.callsThisSecond >= appConfig.rateLimiter.requestsPerSecond) {
+                    // Should have a settable handler, like a route
+                    res.writeStatus("503 Service Unavailable");
+                    res.end("Hold on now!");
+                    return;
+                }
+                app.callsThisSecond++;
+
                 //force main domain & SSL
                 /*
                 if ( appConfig.mainDomain != null && appConfig.mainDomain != "" && appConfig.mainDomain != subDomain + "." + domain ){

@@ -9,6 +9,10 @@
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
   "HSTS": false,
+  "rateLimiter" : {
+    "requestsPerSecond" : 1,
+    "messagesPerSecond": 1
+  },
   "CORS": {
       "access-control-allow-origin": "*"
   },

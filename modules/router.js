@@ -21,9 +21,16 @@ module.exports = {
     start: (app, serverConfig) => {
 
         // We start a timer for every app, resetting the rateLimiter
-        app.callsThisSecond = 0;
+        app.callsThisSecond = {};
         setInterval(() => {
-            app.callsThisSecond = 0;
+            app.callsThisSecond = {};
+            /*
+            var keysToClear = sharedmem.getIntegerKeys("/IpRateLimiter/ip/");
+            for(var i = 0; i < keysToClear.length; i++){
+                //console.log(keysToClear)
+                sharedmem.setInteger(keysToClear[i], 0, "/IpRateLimiter/ip/");
+            }
+            */
         }, 1000);
 
         //var modules = [apiFunctions, apiDB, staticFiles];
@@ -168,14 +175,27 @@ module.exports = {
                     return;
                 }
 
-                // Implements a basic rate limiter
-                if (app.callsThisSecond >= appConfig.rateLimiter.requestsPerSecond) {
-                    // Should have a settable handler, like a route
+                // Implements a basic rate limiter for app level
+                var rateLimiterKey = "/IpRateLimiter/ip/" + reqInfos.ip ;
+                var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
+                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/IpRateLimiter/ip/");
+                if ( curRateLimitForIP == null ) {
+                    app.callsThisSecond[rateLimiterKey] = 0;
+                    curRateLimitForIP = 0;
+                }
+
+                if (  curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond) {
+
+                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    await tools.sleep(1000);
+
+                    //then stop the process and return a 503
                     res.writeStatus("503 Service Unavailable");
-                    res.end("Hold on now!");
+                    res.end("You are sending too many request, please slow down.");
                     return;
                 }
-                app.callsThisSecond++;
+                app.callsThisSecond[rateLimiterKey] += 1;
+                //sharedmem.incInteger(reqInfos.ip, 1, "/IpRateLimiter/ip/");
 
                 //force main domain & SSL
                 /*

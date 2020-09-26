@@ -184,7 +184,7 @@ module.exports = {
                     curRateLimitForIP = 0;
                 }
 
-                if (  curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond) {
+                if (  curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond && appConfig.rateLimiter.requestsPerSecond > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000);

@@ -184,10 +184,13 @@ module.exports = {
                     curRateLimitForIP = 0;
                 }
 
+                //console.log(serverConfig)
+
                 if (  curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond && appConfig.rateLimiter.requestsPerSecond > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
-                    await tools.sleep(1000);
+                    await tools.sleep(1000*serverConfig.nbThreads);
+                    //await tools.sleep(1000);
 
                     //then stop the process and return a 503
                     res.writeStatus("503 Service Unavailable");
@@ -587,6 +590,30 @@ module.exports = {
                 //UPDATE STATS
                 memory.incr("websocket.requests", 1, "STATS");
                 memory.incr("websocket.data.in", message.byteLength, "STATS");
+
+
+                // Implements a basic rate limiter for app level
+                var rateLimiterKey = "/IpRateLimiter/ip/" + ws.reqInfos.ip ;
+                var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
+                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/IpRateLimiter/ip/");
+                if ( curRateLimitForIP == null ) {
+                    app.callsThisSecond[rateLimiterKey] = 0;
+                    curRateLimitForIP = 0;
+                }
+                if (  curRateLimitForIP >= ws.appConfig.rateLimiter.requestsPerSecond && ws.appConfig.rateLimiter.requestsPerSecond > 0) {
+
+                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    await tools.sleep(1000*serverConfig.nbThreads);
+                    //await tools.sleep(1000);
+
+                    //then stop the process and return a 503
+                    var rlResponse = { "status": "Error", "cause": "RateLimited", "details": "You are sending too many request, please slow down" };
+                    ws.send(JSON.stringify(rlResponse), false, false);
+                    return;
+                }
+                app.callsThisSecond[rateLimiterKey] += 1;
+                //sharedmem.incInteger(reqInfos.ip, 1, "/IpRateLimiter/ip/");
+
 
                 try{
                     

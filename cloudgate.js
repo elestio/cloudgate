@@ -163,6 +163,9 @@ exports.asyncQuery = (sql, ...parameters) => {
 var workersList = [];
 if (isMainThread) {
     /* Main thread loops over all CPUs */
+    process.argv.push("--nbThreads");
+    process.argv.push(nbThreads);
+
     for ( var i = 0; i < nbThreads; i++ ){
         /* Spawn a new thread running this source file */
         var worker = new Worker(__filename);
@@ -173,11 +176,7 @@ if (isMainThread) {
             if (code !== 0)
             console.log(`Worker stopped with exit code ${code}`);
         });
-
-
-        process.argv.push("--nbThreads");
-        process.argv.push(nbThreads);
-        
+       
 
         var obj = { argv: process.argv };
         worker.postMessage(obj);

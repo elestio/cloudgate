@@ -434,6 +434,7 @@ function Start(argv) {
             admin: argv.admin,
             adminpath: argv.adminpath,
             admintoken: argv.admintoken,
+            argv: argv,
             cache: argv.c,
             timeout: argv.t,
             showDir: argv.d,
@@ -489,7 +490,8 @@ function Start(argv) {
             admintoken: options.admintoken,
             watch: watchBool,
             outputcache: options.outputcache,
-            debug: debugBool
+            debug: debugBool,
+            nbThreads: argv.nbThreads
         }
 
         

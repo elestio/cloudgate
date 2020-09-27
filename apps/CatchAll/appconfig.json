@@ -10,8 +10,7 @@
   "redirect404toIndex": false,
   "HSTS": false,
   "rateLimiter" : {
-    "requestsPerSecond" : 5,
-    "messagesPerSecond": 5
+    "requestsPerSecond" : 5
   },
   "CORS": {
       "access-control-allow-origin": "*"

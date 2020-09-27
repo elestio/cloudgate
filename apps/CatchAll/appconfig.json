@@ -10,7 +10,7 @@
   "redirect404toIndex": false,
   "HSTS": false,
   "rateLimiter" : {
-    "requestsPerSecond" : 5
+    "requestsPerSecond" : 10
   },
   "CORS": {
       "access-control-allow-origin": "*"

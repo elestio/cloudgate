@@ -186,7 +186,7 @@ module.exports = {
 
                 //console.log(serverConfig)
 
-                if (  curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond && appConfig.rateLimiter.requestsPerSecond > 0) {
+                if ( appConfig.rateLimiter != null && curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond && appConfig.rateLimiter.requestsPerSecond > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
@@ -600,7 +600,7 @@ module.exports = {
                     app.callsThisSecond[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
-                if (  curRateLimitForIP >= ws.appConfig.rateLimiter.requestsPerSecond && ws.appConfig.rateLimiter.requestsPerSecond > 0) {
+                if ( ws.appConfig.rateLimiter != null && curRateLimitForIP >= ws.appConfig.rateLimiter.requestsPerSecond && ws.appConfig.rateLimiter.requestsPerSecond > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);

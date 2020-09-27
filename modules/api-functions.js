@@ -31,7 +31,8 @@ module.exports = {
 
             var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
-            var cleanPath = endpointTarget.replace('/api', "");
+            //var cleanPath = endpointTarget.replace('/api', "");
+            var cleanPath = endpointTarget;
             var apiEndpoint = functionsList[cleanPath];
 
             //if not found, check if we have a rule with a wildcard (*) matching

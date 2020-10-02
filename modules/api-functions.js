@@ -5,6 +5,7 @@ const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
 var multiparty = require('multiparty');
+const Injector = require('require-injector').default;
 
 const https = require('https');
 const Axios = require('axios');
@@ -24,11 +25,12 @@ module.exports = {
     name: "api-functions",
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
         return new Promise(async function(resolve, reject) {
+            process.env['APPCONFIG_PATH'] = `${appConfig.root}/appconfig.json`;
             var functionsList = appConfig.apiEndpoints;
             if (functionsList == null) {
                 functionsList = [];
             }
-
+            console.log(functionsList)
             var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
             //var cleanPath = endpointTarget.replace('/api', "");
@@ -49,7 +51,6 @@ module.exports = {
                     }
                 }
             }
-
             //console.log(appConfig);
 
             if (typeof (apiEndpoint) != 'undefined') {
@@ -559,7 +560,12 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
-
+        let rj = new Injector({basedir: __dirname});
+        rj.fromDir(`./apps/maxsens/api/Auth/`)
+        .substitute('appdrag-cloudbackend', './modules/cloudgate-cloudbackend');
+        rj.on('inject',(moduleId) => {
+            console.log(`Found replacement for ${moduleId} `)
+        })
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
     }
     catch (ex) {

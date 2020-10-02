@@ -31,6 +31,7 @@
     "node-forge": "^0.9.1",
     "optimist": "^0.6.1",
     "request": "^2.88.2",
+    "require-injector": "^5.2.0-alpha.2",
     "serverless-http": "^2.3.2",
     "shelljs": "^0.8.4",
     "systeminformation": "^4.23.5",

@@ -30,10 +30,8 @@ module.exports = {
             if (functionsList == null) {
                 functionsList = [];
             }
-            console.log(functionsList)
             var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
             var matchingPrefix = endpointTarget;
-            //var cleanPath = endpointTarget.replace('/api', "");
             var cleanPath = endpointTarget;
             var apiEndpoint = functionsList[cleanPath];
 
@@ -560,12 +558,12 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
-        let rj = new Injector({basedir: __dirname});
-        rj.fromDir(`./apps/maxsens/api/Auth/`)
-        .substitute('appdrag-cloudbackend', './modules/cloudgate-cloudbackend');
-        rj.on('inject',(moduleId) => {
-            console.log(`Found replacement for ${moduleId} `)
-        })
+        // let rj = new Injector({basedir: __dirname});
+        // rj.fromDir()
+        // .substitute('appdrag-cloudbackend', './modules/cloudgate-cloudbackend');
+        // rj.on('inject',(moduleId) => {
+        //     console.log(`Found replacement for ${moduleId} `)
+        // })
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
     }
     catch (ex) {

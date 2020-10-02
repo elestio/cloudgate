@@ -251,7 +251,7 @@ exports.downloadRemoteFile = function (url, filekey) {
 
 exports.sqlSelect = function (query) {
  return new Promise(async (resolve, reject) => {
-    var rows = await apiDB.ExecuteQuery(appConfig, "SELECT * FROM Products")
+    var rows = await apiDB.ExecuteQuery(appConfig, query)
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);
 
@@ -268,7 +268,7 @@ exports.sqlSelect = function (query) {
 
 exports.sqlExecuteRawQuery = function (query) {
   return new Promise(async (resolve, reject) => {
-    var rows = await apiDB.ExecuteQuery(appConfig, "SELECT * FROM Products")
+    var rows = await apiDB.ExecuteQuery(appConfig, query)
     
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);

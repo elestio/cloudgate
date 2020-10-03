@@ -83,11 +83,11 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 
 &nbsp;
 
-### DB Service: Run MySQL in docker (optional)
+### DB Service: Run MySQL as a docker service (optional)
     cd DB/MYSQL/
     ./startMYSQL.sh
 
-### SMTP Service: Run Postfix in docker (optional)
+### SMTP Service: Run Postfix as a docker service (optional)
     cd SMTP/
     ./startPostfix.sh
 

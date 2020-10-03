@@ -5,7 +5,6 @@ const mime = require('mime');
 const qs = require('querystring');
 const tools = require('../lib/tools.js');
 var multiparty = require('multiparty');
-const Injector = require('require-injector').default;
 
 const https = require('https');
 const Axios = require('axios');
@@ -558,12 +557,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
-        // let rj = new Injector({basedir: __dirname});
-        // rj.fromDir()
-        // .substitute('appdrag-cloudbackend', './modules/cloudgate-cloudbackend');
-        // rj.on('inject',(moduleId) => {
-        //     console.log(`Found replacement for ${moduleId} `)
-        // })
+      
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
     }
     catch (ex) {

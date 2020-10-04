@@ -1,4 +1,5 @@
 #Postfix server used to delived emails sent through cloudgate-cloudbackend
+#Note: this is great for testing, another great option for production is to use AWS SES instead of this
 
 if [ -z "$1" ]
 then
@@ -31,18 +32,12 @@ else
         echo "Starting new cloudgate-postfix instance..."
         docker run -d --name cloudgate-postfix -e "ALLOWED_SENDER_DOMAINS=${domain}" -e "DKIM_AUTOGENERATE=1" -v ${PWD}/dkim:/etc/opendkim/keys -p 172.17.0.1:25:587 -e POSTFIX_myhostname=${domain} boky/postfix
 
-        #Note: this is great for testing, but for production you will need to address several things like to get your emails delivered not in spam
-        #Setting on your domain SPF, DKIM, reverse DNS of your IP ... 
-        #Another great option for production is to use AWS SES instead of this
-
-
         #Read DKIM Key
         DKIMKey=`cat ./dkim/${domain}.txt`;
         DKIMValue=`echo ${DKIMKey} | sed "s|mail._domainkey IN TXT ( \"||g"`
         DKIMValue=`echo ${DKIMValue} | sed "s|\" ) ; ----- DKIM key mail for terasp.net||g"`
         DKIMValue=`echo ${DKIMValue} | sed "s|\" \"||g"`
         #echo $DKIMValue;
-
 
         echo "";
         echo "*******************************************************************************************"
@@ -58,4 +53,5 @@ else
         echo "${publicIP} -> ${domain}";
         echo "*******************************************************************************************"
         echo "";
+
 fi

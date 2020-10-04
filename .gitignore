@@ -1,5 +1,6 @@
 node_modules
 core
+compose/data/
 benchmarks/wrk
 memorystate.json
 binaries/

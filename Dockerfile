@@ -15,4 +15,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 3000
-CMD [ "node", "cloudgate.js", "./apps/CatchAll" ]
+CMD node cloudgate.js -r ./apps/CatchAll

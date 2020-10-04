@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  cloudgate:
+    container_name: cloudgate
+    build: ../
+    ports:
+      - "9000:3000"
+    volumes:
+      - .:/code
+    environment:
+      - APP_ROOT=./apps/Static/
+    depends_on:
+      - mysql
+      - redis
+  redis:
+    image: redis:alpine
+    container_name: cloudgate-redis
+    ports:
+      - "16379:6379"
+    volumes:
+      - ./data/redis:/data
+  mysql:
+    image: mysql:5.7
+    container_name: cloudgate-mysql
+    volumes:
+      - ./data/db:/var/lib/mysql
+    restart: always
+    ports:
+      - "13306:3306"
+    environment:
+      "MYSQL_DATABASE": "TEST"
+      "MYSQL_ROOT_PASSWORD": "X82zE5g86s-egf155-eg23230.7"

@@ -20,20 +20,12 @@ var _serverConfig = null;
 module.exports = {
     start: (app, serverConfig) => {
 
-        // We start a timer for every app, resetting the rateLimiter
+        // reset rateLimiter every 60 seconds (maxRequestsPerMinutePerIP)
         app.callsThisSecond = {};
         setInterval(() => {
             app.callsThisSecond = {};
-            /*
-            var keysToClear = sharedmem.getIntegerKeys("/IpRateLimiter/ip/");
-            for(var i = 0; i < keysToClear.length; i++){
-                //console.log(keysToClear)
-                sharedmem.setInteger(keysToClear[i], 0, "/IpRateLimiter/ip/");
-            }
-            */
-        }, 1000);
+        }, 60*1000);
 
-        //var modules = [apiFunctions, apiDB, staticFiles];
         var modules = [apiFunctions, apiDB, staticFiles];
 
         if ( _serverConfig == null ){
@@ -176,17 +168,19 @@ module.exports = {
                 }
 
                 // Implements a basic rate limiter for app level
-                var rateLimiterKey = "/IpRateLimiter/ip/" + reqInfos.ip ;
+                var rateLimiterKey = "/RLIP/" + reqInfos.ip ;
                 var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
-                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/IpRateLimiter/ip/");
+                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
                     app.callsThisSecond[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
 
                 //console.log(serverConfig)
+                //var maxRequestsPerMinutePerIP = (appConfig.maxRequestsPerMinutePerIP/ serverConfig.nbThreads);
+                var maxRequestsPerMinutePerIP = appConfig.maxRequestsPerMinutePerIP;
 
-                if ( appConfig.rateLimiter != null && curRateLimitForIP >= appConfig.rateLimiter.requestsPerSecond && appConfig.rateLimiter.requestsPerSecond > 0) {
+                if ( appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && appConfig.maxRequestsPerMinutePerIP > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
@@ -198,7 +192,7 @@ module.exports = {
                     return;
                 }
                 app.callsThisSecond[rateLimiterKey] += 1;
-                //sharedmem.incInteger(reqInfos.ip, 1, "/IpRateLimiter/ip/");
+                //sharedmem.incInteger(reqInfos.ip, 1, "/RLIP/");
 
                 //force main domain & SSL
                 /*
@@ -593,14 +587,18 @@ module.exports = {
 
 
                 // Implements a basic rate limiter for app level
-                var rateLimiterKey = "/IpRateLimiter/ip/" + ws.reqInfos.ip ;
+                var rateLimiterKey = "/RLIP/" + ws.reqInfos.ip ;
                 var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
-                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/IpRateLimiter/ip/");
+                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
                     app.callsThisSecond[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
-                if ( ws.appConfig.rateLimiter != null && curRateLimitForIP >= ws.appConfig.rateLimiter.requestsPerSecond && ws.appConfig.rateLimiter.requestsPerSecond > 0) {
+
+                //var maxRequestsPerMinutePerIP = (ws.appConfig.maxRequestsPerMinutePerIP/ serverConfig.nbThreads);
+                var maxRequestsPerMinutePerIP = ws.appConfig.maxRequestsPerMinutePerIP;
+
+                if ( ws.appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && ws.appConfig.maxRequestsPerMinutePerIP > 0) {
 
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
@@ -612,7 +610,7 @@ module.exports = {
                     return;
                 }
                 app.callsThisSecond[rateLimiterKey] += 1;
-                //sharedmem.incInteger(reqInfos.ip, 1, "/IpRateLimiter/ip/");
+                //sharedmem.incInteger(reqInfos.ip, 1, "/RLIP/");
 
 
                 try{

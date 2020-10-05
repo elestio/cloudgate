@@ -9,9 +9,7 @@
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
   "HSTS": false,
-  "rateLimiter" : {
-    "requestsPerSecond" : 10
-  },
+  "maxRequestsPerMinutePerIP": 120,
   "CORS": {
       "access-control-allow-origin": "*"
   },

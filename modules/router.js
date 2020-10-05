@@ -170,22 +170,15 @@ module.exports = {
                 // Implements a basic rate limiter for app level
                 var rateLimiterKey = "/RLIP/" + reqInfos.ip ;
                 var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
-                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
                     app.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
-
-                //console.log(serverConfig)
-                //var maxRequestsPerMinutePerIP = (appConfig.maxRequestsPerMinutePerIP/ serverConfig.nbThreads);
                 var maxRequestsPerMinutePerIP = appConfig.maxRequestsPerMinutePerIP;
-
                 if ( appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && appConfig.maxRequestsPerMinutePerIP > 0) {
 
-                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    //let's wait instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
-                    //await tools.sleep(1000);
-
                     //then stop the process and return a 503
                     res.writeStatus("503 Service Unavailable");
                     res.end("You are sending too many request, please slow down.");
@@ -589,20 +582,15 @@ module.exports = {
                 // Implements a basic rate limiter for app level
                 var rateLimiterKey = "/RLIP/" + ws.reqInfos.ip ;
                 var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
-                //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
                     app.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
-
-                //var maxRequestsPerMinutePerIP = (ws.appConfig.maxRequestsPerMinutePerIP/ serverConfig.nbThreads);
                 var maxRequestsPerMinutePerIP = ws.appConfig.maxRequestsPerMinutePerIP;
-
                 if ( ws.appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && ws.appConfig.maxRequestsPerMinutePerIP > 0) {
 
-                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    //let's wait instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
-                    //await tools.sleep(1000);
 
                     //then stop the process and return a 503
                     var rlResponse = { "status": "Error", "cause": "RateLimited", "details": "You are sending too many request, please slow down" };

@@ -20,7 +20,8 @@
     },
     "/tests/full" : {
       "src" : "./API/tests/",
-      "handler": "full.handler"
+      "handler": "full.handler",
+      "maxRequestsPerMinutePerIP": 50
     },
     "/wildcardtest/*" : {
       "src" : "./API/tests/",

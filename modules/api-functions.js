@@ -52,6 +52,33 @@ module.exports = {
 
             if (typeof (apiEndpoint) != 'undefined') {
 
+
+                // Implements a basic rate limiter for endpoint level
+                var rateLimiterKey = "/RLIP/" + reqInfos.ip + "/HTTP/" + endpointTarget;
+                var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
+                if ( curRateLimitForIP == null ) {
+                    app.rateLimiterMemory[rateLimiterKey] = 0;
+                    curRateLimitForIP = 0;
+                }
+                var maxRequestsPerMinutePerIP = apiEndpoint.maxRequestsPerMinutePerIP;
+
+                if ( apiEndpoint.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && apiEndpoint.maxRequestsPerMinutePerIP > 0) {
+
+                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    await tools.sleep(1000*serverConfig.nbThreads);
+                    //await tools.sleep(1000);
+
+                    //then stop the process and return a 503
+                    resolve({
+                        status: "503",
+                        processed: true,
+                        content: `You are sending too many request, please slow down.`
+                    });
+                    return;
+                }
+                app.rateLimiterMemory[rateLimiterKey] += 1;
+
+
                 //read headers
                 req.forEach((k, v) => {
                     reqInfos.headers[k] = v;

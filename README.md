@@ -447,6 +447,12 @@ Here is the full list of configuration options supported in appconfig.json:
         "access-control-allow-origin": "*"
     },
 
+**maxRequestsPerMinutePerIP**: Define max number of request allowed per minute per IP address, the goal is to protect from DOS attacks. You should define it to a sane value for your use case.
+
+    "maxRequestsPerMinutePerIP": 120
+
+This setting allow 120 requests per minute per unique IP address
+
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
   
 **apiEndpoints**: object containing list of defined endpoints.
@@ -458,7 +464,8 @@ Here is the full list of configuration options supported in appconfig.json:
     	},
     	"/tests/full": {
     		"src": "./API/tests/",
-    		"handler": "full.handler"
+    		"handler": "full.handler",
+            "maxRequestsPerMinutePerIP": 30
     	},
         "/wildcardtest/*" : {
             "src" : "./API/tests/",
@@ -473,7 +480,8 @@ and will be served using the code in the folder defined by the attribute "src"
 The handler attribute here "simple.handler" mean our handler source code will be in the file simple.js
 In this example a second function is declared, the handler code is in the same folder but in a different file named full.js
 In the third apiEndpoint we are using a wildcard (*) so all path starting the the prefix /wildcardtest/ will be routed to that function
-  
+
+Please notice that some apiEndpoints and websocketEndpoints can have a custom rate limiter setting, it will be applied only if lower than the global rate limiter setting
 
 **websocketEndpoints**: this works exactly like apiEndpoints, but instead of declaring an handler we have to declare several events: open, message, close
 

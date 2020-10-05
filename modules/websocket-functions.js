@@ -84,10 +84,34 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
             }
 
             if (typeof (apiEndpoint) != 'undefined' && apiEndpoint[subFunction] != null ) {
+
+                // Implements a basic rate limiter for endpoint level
+                var rateLimiterKey = "/RLIP/" + reqInfos.ip + "/WS/" + endpointTarget;
+                var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
+                if ( curRateLimitForIP == null ) {
+                    app.rateLimiterMemory[rateLimiterKey] = 0;
+                    curRateLimitForIP = 0;
+                }
+                var maxRequestsPerMinutePerIP = apiEndpoint.maxRequestsPerMinutePerIP;
+                if ( apiEndpoint.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && apiEndpoint.maxRequestsPerMinutePerIP > 0) {
+
+                    //let's wait 1 second instead of answering immediately to prevent DOS attacks
+                    await tools.sleep(1000*serverConfig.nbThreads);
+                    //await tools.sleep(1000);
+
+                    //then stop the process and return a 503
+                    resolve({
+                        status: "503",
+                        processed: true,
+                        content: `You are sending too many request, please slow down.`
+                    });
+                    return;
+                }
+                app.rateLimiterMemory[rateLimiterKey] += 1;
+
+
                 var functionIndexFile = apiEndpoint[subFunction].split('.')[0];
-                var functionHandlerFunction = apiEndpoint[subFunction].split('.')[1];
-                // TODO : check path doesn't crash
-                
+                var functionHandlerFunction = apiEndpoint[subFunction].split('.')[1];                
                 //var functionPath = tools.safeJoinPath("../", appConfig.root, apiEndpoint.src, functionIndexFile + '.js');
                 var functionPath = "";
                 if (appConfig.root.startsWith("./")) {

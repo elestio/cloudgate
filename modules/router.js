@@ -21,9 +21,9 @@ module.exports = {
     start: (app, serverConfig) => {
 
         // reset rateLimiter every 60 seconds (maxRequestsPerMinutePerIP)
-        app.callsThisSecond = {};
+        app.rateLimiterMemory = {};
         setInterval(() => {
-            app.callsThisSecond = {};
+            app.rateLimiterMemory = {};
         }, 60*1000);
 
         var modules = [apiFunctions, apiDB, staticFiles];
@@ -169,10 +169,10 @@ module.exports = {
 
                 // Implements a basic rate limiter for app level
                 var rateLimiterKey = "/RLIP/" + reqInfos.ip ;
-                var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
+                var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
                 //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
-                    app.callsThisSecond[rateLimiterKey] = 0;
+                    app.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
 
@@ -191,7 +191,7 @@ module.exports = {
                     res.end("You are sending too many request, please slow down.");
                     return;
                 }
-                app.callsThisSecond[rateLimiterKey] += 1;
+                app.rateLimiterMemory[rateLimiterKey] += 1;
                 //sharedmem.incInteger(reqInfos.ip, 1, "/RLIP/");
 
                 //force main domain & SSL
@@ -588,10 +588,10 @@ module.exports = {
 
                 // Implements a basic rate limiter for app level
                 var rateLimiterKey = "/RLIP/" + ws.reqInfos.ip ;
-                var curRateLimitForIP = app.callsThisSecond[rateLimiterKey];
+                var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
                 //var curRateLimitForIP = sharedmem.getInteger(reqInfos.ip, "/RLIP/");
                 if ( curRateLimitForIP == null ) {
-                    app.callsThisSecond[rateLimiterKey] = 0;
+                    app.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
 
@@ -609,7 +609,7 @@ module.exports = {
                     ws.send(JSON.stringify(rlResponse), false, false);
                     return;
                 }
-                app.callsThisSecond[rateLimiterKey] += 1;
+                app.rateLimiterMemory[rateLimiterKey] += 1;
                 //sharedmem.incInteger(reqInfos.ip, 1, "/RLIP/");
 
 

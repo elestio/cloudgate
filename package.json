@@ -30,6 +30,7 @@
     "mysql": "^2.18.1",
     "node-forge": "^0.10.0",
     "optimist": "^0.6.1",
+    "parse-multipart": "^1.0.4",
     "request": "^2.88.2",
     "serverless-http": "^2.3.2",
     "shelljs": "^0.8.4",

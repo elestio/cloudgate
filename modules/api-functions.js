@@ -19,6 +19,7 @@ var proxyCache = {};
 
 var sharedmem = require("./shared-memory");
 const apiDB = require('./api-db');
+const { ProcessMultipart } = require('./multipart.js');
 
 module.exports = {
     name: "api-functions",
@@ -93,7 +94,7 @@ module.exports = {
                             }
                         }
 
-                        
+
 
                         //console.log(finalPath);
 
@@ -123,8 +124,8 @@ module.exports = {
                             console.log("Fetching remote url: " + finalUrl);
                             console.log(reqInfos.query);
                             console.log(optAxios);
-                        }      
-                        
+                        }
+
                         axios(finalUrl, optAxios)
                             .then(async function(response) {
 
@@ -132,28 +133,28 @@ module.exports = {
                                 if ( response.status == 206 || response.status == "206" || response.headers && response.headers["content-range"] != null ){
                                     res.writeStatus("206");
                                 }
-                                
+
                                 //console.log(response.request.headers);
                                 //console.log(response.headers);
                                 //console.log(response.status);
-                                
-                                try 
+
+                                try
                                 {
                                     for (var key in response.headers) {
-                                        if (key.toUpperCase() != 'CONTENT-LENGTH' && key.toUpperCase() != 'TRANSFER-ENCODING' && key.toUpperCase() != 'X-FRAME-OPTIONS') 
+                                        if (key.toUpperCase() != 'CONTENT-LENGTH' && key.toUpperCase() != 'TRANSFER-ENCODING' && key.toUpperCase() != 'X-FRAME-OPTIONS')
                                         {
                                             var value = response.headers[key] + "";
                                             res.writeHeader(key, value);
                                         }
                                     }
-                                    
+
                                     const stream = response.data;
                                     //tools.pipeStreamOverResponse(res, stream, stream.length, memory);
                                     //return;
 
                                     var respContentType = response.headers["content-type"];
                                     //console.log("response ctype: " + respContentType);
-                                    
+
                                     //do rewriting (TODO: should call a backend function defined in appconfig.json)
                                     if ( respContentType.indexOf("text/html") > -1 || respContentType.indexOf("text/css") > -1 || respContentType.indexOf("text/javascript") > -1 )
                                     {
@@ -173,7 +174,7 @@ module.exports = {
 
                                             curFunction = require( require("path").join(appConfig.root, postProcessor ) );
                                             functionHandlerFunction = apiEndpoint.handler.split('.')[1];
-                
+
                                             var path = reqInfos.url;
                                             if ( curRoute != null && curRoute.endsWith('/*')) {
                                                 path = reqInfos.url.substring(curRoute.length - 3);
@@ -200,7 +201,7 @@ module.exports = {
                                             //no preProcessor defined
                                             res.end(finalContent);
                                         }
-                                        
+
                                     }
                                     else{
                                         //binary content, no rewrite
@@ -219,12 +220,12 @@ module.exports = {
                                             }
                                         });
                                     }
-                                    
-                                    
+
+
 
 
                                 }
-                                catch (ex) 
+                                catch (ex)
                                 {
                                     var erroMSG = ex + ""; //force a cast to string
                                     if (erroMSG.indexOf("Invalid access of discarded") == -1) {
@@ -232,7 +233,7 @@ module.exports = {
                                         console.log(ex);
                                     }
                                 }
-                                
+
                                 return;
                             })
                             .catch(function(error) {
@@ -384,7 +385,7 @@ module.exports = {
                     };
                     lambda.invoke(params, function(err, data) {
                         if (err) {
-                            //console.log(err, err.stack); 
+                            //console.log(err, err.stack);
 
                             const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                             var durationMS = (nanoSeconds / 1000000);
@@ -400,8 +401,8 @@ module.exports = {
                         else {
                             var logs = new Buffer.from(data.LogResult, 'base64').toString('utf8');
 
-                            //console.log(payload);  
-                            //console.log(logs);  
+                            //console.log(payload);
+                            //console.log(logs);
 
                             var payload = JSON.parse(data.Payload);
 
@@ -478,6 +479,10 @@ module.exports = {
                     headers: reqInfos.headers
                 };
                 event[event.httpMethod] = finalQueryObj;
+
+                // parse any multipart
+                ProcessMultipart(event);
+
                 //EXECUTE FUNCTION
                 ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
 
@@ -557,7 +562,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
-      
+
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
     }
     catch (ex) {

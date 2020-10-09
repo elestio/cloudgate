@@ -347,6 +347,10 @@ module.exports = {
 
                     //console.log(processResult);
 
+                    if ( isNaN(processResult.status) ){
+                        processResult.status = 200;
+                    }
+
                     res.writeStatus("" + (processResult.status || 200));
                     for (var key in processResult.headers) {
                         if ( key.toLowerCase() != "content-length" ){

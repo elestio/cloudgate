@@ -553,9 +553,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             response = {"content": "No content returned by the cloud function ..."};
         }
 
-        if ( response.headers == null ){
-            response.headers = {};
-        }
+        //if ( response.headers == null ){
+        //    response.headers = {};
+        //}
 
         if ( response != null && response.headers != null ){
             response.headers["Access-Control-Allow-Origin"] = "*";
@@ -573,13 +573,19 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             }
         }
 
+        //console.log(JSON.stringify(response))
+        //console.log(response.content || response.body || response);
+
         if (typeof response == "object") {
-            resolve({
+            var prepatedResponse = {
                 status: (response.status || 200),
                 processed: true,
-                headers: response.headers,
-                content: response.content || response.body
-            });
+                content: response.content || response.body || response
+            };
+            if ( response.headers != null ){
+                prepatedResponse.headers= response.headers;
+            }
+            resolve(prepatedResponse);
         }
         else {
 

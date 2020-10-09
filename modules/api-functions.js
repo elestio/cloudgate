@@ -532,6 +532,9 @@ let forbiddenEnvVars = ['PATH','LS_COLORS','SSH_CONNECTION','LESSCLOSE','LANG','
 
 async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig){
 
+    //console.log("Going to execute: ");
+    //console.log(apiEndpoint);
+
     var ctx = {
         succeed: function(result) {
             //console.log(result)
@@ -545,7 +548,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         if (err != null) {
             console.log(err);
         } else {
-            // console.log(response);
+            //console.log(response);
         }
 
         //prevent a crash if the cloud function don't return anything
@@ -553,9 +556,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             response = {"content": "No content returned by the cloud function ..."};
         }
 
-        //if ( response.headers == null ){
-        //    response.headers = {};
-        //}
+        if ( response.headers == null ){
+            response.headers = {};
+        }
 
         if ( response != null && response.headers != null ){
             response.headers["Access-Control-Allow-Origin"] = "*";
@@ -577,15 +580,12 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         //console.log(response.content || response.body || response);
 
         if (typeof response == "object") {
-            var prepatedResponse = {
+            resolve({
                 status: (response.status || 200),
                 processed: true,
+                headers: response.headers,
                 content: response.content || response.body || response
-            };
-            if ( response.headers != null ){
-                prepatedResponse.headers= response.headers;
-            }
-            resolve(prepatedResponse);
+            });
         }
         else {
 

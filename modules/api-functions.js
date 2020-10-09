@@ -343,8 +343,12 @@ module.exports = {
                         delete finalQueryObj.apiKey;
                     }
                     if (!apiEndpoint.type.includes('nodejs')) {
+                        
+                        //SQL Source
                         let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
-                        if (apiEndpoint.type.slice(0,3) === 'SQL') {
+                        
+                        //VisualSQL + RAW SQL support
+                        if (apiEndpoint.type.slice(0,3) === 'SQL' || apiEndpoint.type == 'SELECT' || apiEndpoint.type == 'INSERT' || apiEndpoint.type == 'UPDATE' || apiEndpoint.type == 'DELETE') {
                             let findParam = sqlRequest.split(' ');
                             findParam = findParam.filter((val) => {
                                 if (val[0] === '@') {
@@ -368,10 +372,13 @@ module.exports = {
                                 return;
                             }
                         }
-                        let rows = apiDB.ExecuteQuery(appConfig, sqlRequest);
+                        //console.log(sqlRequest);
+                        let rows = await apiDB.ExecuteQuery(appConfig, sqlRequest);
+                        //console.log(rows);
                         resolve({
                             processed: true,
                             content: rows,
+                            headers: {"content-type": "application/json"},
                             status: 200
                         })
                         return;

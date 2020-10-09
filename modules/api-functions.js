@@ -294,7 +294,7 @@ module.exports = {
                 }
 
                 // TODO : check path doesn't crash
-                let supportedTypes = ['nodejs12.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
+                let supportedTypes = ['nodejs6.x', 'nodejs8.x', 'nodejs10.x', 'nodejs12.x', 'nodejs14.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
                 if (!supportedTypes.includes(apiEndpoint.type)) {
                     resolve({
                         status: "415",
@@ -556,12 +556,22 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
         }
 
+        //Cloudbackend support (should be moved to cloudgate-cloudbackend as an exported function)
+        if (apiEndpoint.output != null && apiEndpoint.output == "GATEWAYBASE64"){
+            try{
+                response.body = Buffer.from(response.body, 'base64');
+            }
+            catch(ex){
+                //response.body = "apiEndpoint output is configured as GATEWAYBASE64 but it's returning non base64...";
+            }
+        }
+
         if (typeof response == "object") {
             resolve({
                 status: (response.status || 200),
                 processed: true,
                 headers: response.headers,
-                content: response.content
+                content: response.content || response.body
             });
         }
         else {

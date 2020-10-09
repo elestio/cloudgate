@@ -13,3 +13,4 @@ apps/Livedash
 apps/CatchAll/CERTS/
 apps/ReverseProxy/CERTS/
 apps/gpt3
+apps/maxsens

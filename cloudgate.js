@@ -21,10 +21,13 @@ if ( Worker == null ){
     return;
 }
 
+
+
 const fs = require('fs');
 const path = require('path')
 
 const resolve = require('path').resolve;
+const join = require('path').join;
 const os = require('os');
 const tools = require('./lib/tools.js');
 const memory = require('./modules/memory');
@@ -58,6 +61,22 @@ if ( process.env.THREADS ){
         nbThreads = parseInt(process.env.THREADS);
     }
 }
+
+
+//hook require to replace appdrag-cloudbackend
+var Module = require('module');
+Module.prototype.require = new Proxy(Module.prototype.require, {
+    apply(target, thisArg, argumentsList){
+        let name = argumentsList[0];
+        //console.log(name);
+        if ( name == "appdrag-cloudbackend" ){
+            argumentsList[0] = join(__dirname, "modules/cloudgate-backend-appdrag-compat.js");
+            //console.log(argumentsList[0]);
+            //console.log("appdrag-cloudbackend converted to cloudgate-cloudbackend");
+        }
+        return Reflect.apply(target, thisArg, argumentsList)
+    }
+});
 
 
 //load config file Settings

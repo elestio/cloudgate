@@ -556,16 +556,22 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             response = {"content": "No content returned by the cloud function ..."};
         }
 
-        if ( response.headers == null ){
-            response.headers = {};
-        }
-
+        var headers = {};
         if ( response != null && response.headers != null ){
-            response.headers["Access-Control-Allow-Origin"] = "*";
-            response.headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT";
-            response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+            headers = response.headers;
         }
 
+        //ALLOW CORS
+        
+        headers["Access-Control-Allow-Origin"] = "*";
+        headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT";
+        headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+
+        //add default content-type & charset if nothing is defined
+        if ( response != null && headers["Content-Type"] == null && headers["content-type"] == null ){
+            headers["Content-Type"] = "application/json; charset=utf-8";
+        }
+        
         //Cloudbackend support (should be moved to cloudgate-cloudbackend as an exported function)
         if (apiEndpoint.output != null && apiEndpoint.output == "GATEWAYBASE64"){
             try{
@@ -583,7 +589,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             resolve({
                 status: (response.status || 200),
                 processed: true,
-                headers: response.headers,
+                headers: headers,
                 content: response.content || response.body || response
             });
         }
@@ -595,6 +601,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             resolve({
                 status: (response.status || 200),
                 processed: true,
+                headers: headers,
                 content: response
             });
         }

@@ -1,10 +1,11 @@
+var cloudgateBackend = require('./cloudgate-backend');
+
 var FormData = require('form-data');
 const axios = require('axios');
 const apiDB = require('./api-db');
 const apiFS = require('./api-fs')
 const appConfig = require (process.env.APPCONFIG_PATH)
 var APIUrl = 'https://api.appdrag.com/CloudBackend.aspx';
-var beginPipeline = process.hrtime();
 
 var config = {
   headers: {
@@ -54,14 +55,12 @@ exports.newslettersDeleteContactsFromLists = function(list, contacts) {
   });
 }
 
-
-
 exports.fileTextWrite = function(filekey, content) {
     return new Promise((resolve, reject) => {
+        var beginPipeline = process.hrtime();
         apiFS.WriteTextFile(filekey, content);
         const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
         var durationMS = (nanoSeconds/1000000);
-
         resolve({
             status: 200,
             content: JSON.stringify({
@@ -251,35 +250,21 @@ exports.downloadRemoteFile = function (url, filekey) {
 
 exports.sqlSelect = function (query) {
  return new Promise(async (resolve, reject) => {
-    var rows = await apiDB.ExecuteQuery(appConfig, query)
+    var rows =  { "Table": await apiDB.ExecuteQuery(appConfig, query) }
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);
 
-    resolve({
-        status: 200,
-        content: JSON.stringify(rows), 
-        headers:{
-            "Content-Type": "application/json;charset=utf-8;",
-            "processTime": durationMS
-        }
-    });
+    resolve(JSON.stringify(rows));
   });
 }
 
 exports.sqlExecuteRawQuery = function (query) {
   return new Promise(async (resolve, reject) => {
-    var rows = await apiDB.ExecuteQuery(appConfig, query)
+    var rows =  { "Table": await apiDB.ExecuteQuery(appConfig, query) }
     
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);
 
-    resolve({
-        status: 200,
-        content: JSON.stringify(rows), 
-        headers:{
-            "Content-Type": "application/json;charset=utf-8;",
-            "processTime": durationMS
-        }
-    });
+    resolve(JSON.stringify(rows));
   });
 }

@@ -4,6 +4,11 @@ const apiDB = require('./api-db');
 const apiFS = require('./api-fs')
 const appConfig = require(process.env.APPCONFIG_PATH);
 
+const nodemailer = require('nodemailer');
+//var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
+var transporter = nodemailer.createTransport('smtp://172.17.0.1/?port=25'); //cloudgate-postfix
+
+
 var config = {
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
@@ -171,8 +176,32 @@ exports.sendEmailAdvanced = function (from, sender, to, cc, bcc, subject, conten
 
 
 exports.sendEmail = function (from, sender, to, subject, content, isHtml) {
-  return new Promise((resolve, reject) => {
-    //TODO:
+  return new Promise(async (resolve, reject) => {
+
+    var mailOptions = {
+        from: '"' + sender + '" <' + from + '>',
+        to: to, 
+        subject: subject
+    };
+
+    if ( isHtml ){
+        mailOptions.html = content;
+        mailOptions.text = content.replace(/<[^>]+>/g, '');
+    }
+    else{
+        mailOptions.text = content;
+    }
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            resolve(error);
+            //return console.log(error);
+        }
+        //console.log('Message sent: ' + info.response);
+        resolve(info);
+    });
+
   });
 }
 

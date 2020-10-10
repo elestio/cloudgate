@@ -24,6 +24,9 @@ module.exports = {
     name: "api-functions",
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
         return new Promise(async function(resolve, reject) {
+
+            var beginPipeline = process.hrtime();
+
             process.env['APPCONFIG_PATH'] = `${appConfig.root}/appconfig.json`;
             var functionsList = appConfig.apiEndpoints;
             if (functionsList == null) {
@@ -218,7 +221,7 @@ module.exports = {
                                             };
 
                                             //console.log("Executing postProcessor");
-                                            var result = await ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
+                                            var result = await ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig, beginPipeline);
                                             //res.end(result.content);
 
                                             //todo handle headers from rewriter
@@ -375,10 +378,14 @@ module.exports = {
                         //console.log(sqlRequest);
                         let rows = await apiDB.ExecuteQuery(appConfig, sqlRequest);
                         //console.log(rows);
+
+                        const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+                        var durationMS = (nanoSeconds/1000000).toFixed(2);
+
                         resolve({
                             processed: true,
-                            content: rows,
-                            headers: {"content-type": "application/json; charset=utf-8"},
+                            content: {"Table": rows},
+                            headers: {"content-type": "application/json; charset=utf-8", "durationMS": durationMS},
                             status: 200
                         })
                         return;
@@ -513,7 +520,7 @@ module.exports = {
                 };
                 event[event.httpMethod] = finalQueryObj;
                 //EXECUTE FUNCTION
-                ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig);
+                ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig, beginPipeline);
 
             }
             else{
@@ -530,7 +537,7 @@ module.exports = {
 
 let forbiddenEnvVars = ['PATH','LS_COLORS','SSH_CONNECTION','LESSCLOSE','LANG','USER','PWD','HOME','SSH_CLIENT','SSH_TTY','MAIL','TERM','SHELL','NVM_BIN','SHLVL','LOGNAME','PATH','NVM_INC','XDG_SESSION_ID','XDG_RUNTIME_DIR','_']
 
-async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig){
+async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig, beginPipeline){
 
     //console.log("Going to execute: ");
     //console.log(apiEndpoint);
@@ -584,6 +591,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
 
         //console.log(JSON.stringify(response))
         //console.log(response.content || response.body || response);
+        const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+        var durationMS = (nanoSeconds/1000000).toFixed(2);
+        headers["durationMS"] = durationMS;
 
         if (typeof response == "object") {
             resolve({

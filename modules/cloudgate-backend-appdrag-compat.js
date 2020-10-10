@@ -145,8 +145,8 @@ exports.sendEmailAdvanced = function (from, sender, to, cc, bcc, subject, conten
 
 
 exports.sendEmail = function (from, sender, to, subject, content, isHtml) {
-  return new Promise( async(resolve, reject) => {
-    //TODO:
+  return new Promise(async (resolve, reject) => {
+    resolve(JSON.stringify(await cloudgateBackend.sendEmail(from, sender, to, subject, content, isHtml)));
   });
 }
 
@@ -158,7 +158,23 @@ exports.downloadRemoteFile = function (url, filekey) {
 
 exports.sqlSelect = function (query) {
  return new Promise(async (resolve, reject) => {
-    resolve(JSON.stringify(await cloudgateBackend.sqlSelect(query)));
+    
+    //ensure we don't pass update result if there is a select to emulare appdrag-cloudbackend response mode (update ...; SELECT; should return only the select)
+    var data = await cloudgateBackend.sqlSelect(query);
+    //resolve(JSON.stringify(data));
+    
+    if ( data.Table.length == 2 )
+    {
+        if (data.Table[0].fieldCount != null && data.Table[0].serverStatus != null)
+        {
+            var newResp = {"Table": data.Table[1]};
+            resolve(JSON.stringify(newResp));
+            return;
+        }
+    }
+
+    resolve(JSON.stringify(data));
+    
   });
 }
 

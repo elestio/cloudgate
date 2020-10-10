@@ -378,7 +378,7 @@ module.exports = {
                         resolve({
                             processed: true,
                             content: rows,
-                            headers: {"content-type": "application/json"},
+                            headers: {"content-type": "application/json; charset=utf-8"},
                             status: 200
                         })
                         return;

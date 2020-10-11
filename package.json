@@ -5,8 +5,8 @@
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
-    "dev": "node cloudgate.js ./apps/CatchAll -p 3000 -d",
-    "web": "node cloudgate.js ./apps/CatchAll -p 80"
+    "dev": "node cloudgate.js -r ./apps/CatchAll -p 3000 -d",
+    "web": "node cloudgate.js -r ./apps/CatchAll -p 80"
   },
   "dependencies": {
     "@greenlock/manager": "^3.1.0",

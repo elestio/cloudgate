@@ -126,7 +126,14 @@ exports.fileCopy = function (filekey, destkey) {
 }
 
 exports.fileSaveUploaded = function(filekey, destkey) {
-    //TODO: filesaveuploaded form data thingy
+    return new Promise((resolve, reject) => {
+        
+        //apiFS.WriteBinaryFile(filekey, content);     
+
+        resolve({
+                status: 'OK'
+        });
+    });
 }
 
 

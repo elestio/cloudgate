@@ -92,7 +92,16 @@ exports.fileCopy = function (filekey, destkey) {
 }
 
 exports.fileSaveUploaded = function(filekey, destkey) {
-    //TODO: filesaveuploaded form data thingy
+    return new Promise( async(resolve, reject) => {
+            var sourceFile = null; 
+            if ( filekey == destkey )
+            {
+                sourceFile = filekey;
+                destkey = sourceFile.filename;
+            }
+            var resp = await cloudgateBackend.fileBinaryWrite(destkey, sourceFile.data);
+            resolve(JSON.stringify(resp));
+    });
 }
 
 
@@ -162,6 +171,8 @@ exports.sqlSelect = function (query) {
     //ensure we don't pass update result if there is a select to emulare appdrag-cloudbackend response mode (update ...; SELECT; should return only the select)
     var data = await cloudgateBackend.sqlSelect(query);
     //resolve(JSON.stringify(data));
+
+    //console.log(data);
     
     if ( data.Table.length == 2 )
     {

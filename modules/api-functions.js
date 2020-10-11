@@ -19,6 +19,7 @@ var proxyCache = {};
 
 var sharedmem = require("./shared-memory");
 const apiDB = require('./api-db');
+var coregate = require('../coregate.js');
 
 module.exports = {
     name: "api-functions",
@@ -319,11 +320,19 @@ module.exports = {
                     if (reqInfos.method === 'get') {
                         finalQueryObj = parseURLEncParams(reqInfos.query);
                     } else {
-                        if (Object.keys(bodyParserTool).includes(contentType)) {
-                            finalQueryObj = bodyParserTool[contentType](reqInfos.body);
-                        } else {
+                        
+                        if (Object.keys(bodyParserTool).includes(contentType.split(';')[0] )) {
+                            finalQueryObj = bodyParserTool[contentType.split(';')[0]](reqInfos.body);
+                        }
+                        else if (contentType.indexOf("multipart/form-data") > -1) {
+                            //finalQueryObj = parseFormData(reqInfos.body, contentType);
+                            //filled later
+                        } 
+                        else {
                             finalQueryObj = parseAppJsonBody(reqInfos.body);
                         }
+
+                        //console.log(finalQueryObj);
                     }
                     if (apiEndpoint.isPrivate) {
                         if (!finalQueryObj.apiKey) {
@@ -519,6 +528,12 @@ module.exports = {
                     headers: reqInfos.headers
                 };
                 event[event.httpMethod] = finalQueryObj;
+
+                let contentType = reqInfos.headers['content-type'];
+                if (contentType != null && contentType.indexOf("multipart/form-data") > -1) {
+                    parseFormData(reqInfos.body, contentType, event); //mutate the event to add FILES & POST
+                } 
+                
                 //EXECUTE FUNCTION
                 ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig, beginPipeline);
 
@@ -682,13 +697,44 @@ const parseAppJsonBody = (body) =>  {
     return body;
 };
 
-const parseFormData = (body) => {
-    //TODO: Deal with form-data
-    //TODO: Check file extension and see if app accepts it
+
+const parseFormData = (body, contentType, event) => {
+    
+    //console.log(contentType)
+    var files = [];
+    var keyValues = [];
+
+    var parts = coregate.getParts(body, contentType);
+    //console.log(body)
+    for(var i=0; i<parts.length;i++){
+        var curPart = parts[i];
+        //console.log(curPart.get("name"));
+        //console.log(curPart);
+
+        if (curPart.get("filename") != null){
+            var newFile = {
+                "name": curPart.get("name"),
+                "type": curPart.get("type"),
+                "filename": curPart.get("filename"),
+                "data": curPart.get("data")
+            };
+            newFile.path = newFile;
+            files.push(newFile);
+            //console.log("file added for name: " + curPart.get("name"));
+        }
+        else{
+            //set key/values directly on the event.POST/PUT/PATCH
+            event[event.httpMethod][curPart.get("name")] = Buffer.from( curPart.get("data") ).toString();
+            //console.log("KV added for name: " + curPart.get("name"));
+        }
+    }
+    
+
+    event.FILES = files;
+    return event;
 }
 
 const bodyParserTool = {
     'application/json': parseAppJsonBody,
-    'application/x-www-form-urlencoded': parseURLEncParams,
-    'multipart/form-data': parseFormData,
+    'application/x-www-form-urlencoded': parseURLEncParams
 }

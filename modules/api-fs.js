@@ -4,7 +4,7 @@ function WriteTextFile(filekey, content) {
     if (!fs.existsSync('public')) {
         fs.mkdirSync('public')
     }
-    if (!fs.existsSync('public/uploads')) {
+    if (!fs.existsSync('public/CloudBackend')) {
         fs.mkdirSync('public/uploads')
     }
     let isDir = filekey.split('/');
@@ -44,9 +44,25 @@ function WriteBinaryFile(filekey, content) {
         }
         if (value === filename) {
             //TODO: deal with binary data
+            
         } else {
             fs.mkdirSync(`./public/uploads/${fullPath}`);
         }
+
+        console.log(`./public/uploads/${fullPath}`)
+        //fs.writeFileSync(`./public/uploads/${fullPath}`, content);
+
+        console.log(content)
+        fs.writeFile(`./public/uploads/${fullPath}`, Buffer.from(content), 'binary',  (err)=> {
+            if (err) {
+                console.log("There was an error writing the image")
+            }
+            else {
+                console.log("Written File ")
+            }
+        });
+
+        
     })
     return;
 }

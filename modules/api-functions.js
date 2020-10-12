@@ -603,6 +603,30 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
                 //response.body = "apiEndpoint output is configured as GATEWAYBASE64 but it's returning non base64...";
             }
         }
+        if (apiEndpoint.output != null && apiEndpoint.output == "GATEWAY"){
+            //console.log(response)
+            try{
+                //response.content = {"payload": response};
+                var newResp = {
+                    statusCode: response.statusCode,
+                    headers: response.headers,
+                    content: {"payload": response}
+                }
+
+                response = newResp;
+            }
+            catch(ex){
+                
+            }
+        }
+        if (apiEndpoint.output != null && apiEndpoint.output == "JSON"){
+            try{
+                response.content = {"payload": response};
+            }
+            catch(ex){
+                
+            }
+        }
 
         //console.log(JSON.stringify(response))
         //console.log(response.content || response.body || response);

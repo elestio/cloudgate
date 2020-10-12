@@ -16,6 +16,7 @@ cp -r * /tmp/cloudgate/
 rm -rf /tmp/cloudgate/DB/
 rm -rf /tmp/cloudgate/binaries/
 rm -rf /tmp/cloudgate/benchmarks/
+rm -rf /tmp/cloudgate/apps/maxsens/
 rm -rf /tmp/cloudgate/apps/CatchAll/CERTS/
 rm -rf /tmp/cloudgate/apps/ReverseProxy/node_modules/
 

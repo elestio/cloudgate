@@ -48,6 +48,7 @@ exports.handler = async (event, context, callback) => {
         status: 200,
         content: response, 
         headers:{
+            "Content-Type": "text/html",
             "processTime": durationMS
         }
     });

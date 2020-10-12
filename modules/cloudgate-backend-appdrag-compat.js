@@ -1,3 +1,4 @@
+const fs = require('fs');
 var cloudgateBackend = require('./cloudgate-backend');
 const appConfig = require (process.env.APPCONFIG_PATH)
 
@@ -41,9 +42,10 @@ exports.newslettersDeleteContactsFromLists = function(list, contacts) {
 }
 
 exports.fileTextWrite = function(filekey, content) {
+    CreateBaseStorage();
     return new Promise( async (resolve, reject) => {
         
-        await cloudgateBackend.WriteTextFile(filekey, content);
+        await cloudgateBackend.WriteTextFile("CloudBackend/uploads/" + filekey, content);
         
         resolve(JSON.stringify({
                 status: 'OK'
@@ -53,17 +55,19 @@ exports.fileTextWrite = function(filekey, content) {
 
 
 exports.fileBinaryWrite = function (filekey, content) {
+  CreateBaseStorage();
   return new Promise( async(resolve, reject) => {
         
-        await cloudgateBackend.WriteBinaryFile(filekey, content);
+        await cloudgateBackend.WriteBinaryFile("CloudBackend/uploads/" + filekey, content);
     
         resolve(JSON.stringify( { "status": "OK"  } ));
   });
 }
 
 exports.fileDelete = function (filekey) {
+  CreateBaseStorage();
   return new Promise( async (resolve, reject) => {
-        await cloudgateBackend.FileDelete(filekey);
+        await cloudgateBackend.FileDelete( "CloudBackend/uploads/" + filekey);
    
         resolve(JSON.stringify({
             status: 'OK'
@@ -72,8 +76,9 @@ exports.fileDelete = function (filekey) {
 }
 
 exports.fileRename = function (filekey, destkey) {
+    CreateBaseStorage();
   return new Promise( async(resolve, reject) => {
-        await cloudgateBackend.FileRename(filekey, destkey);
+        await cloudgateBackend.FileRename("CloudBackend/uploads/" + filekey, "CloudBackend/uploads/" + destkey);
     
         resolve(JSON.stringify({
             status: 'OK'
@@ -82,32 +87,30 @@ exports.fileRename = function (filekey, destkey) {
 }
 
 exports.fileCopy = function (filekey, destkey) {
+    CreateBaseStorage();
     return new Promise( async(resolve, reject) => {
-            await cloudgateBackend.FileCopy(filekey, destkey);
-       
-            resolve(JSON.stringify({
-                status: 'OK'
-            }));
-  });
+        await cloudgateBackend.FileCopy("CloudBackend/uploads/" + filekey, "CloudBackend/uploads/" + destkey);
+
+        resolve(JSON.stringify({
+            status: 'OK'
+        }));
+    });
 }
 
 exports.fileSaveUploaded = function(filekey, destkey) {
+    CreateBaseStorage();
     return new Promise( async(resolve, reject) => {
-            var sourceFile = null; 
-            if ( filekey == destkey )
-            {
-                sourceFile = filekey;
-                destkey = sourceFile.filename;
-            }
-            var resp = await cloudgateBackend.fileBinaryWrite(destkey, sourceFile.data);
-            resolve(JSON.stringify(resp));
+        var sourceFile = filekey; 
+        destkey = sourceFile.filename;
+        var resp = await cloudgateBackend.fileBinaryWrite("CloudBackend/uploads/" + destkey, sourceFile.data);
+        resolve(JSON.stringify(resp));
     });
 }
 
 
 exports.directoryCreate = function (directoryName) {
   return new Promise( async(resolve, reject) => {
-            await cloudgateBackend.DirectoryCreate(directoryName);
+            await cloudgateBackend.DirectoryCreate("CloudBackend/uploads/" + directoryName);
         
             resolve(JSON.stringify({
                 status: 'OK',
@@ -117,7 +120,7 @@ exports.directoryCreate = function (directoryName) {
 
 exports.directoryList = function (directoryName) {
   return new Promise( async(resolve, reject) => {
-        let list = await cloudgateBackend.DirectoryList(directoryName);
+        let list = await cloudgateBackend.DirectoryList("CloudBackend/uploads/" + directoryName);
    
         resolve(JSON.stringify({
             status: 'OK',
@@ -193,4 +196,15 @@ exports.sqlExecuteRawQuery = function (query) {
   return new Promise(async (resolve, reject) => {
     resolve(JSON.stringify(await cloudgateBackend.sqlExecuteRawQuery(query)));
   });
+}
+
+
+
+function CreateBaseStorage(){
+    if (!fs.existsSync('public/CloudBackend')) {
+        fs.mkdirSync('public/CloudBackend')
+    }
+    if (!fs.existsSync('public/CloudBackend/uploads')) {
+        fs.mkdirSync('public/CloudBackend/uploads')
+    }
 }

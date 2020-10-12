@@ -90,7 +90,7 @@ module.exports = {
 
                 //read the body only if needed
                 if (reqInfos.method != "get") {
-                    reqInfos.body = await tools.getBody(req, res);
+                    reqInfos.body = await tools.getBody(req, res, true);
                 }
 
                 var apiSrc = apiEndpoint.src;
@@ -680,6 +680,7 @@ function isArrayBuffer(value) {
 
 
 const parseURLEncParams = (body)  => {
+    body = body.toString('utf8');
     body = new URLSearchParams(body);
     let finalBody = {};
     for (const[key, value] of body) {
@@ -703,9 +704,9 @@ const parseFormData = (body, contentType, event) => {
     //console.log(contentType)
     var files = [];
     var keyValues = [];
-
     var parts = coregate.getParts(body, contentType);
-    //console.log(body)
+    //console.log(parts)
+
     for(var i=0; i<parts.length;i++){
         var curPart = parts[i];
         //console.log(curPart.get("name"));

@@ -4,106 +4,75 @@ function WriteTextFile(filekey, content) {
     if (!fs.existsSync('public')) {
         fs.mkdirSync('public')
     }
-    if (!fs.existsSync('public/CloudBackend')) {
-        fs.mkdirSync('public/uploads')
-    }
-    let isDir = filekey.split('/');
-    let filename = isDir.slice(-1)[0];
-    console.log(isDir, filename)
-    let fullPath = "";
-    isDir.map(value => {
-        if (fullPath === "") {
-            fullPath += value
-        } else {
-            fullPath += `/${value}`;
+    var fullPath = `./public/${filekey}`;
+    var status = fs.writeFile(fullPath, content, (err)=> {
+        if (err) {
+            return err;
         }
-        if (value === filename) {
-            fs.writeFileSync(`./public/uploads/${fullPath}`, content);
-        } else {
-            fs.mkdirSync(`./public/uploads/${fullPath}`)
+        else {
+            //console.log("Written File");
+            return "OK";
         }
-    })
-    return;
+    });
 }
 
 function WriteBinaryFile(filekey, content) {
     if (!fs.existsSync('public')) {
         fs.mkdirSync('public');
     }
-    if (!fs.existsSync('public/uploads')) {
-        fs.mkdirSync('public/uploads')
-    }
-    let isDir = filekey.split('/');
-    let filename = isDir.slice(-1)[0];
-    let fullPath = "";
-    isDir.map(value => {
-        if (fullPath === "") {
-            fullPath += value;
-        } else {
-            fullPath += `/${value}`;
+    
+    var fullPath = `./public/${filekey}`;
+    var status = fs.writeFile(fullPath, Buffer.from(content), 'binary',  (err)=> {
+        if (err) {
+            return err;
         }
-        if (value === filename) {
-            //TODO: deal with binary data
-            
-        } else {
-            fs.mkdirSync(`./public/uploads/${fullPath}`);
+        else {
+            //console.log("Written File");
+            return "OK";
         }
-
-        console.log(`./public/uploads/${fullPath}`)
-        //fs.writeFileSync(`./public/uploads/${fullPath}`, content);
-
-        console.log(content)
-        fs.writeFile(`./public/uploads/${fullPath}`, Buffer.from(content), 'binary',  (err)=> {
-            if (err) {
-                console.log("There was an error writing the image")
-            }
-            else {
-                console.log("Written File ")
-            }
-        });
-
-        
-    })
-    return;
+    });
+    
 }
 
 
 function FileDelete(filekey) {
-    if (fs.existsSync(`public/uploads/${filekey}`)) {
-        fs.unlinkSync(`public/uploads/${filekey}`)
+    if (fs.existsSync(`public/${filekey}`)) {
+        fs.unlinkSync(`public/${filekey}`)
     }
     return;
 }
 
 function FileRename(filekey, destkey) {
-    if (fs.existsSync(`public/uploads/${filekey}`)) {
-        fs.renameSync(`public/uploads/${filekey}`, `public/uploads/${destkey}`)
+    if (fs.existsSync(`public/${filekey}`)) {
+        fs.renameSync(`public/${filekey}`, `public/${destkey}`)
     }
     return;
 }
 
 function FileCopy(filekey, destkey) {
-    if (fs.existsSync(`public/uploads/${filekey}`)) {
-        fs.copyFileSync(`public/uploads/${filekey}`, `public/uploads/${destkey}`)
+    if (fs.existsSync(`public/${filekey}`)) {
+        fs.copyFileSync(`public/${filekey}`, `public/${destkey}`)
     }
     return;
 }
 
-function FileSaveUpload(filekey, destkey) {
-    //TODO:
-    return;
+function FileSaveUpload(data, destkey) {
+    return new Promise( async(resolve, reject) => {
+        var resp = await cloudgateBackend.fileBinaryWrite("public/" + destkey, data);
+        resolve(resp);
+    });
 }
 
 function DirectoryCreate(directoryName) {
-    if (!fs.existsSync(`public/uploads/${directoryName}`)) {
-        fs.mkdirSync(`public/uploads/${directoryName}`)
+    if (!fs.existsSync(`public/${directoryName}`)) {
+        fs.mkdirSync(`public/${directoryName}`)
     }
     return;
 }
 
 function DirectoryList(directoryName) {
-    if (fs.existsSync(`public/uploads/${directoryName}`)) {
-        let filenames = fs.readdirSync(`public/uploads/${directoryName}`);
+    if (fs.existsSync(`public/${directoryName}`)) {
+        let filenames = fs.readdirSync(`public/${directoryName}`);
         let finaltab = [];
         filenames.map(file => {
             let fileobj = {
@@ -115,9 +84,9 @@ function DirectoryList(directoryName) {
                 "lastWriteTime": 0,
                 "size": 0
             };
-            if (fs.lstatSync(`public/uploads/${file}`).isDirectory()) {
+            if (fs.lstatSync(`public/${file}`).isDirectory()) {
                 fileobj.type = "DIRECTORY";
-                if (fs.readdirSync(`public/uploads/${file}`).length !== 0) {
+                if (fs.readdirSync(`public/${file}`).length !== 0) {
                     fileobj.isEmpty = false;
                 }
             }
@@ -129,15 +98,15 @@ function DirectoryList(directoryName) {
 }
 
 function DirectoryRename(directoryName, destDirectory) {
-    if (fs.existsSync(`public/uploads/${directoryName}`)) {
-        fs.renameSync(`public/uploads/${directoryName}`, `public/uploads/${destDirectory}`);
+    if (fs.existsSync(`public/${directoryName}`)) {
+        fs.renameSync(`public/${directoryName}`, `public/${destDirectory}`);
     }
     return;
 }
 
 function DirectoryDelete(filekey) {
-    if (fs.existsSync(`public/uploads/${filekey}`)) {
-        fs.rmdirSync(`public/uploads/${filekey}`, { recursive: true });
+    if (fs.existsSync(`public/${filekey}`)) {
+        fs.rmdirSync(`public/${filekey}`, { recursive: true });
         return true;
     }
     return false;

@@ -86,10 +86,21 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
             if (typeof (apiEndpoint) != 'undefined' && apiEndpoint[subFunction] != null ) {
 
                 // Implements a basic rate limiter for endpoint level
-                var rateLimiterKey = "/RLIP/" + reqInfos.ip + "/WS/" + endpointTarget;
-                var curRateLimitForIP = app.rateLimiterMemory[rateLimiterKey];
+                if( reqInfos.ws == null ){
+                    reqInfos.ws = {};
+                }
+                if( reqInfos.ws.rateLimiterMemory == null ){
+                    reqInfos.ws.rateLimiterMemory = {};
+                }
+
+                var rateLimiterKey = "/RLIP/" + reqInfos.ip + "/WS" + endpointTarget;
+                var curRateLimitForIP = null;
+                if ( reqInfos.ws.rateLimiterMemory != null ){
+                    curRateLimitForIP = reqInfos.ws.rateLimiterMemory[rateLimiterKey];
+                }
+                
                 if ( curRateLimitForIP == null ) {
-                    app.rateLimiterMemory[rateLimiterKey] = 0;
+                    reqInfos.ws.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
                 var maxRequestsPerMinutePerIP = apiEndpoint.maxRequestsPerMinutePerIP;
@@ -107,7 +118,7 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                     });
                     return;
                 }
-                app.rateLimiterMemory[rateLimiterKey] += 1;
+                reqInfos.ws.rateLimiterMemory[rateLimiterKey] += 1;
 
 
                 var functionIndexFile = apiEndpoint[subFunction].split('.')[0];

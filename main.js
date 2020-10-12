@@ -37,7 +37,7 @@ const resolve = require('path').resolve;
 const memory = require('./modules/memory');
 const sharedmem = require('./modules/shared-memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
-const tools = require('./lib/tools.js');
+const tools = require('./modules/tools.js');
 
 var globalSSLApp = null;
 
@@ -123,7 +123,7 @@ function Start(argv) {
     
     const router = require('./modules/router');
     const { v4: uuidv4 } = require('uuid')
-    const appLoader = require('./loaders/app-loader.js');
+    const appLoader = require('./modules/app-loader.js');
     var ifaces = os.networkInterfaces();
 
     var memoryPath = "./memorystate.json";
@@ -581,7 +581,7 @@ function Start(argv) {
                 {
                     sharedmem.setString(options.https.ssldomain, "1", "SSLGeneration");
 
-                    var Letsencrypt = require('./lib/letsencrypt');
+                    var Letsencrypt = require('./modules/letsencrypt');
                     var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
                     var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
                     var isProd = true;

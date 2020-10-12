@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
-const tools = require('../lib/tools.js');
+const tools = require('./tools.js');
 var sharedmem = require("./shared-memory");
 const apiDB = require('./api-db');
 

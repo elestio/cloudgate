@@ -813,7 +813,7 @@ function ProcessCommandLine(argv)
 
             
             console.log("loading app: " + appPath);
-            var loader = require("../loaders/app-loader.js");
+            var loader = require("../modules/app-loader.js");
             var result = loader.load(appPath);
             console.log(result);
 

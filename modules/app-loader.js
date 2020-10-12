@@ -1,6 +1,6 @@
 const memory = require('../modules/memory');
 const sharedmem = require('../modules/shared-memory');
-const tools = require('../lib/tools.js');
+const tools = require('../modules/tools.js');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid')
 

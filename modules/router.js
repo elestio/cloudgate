@@ -7,7 +7,7 @@ const websocketFunctions = require('../modules/websocket-functions.js');
 const cloudgateWebsocket = require('../modules/cloudgate-websocket.js');
 const cloudgateAPI = require('../modules/cloudgate-api.js');
 const apiDB = require('../modules/api-db.js');
-const tools = require('../lib/tools.js');
+const tools = require('../modules/tools.js');
 
 //In-memory cache
 var cache = {};

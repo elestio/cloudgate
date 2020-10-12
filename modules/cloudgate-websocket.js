@@ -9,11 +9,11 @@ const clearModule = require('clear-module');
 const { v4: uuidv4 } = require('uuid')
 const si = require('systeminformation');
 
-const tools = require('../lib/tools.js');
+const tools = require('../modules/tools.js');
 const memory = require('../modules/memory');
 var sharedmem = require("../modules/shared-memory");
-const appLoader = require('../loaders/app-loader.js');
-const cloudgatePubSub = require('../modules/cloudgate-pubsub.js');
+const appLoader = require('./app-loader.js');
+const cloudgatePubSub = require('./cloudgate-pubsub.js');
 
 var functionsCache = {};
 

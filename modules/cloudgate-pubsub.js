@@ -14,7 +14,7 @@ catch(ex){
 
 }
 
-const tools = require('../lib/tools.js');
+const tools = require('./tools.js');
 
 const WebSocket = require('ws');
 var wsClient = null;

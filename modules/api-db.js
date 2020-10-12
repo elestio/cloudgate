@@ -1,4 +1,4 @@
-const tools = require('../lib/tools.js');
+const tools = require('./tools.js');
 
 
 var mysql      = require('mysql');

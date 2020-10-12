@@ -1,6 +1,6 @@
 var fs = require('fs');
 const mime = require('mime');
-const tools = require('../lib/tools.js');
+const tools = require('./tools.js');
 const memory = require('./memory');
 
 var fileMonitorStarted = false;

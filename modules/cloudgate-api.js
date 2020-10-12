@@ -4,8 +4,8 @@ var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const clearModule = require('clear-module');
-const appLoader = require('../loaders/app-loader.js');
-const tools = require('../lib/tools.js');
+const appLoader = require('./app-loader.js');
+const tools = require('./tools.js');
 
 var functionsCache = {};
 

@@ -17,7 +17,6 @@ exports.newslettersInsertContactsIntoLists = function(list, contacts) {
   });
 }
 
-
 exports.newslettersDeleteList = function(list, contacts) {
 
   return new Promise((resolve, reject) => {
@@ -25,14 +24,12 @@ exports.newslettersDeleteList = function(list, contacts) {
   });
 }
 
-
 exports.newslettersGetFailedMail = function(fromDate) {
     //TODO:
   return new Promise((resolve, reject) => {
     //TODO:
   });
 }
-
 
 exports.newslettersDeleteContactsFromLists = function(list, contacts) {
     //TODO:
@@ -52,7 +49,6 @@ exports.fileTextWrite = function(filekey, content) {
         }));
   });
 }
-
 
 exports.fileBinaryWrite = function (filekey, content) {
   CreateBaseStorage();
@@ -174,7 +170,6 @@ exports.sqlSelect = function (query) {
     //ensure we don't pass update result if there is a select to emulare appdrag-cloudbackend response mode (update ...; SELECT; should return only the select)
     var data = await cloudgateBackend.sqlSelect(query);
     //resolve(JSON.stringify(data));
-
     //console.log(data);
     
     if ( data.Table.length == 2 )
@@ -197,8 +192,6 @@ exports.sqlExecuteRawQuery = function (query) {
     resolve(JSON.stringify(await cloudgateBackend.sqlExecuteRawQuery(query)));
   });
 }
-
-
 
 function CreateBaseStorage(){
     if (!fs.existsSync('public/CloudBackend')) {

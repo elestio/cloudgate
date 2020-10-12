@@ -586,6 +586,9 @@ function Start(argv) {
                     var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
                     var isProd = true;
 
+                    fs.mkdirSync(certPath, { recursive: true });
+                    fs.mkdirSync(LEAccountPath.replace("account.key", ""), { recursive: true });
+
                     //generate dhparam for the server if not present
                     var dhParamsPath = path.join(options.root, "CERTS/letsencrypt/dhparams.pem");
                     if (!fs.existsSync(dhParamsPath)) {

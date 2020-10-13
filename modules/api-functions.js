@@ -636,7 +636,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
 
         if (typeof response == "object") {
             resolve({
-                status: (response.status || 200),
+                status: (response.status || response.statusCode || 200),
                 processed: true,
                 headers: headers,
                 content: response.content || response.body || response

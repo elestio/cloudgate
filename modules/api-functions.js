@@ -1,10 +1,14 @@
 var zlib = require('zlib');
 var fs = require('fs');
+var util = require('util');
 var path = require('path');
 const mime = require('mime');
 const qs = require('querystring');
 const tools = require('./tools.js');
-var multiparty = require('multiparty');
+
+var StdOutFixture = require('./fixture-output');
+var fixture = new StdOutFixture();
+
 
 const https = require('https');
 const Axios = require('axios');
@@ -316,7 +320,7 @@ module.exports = {
                         return;
                     }
                     let contentType = reqInfos.headers['content-type'];
-                    var finalQueryObj = {};
+                    var finalQueryObj = {}; var FILES = [];
                     if (reqInfos.method === 'get') {
                         finalQueryObj = parseURLEncParams(reqInfos.query);
                     } else {
@@ -325,8 +329,13 @@ module.exports = {
                             finalQueryObj = bodyParserTool[contentType.split(';')[0]](reqInfos.body);
                         }
                         else if (contentType.indexOf("multipart/form-data") > -1) {
-                            //finalQueryObj = parseFormData(reqInfos.body, contentType);
-                            //filled later
+                            var event = {"httpMethod": reqInfos.method.toUpperCase()};
+                            event[reqInfos.method.toUpperCase()] = {};
+
+                            parseFormData(reqInfos.body, contentType, event); //mutate the event to add FILES & POST
+                            finalQueryObj = event[event.httpMethod];
+                            FILES = event.FILES;
+                            //console.log(finalQueryObj);
                         } 
                         else {
                             finalQueryObj = parseAppJsonBody(reqInfos.body);
@@ -540,11 +549,14 @@ module.exports = {
                     headers: reqInfos.headers
                 };
                 event[event.httpMethod] = finalQueryObj;
+                event.FILES = FILES;
 
+                /*
                 let contentType = reqInfos.headers['content-type'];
                 if (contentType != null && contentType.indexOf("multipart/form-data") > -1) {
                     parseFormData(reqInfos.body, contentType, event); //mutate the event to add FILES & POST
                 } 
+                */
                 
                 //EXECUTE FUNCTION
                 ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction, resolve, event, appConfig, beginPipeline);
@@ -577,7 +589,7 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             console.log(error);
         }
     };
-    var callback = function(err, response) {
+    var callback = function(err, response, logs) {
 
         if (err != null) {
             //console.log("isError")
@@ -635,7 +647,12 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         }
         if (apiEndpoint.output != null && apiEndpoint.output == "JSON"){
             try{
-                response.content = {"payload": response};
+       
+                var fullResp = {
+                    status: (response.status || response.statusCode || 200),
+                    content: {"payload": response, "logs": logs}
+                };
+                response = fullResp;
             }
             catch(ex){
                 
@@ -673,12 +690,45 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
     };
 
     var result = null;
+    var execLogs = [];
+    
     try {
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
       
+        //CAPTURE console.log()
+        fixture.capture( function onWrite (string, encoding, fd) {
+            execLogs.push(JSON.parse(string));
+                    
+            // If you return `false`, you'll prevent the write to the original stream (useful for preventing log output during tests.)
+            return false;
+
+        });
+
+        //DO EXECUTION
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
+
+        if (apiEndpoint.output != null && apiEndpoint.output == "JSON"){
+            try{
+                var fullResp = {
+                    status: (response.status || response.statusCode || 200),
+                    //content: {"payload": JSON.parse(response)}
+                    content: JSON.parse(response)
+                };
+                result = fullResp;
+            }
+            catch(ex){
+                
+            }
+        }
+
+        //RELEASE console.log()
+        fixture.release();
+
+        //console.log("fixtures");
+        //console.log(_writes);
+
     }
     catch (ex) {
         resolve({
@@ -694,11 +744,17 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
     }
 
     if (result) {
+        
         if (result.then) {
             result.then(ctx.succeed, ctx.fail);
         } else {
+           
             ctx.succeed(result);
         }
+    }
+    else{
+        //no callback from the cloud function, let's return an empty string in this case to avoid infinite wait
+        callback(null, "", execLogs);
     }
     return;
 
@@ -777,3 +833,4 @@ const bodyParserTool = {
     'application/json': parseAppJsonBody,
     'application/x-www-form-urlencoded': parseURLEncParams
 }
+

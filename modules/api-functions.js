@@ -726,9 +726,6 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         //RELEASE console.log()
         fixture.release();
 
-        //console.log("fixtures");
-        //console.log(_writes);
-
     }
     catch (ex) {
         resolve({
@@ -753,8 +750,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         }
     }
     else{
+        ////DISABLED because it's preventing non async function to work ... (ex: maxsens/api/testQR)
         //no callback from the cloud function, let's return an empty string in this case to avoid infinite wait
-        callback(null, "", execLogs);
+        //callback(null, "", execLogs);
     }
     return;
 

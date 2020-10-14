@@ -700,21 +700,32 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         //CAPTURE console.log()
         fixture.capture( function onWrite (string, encoding, fd) {
             execLogs.push(JSON.parse(string));
-                    
             // If you return `false`, you'll prevent the write to the original stream (useful for preventing log output during tests.)
-            return false;
-
+            return true;
         });
 
         //DO EXECUTION
         result = await curFunction[functionHandlerFunction](event, ctx, callback);
+
+        /*
+        result = await new Promise( function(resolve, reject){
+            resolve( curFunction[functionHandlerFunction](event, ctx, callback));
+        })
+        */
+
+        //RELEASE console.log()
+        fixture.release();
+
+        //this seems to works only for async functions ...
+        //console.log(execLogs)
 
         if (apiEndpoint.output != null && apiEndpoint.output == "JSON"){
             try{
                 var fullResp = {
                     status: (response.status || response.statusCode || 200),
                     //content: {"payload": JSON.parse(response)}
-                    content: JSON.parse(response)
+                    content: JSON.parse(response),
+                    logs: execLogs
                 };
                 result = fullResp;
             }
@@ -722,9 +733,6 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
                 
             }
         }
-
-        //RELEASE console.log()
-        fixture.release();
 
     }
     catch (ex) {
@@ -753,6 +761,8 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ////DISABLED because it's preventing non async function to work ... (ex: maxsens/api/testQR)
         //no callback from the cloud function, let's return an empty string in this case to avoid infinite wait
         //callback(null, "", execLogs);
+
+        //TODO: implement a timeout (appconfig) and stop execution after a certain amount of time + return logs + TIMEOUT MSG + duration configured
     }
     return;
 

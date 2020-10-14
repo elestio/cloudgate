@@ -385,6 +385,18 @@ module.exports = {
                             }
                         }
                         //console.log(sqlRequest);
+                        
+                        //replace params in SQL Query
+                        var allParams = Object.keys(finalQueryObj);
+                        if ( allParams != null && allParams.length > 0) {
+                            for (var i = 0; i < allParams.length; i++){
+                                var curParam = allParams[i];
+                                //console.log("replacing @PARAM_" + curParam + " with: " + finalQueryObj[curParam])
+                                sqlRequest = tools.replaceAll(sqlRequest, "@PARAM_" + curParam, finalQueryObj[curParam].replace(/\'/g, "''"));
+                            }
+                        }
+                        //console.log(sqlRequest);
+
                         let rows = await apiDB.ExecuteQuery(appConfig, sqlRequest);
                         //console.log(rows);
 
@@ -568,8 +580,10 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
     var callback = function(err, response) {
 
         if (err != null) {
+            //console.log("isError")
             console.log(err);
         } else {
+            //console.log("isResponse")
             //console.log(response);
         }
 

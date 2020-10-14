@@ -200,15 +200,23 @@ exports.sendEmail = function (from, sender, to, subject, content, isHtml) {
     }
 
     // send mail with defined transport object
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            resolve(error);
-            //return console.log(error);
-        }
-        //console.log('Message sent: ' + info.response);
-        resolve(info);
-    });
+    try{
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                //console.log("error in sendmail callback")
+                resolve(error);
+                //return console.log(error);
+            }
+            //console.log('Message sent: ' + info.response);
+            resolve(info);
+        });
 
+    }
+    catch(ex){
+        console.log(ex);
+        console.log("sendmail error catched");
+    }
+    
   });
 }
 

@@ -487,6 +487,11 @@ function onAbortedOrFinishedResponse(res, readStream) {
   res.id = -1;
 }
 
+module.exports.replaceAll = replaceAll;
+function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
+
 module.exports.ProcessCommandLine = ProcessCommandLine;
 function ProcessCommandLine(argv)
 {

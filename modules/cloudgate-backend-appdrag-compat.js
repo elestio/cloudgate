@@ -154,7 +154,18 @@ exports.sendEmailAdvanced = function (from, sender, to, cc, bcc, subject, conten
 
 exports.sendEmail = function (from, sender, to, subject, content, isHtml) {
   return new Promise(async (resolve, reject) => {
-    resolve(JSON.stringify(await cloudgateBackend.sendEmail(from, sender, to, subject, content, isHtml)));
+
+    var resp = await cloudgateBackend.sendEmail(from, sender, to, subject, content, isHtml);
+    var finalResp = null;
+    try{
+        finalResp = JSON.stringify(resp);
+    } catch(ex){
+        finalResp = resp;
+    }
+
+    //console.log(finalResp)
+
+    resolve(finalResp);
   });
 }
 

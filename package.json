@@ -1,7 +1,7 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.70",
+  "version": "1.0.71",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "hashlru": "^2.3.0",
     "ioredis": "^4.16.0",
     "mime": "^2.4.4",
+    "moment": "^2.29.1",
     "multiparty": "^4.2.2",
     "mysql": "^2.18.1",
     "node-forge": "^0.10.0",

@@ -14,6 +14,13 @@ main() {
 
     InstallOrCleanDocker;
     startContainer;
+
+    ##TODO: set global config to allow std behavior of MySQL
+    ## SET sql_mode = ''; SET GLOBAL sql_mode = '';
+
+    
+    echo "";
+    echo "You can now connect to the mysql cli like this: ./mysql-docker-cli.sh";
 }
 
 function PomptUser {
@@ -65,9 +72,6 @@ function startContainer {
 
     sleep 5;
     docker logs mysql80;
-
-    echo "";
-    echo "You can now connect to the mysql cli like this: ./mysql-docker-cli.sh";
 }
 
 

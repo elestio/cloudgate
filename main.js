@@ -273,7 +273,8 @@ function Start(argv) {
         if ( argv.r ){
             //argv.r = resolve(argv.r);
             if ( argv.r.startsWith("./") || argv.r.startsWith("../") || !argv.r.startsWith("/") ){
-                argv.r = require("path").join(__dirname, argv.r);
+                //argv.r = require("path").join(__dirname, argv.r);
+                argv.r = require("path").resolve(".");
             }
         }
     }

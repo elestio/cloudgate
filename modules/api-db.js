@@ -1,6 +1,4 @@
 const tools = require('./tools.js');
-
-
 var mysql      = require('mysql');
 const connections = {}; //cached connections
 
@@ -8,7 +6,8 @@ function getConnection(appConfig) {
   //var keyConnection = appConfig.db.MYSQL.host + ";" + appConfig.db.MYSQL.port + ";" + appConfig.db.MYSQL.user + ";" + appConfig.db.MYSQL.password + ";" + appConfig.db.MYSQL.database;
   var keyConnection = appConfig.root;
   if (typeof(connections[keyConnection]) == 'undefined') {
-    connections[keyConnection] = mysql.createPool({
+      //console.log("creating new connection for keyConnection")
+      connections[keyConnection] = mysql.createPool({
       connectionLimit : 10,
       host     : appConfig.db.MYSQL.host,
       port     : appConfig.db.MYSQL.port,

@@ -27,7 +27,7 @@ var coregate = require('../coregate.js');
 
 module.exports = {
     name: "api-functions",
-    process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
+    process: (appConfig, reqInfos, res, req, memory, serverConfig, app, event) => {
         return new Promise(async function(resolve, reject) {
 
             var beginPipeline = process.hrtime();
@@ -86,15 +86,19 @@ module.exports = {
                 }
                 app.rateLimiterMemory[rateLimiterKey] += 1;
 
-
-                //read headers
-                req.forEach((k, v) => {
-                    reqInfos.headers[k] = v;
-                });
+                if ( reqInfos.headers == null || Object.keys(reqInfos.headers).length == 0 ){
+                    //read headers
+                    req.forEach((k, v) => {
+                        reqInfos.headers[k] = v;
+                    });
+                }
+                
 
                 //read the body only if needed
                 if (reqInfos.method != "get") {
-                    reqInfos.body = await tools.getBody(req, res, true);
+                    if (reqInfos.body == null){
+                        reqInfos.body = await tools.getBody(req, res, true);
+                    }
                 }
 
                 var apiSrc = apiEndpoint.src;
@@ -302,7 +306,7 @@ module.exports = {
                 }
 
                 // TODO : check path doesn't crash
-                let supportedTypes = ['nodejs6.x', 'nodejs8.x', 'nodejs10.x', 'nodejs12.x', 'nodejs14.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE'];
+                let supportedTypes = ['nodejs6.x', 'nodejs8.x', 'nodejs10.x', 'nodejs12.x', 'nodejs14.x', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'SQLSELECT', 'SQLINSERT', 'SQLUPDATE', 'SQLDELETE', 'SQL'];
                 if (!supportedTypes.includes(apiEndpoint.type)) {
                     resolve({
                         status: "415",
@@ -311,6 +315,9 @@ module.exports = {
                     });
                     return;
                 } else {
+
+                    //enforce declared method
+                    /*
                     if (apiEndpoint.method !== reqInfos.method.toUpperCase() && apiEndpoint.method != null) {
                         resolve({
                             processed: true,
@@ -319,6 +326,8 @@ module.exports = {
                         })
                         return;
                     }
+                    */
+
                     let contentType = reqInfos.headers['content-type'];
                     var finalQueryObj = {}; var FILES = [];
                     if (reqInfos.method === 'get') {

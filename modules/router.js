@@ -7,6 +7,7 @@ const websocketFunctions = require('../modules/websocket-functions.js');
 const cloudgateWebsocket = require('../modules/cloudgate-websocket.js');
 const cloudgateAPI = require('../modules/cloudgate-api.js');
 const apiDB = require('../modules/api-db.js');
+const dynamicDatasource = require('../modules/dynamic-datasource.js');
 const tools = require('../modules/tools.js');
 
 //In-memory cache
@@ -267,6 +268,15 @@ module.exports = {
                     //const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
                     //console.log("Module: " + i + " - " + (nanoSeconds/1000000) + "ms");
 
+                    //Dynamic Datasource (only for static files + html files only)
+                    //if (modules[i].name == "static-files" && (reqInfos.url == "/" || reqInfos.url.endsWith('.html') || reqInfos.url.endsWith('.htm') || reqInfos.url.split('.').length == 1) && result.status != 404) {
+                    //console.log(result)
+                    if (modules[i].name == "static-files" && result.status == 200 && result.headers && result.headers["Content-Type"] && result.headers["Content-Type"].indexOf("text/html") > -1) {
+                        //console.log("Processing Dynamic Datasource");
+                        result = await dynamicDatasource(result, reqInfos.query, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB);
+                    }
+                    
+
                     //SPA routing - Redirect all 404 to index.html
                     if ( appConfig.redirect404toIndex == true ){
                         if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
@@ -306,6 +316,7 @@ module.exports = {
                                     //console.log(processResult);
                                     
                                     //memory.set(cacheKey, processResult, "ResponseCache");
+                                    //Disable LRU completely by commenting next line
                                     lru.set(cacheKey, processResult);
                                 }
                                 else{

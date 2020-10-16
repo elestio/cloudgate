@@ -233,6 +233,7 @@ module.exports = {
                                 res.writeHeader(key, processResult.headers[key]);
                                 totalBytesSent += key.length + processResult.headers[key].length;
                             }
+                            res.writeHeader("durationMS", "0ms");
 
                             if (processResult.content != null) {
                                 
@@ -257,7 +258,7 @@ module.exports = {
                     
                 }
 
-                //var beginPipeline = process.hrtime();
+                var beginPipeline = process.hrtime();
                 var hasBeenProcessed = false;
                 var processResult = null;
                 for (var i = 0; i < modules.length; i++) {
@@ -276,7 +277,7 @@ module.exports = {
                         result = await dynamicDatasource(result, reqInfos.query, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB);
                     }
                     
-
+                 
                     //SPA routing - Redirect all 404 to index.html
                     if ( appConfig.redirect404toIndex == true ){
                         if (modules[i].name == "static-files" && result.status == 404 && reqInfos.url != "/" && reqInfos.url != "/index.html") {
@@ -329,7 +330,7 @@ module.exports = {
                     }
                 }
 
-                //const nanoSecondsPipeline = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
+                const nanoSecondsPipeline = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
                 //console.log("processing Pipeline: " + (nanoSecondsPipeline/1000000) + "ms");
 
                 if (!res.aborted) {
@@ -370,6 +371,9 @@ module.exports = {
                         totalBytesSent += key.length + processResult.headers[key].length;
                     }
 
+                    //add processingTime header
+                    res.writeHeader("durationMS", parseInt(nanoSecondsPipeline/1000000) + "ms");
+                     
                     //Add HSTS to reach A+ on SSL Labs test
                     if ( appConfig.HSTS == true ){
                         res.writeHeader("strict-transport-security", "max-age=31536000; includeSubDomains;");

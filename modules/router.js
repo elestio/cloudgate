@@ -33,6 +33,7 @@ module.exports = {
             _serverConfig = serverConfig;
         }
 
+        //console.log(serverConfig.outputcache)
         if ( serverConfig.outputcache ){
             lru = HLRU(500);
         }
@@ -91,7 +92,7 @@ module.exports = {
 
                         res.writeStatus("" + (result.status || 200));
                         for (var key in result.headers) {
-                            res.writeHeader(key, result.headers[key]);
+                            res.writeHeader(key, result.headers[key] + "");
                         }
 
                         if (result.content != null) {
@@ -218,7 +219,11 @@ module.exports = {
                     {
                         //var cacheContent = memory.get(cacheKey, "ResponseCache");
                         var cacheContent = lru.get(cacheKey);
-                        if (cacheContent != null) {
+                        //var cacheContent = sharedmem.getString(cacheKey, "RESPONSECACHE");
+                        
+                        if (cacheContent != null && cacheContent != "") {
+
+                            //cacheContent = JSON.parse(cacheContent);
 
                             if ( serverConfig.debug){
                                 console.log("Serving from cache:" + cacheKey)  ;
@@ -228,12 +233,14 @@ module.exports = {
                             var totalBytesSent = 0;
 
                             var processResult = cacheContent;
+                            processResult.headers["core-cache"] = 1;
+                            
                             res.writeStatus("" + (processResult.status || 200));
                             for (var key in processResult.headers) {
-                                res.writeHeader(key, processResult.headers[key]);
+                                res.writeHeader(key, processResult.headers[key] + "");
                                 totalBytesSent += key.length + processResult.headers[key].length;
                             }
-                            res.writeHeader("durationMS", "0ms");
+                            res.writeHeader("processing", "<1ms");
 
                             if (processResult.content != null) {
                                 
@@ -317,8 +324,9 @@ module.exports = {
                                     //console.log(processResult);
                                     
                                     //memory.set(cacheKey, processResult, "ResponseCache");
-                                    //Disable LRU completely by commenting next line
+                                    //sharedmem.setString(cacheKey, JSON.stringify(processResult), "RESPONSECACHE");;
                                     lru.set(cacheKey, processResult);
+                                    
                                 }
                                 else{
                                     //console.log( "test: " + processResult.error);
@@ -372,7 +380,7 @@ module.exports = {
                     }
 
                     //add processingTime header
-                    res.writeHeader("durationMS", parseInt(nanoSecondsPipeline/1000000) + "ms");
+                    res.writeHeader("processing", (nanoSecondsPipeline/1000000).toFixed(2) + "ms");
                      
                     //Add HSTS to reach A+ on SSL Labs test
                     if ( appConfig.HSTS == true ){

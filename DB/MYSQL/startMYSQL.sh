@@ -64,7 +64,7 @@ function startContainer {
     echo "Starting new mysql80 container"
 
     docker run --name=mysql80 \
-    --publish $NETFACE:3306:$NETPORT \
+    --publish $NETFACE:$NETPORT:3306 \
     -e MYSQL_ROOT_PASSWORD=$rootPassword \
     -e MYSQL_ROOT_HOST=172.17.0.1 \
     -v $DBPATH:/var/lib/mysql \

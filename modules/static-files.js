@@ -11,7 +11,7 @@ module.exports = {
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app) => {
 
         var rootFolder = tools.safeJoinPath(appConfig.root, appConfig.publicFolder);
-        var curURL = reqInfos.url.split('?')[0];
+        var curURL = decodeURIComponent(reqInfos.url.split('?')[0]);
 
         if (appConfig.AWS == null || appConfig.TypeFS != "S3" ) {
             if (!fileMonitorStarted && serverConfig.watch == true) {

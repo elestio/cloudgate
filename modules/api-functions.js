@@ -334,10 +334,10 @@ module.exports = {
                         finalQueryObj = parseURLEncParams(reqInfos.query);
                     } else {
                         
-                        if (Object.keys(bodyParserTool).includes(contentType.split(';')[0] )) {
+                        if (contentType != null && Object.keys(bodyParserTool).includes(contentType.split(';')[0] )) {
                             finalQueryObj = bodyParserTool[contentType.split(';')[0]](reqInfos.body);
                         }
-                        else if (contentType.indexOf("multipart/form-data") > -1) {
+                        else if (contentType != null && contentType.indexOf("multipart/form-data") > -1) {
                             var event = {"httpMethod": reqInfos.method.toUpperCase()};
                             event[reqInfos.method.toUpperCase()] = {};
 
@@ -670,9 +670,13 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
 
         //console.log(JSON.stringify(response))
         //console.log(response.content || response.body || response);
+        
+        //already done globally in router.js
+        /*
         const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
         var durationMS = (nanoSeconds/1000000).toFixed(2);
         headers["durationMS"] = durationMS;
+        */
 
         if (typeof response == "object") {
             resolve({

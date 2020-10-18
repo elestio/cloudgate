@@ -42,5 +42,13 @@
       "message": "Chat.message",
       "close": "Chat.close"
     }
-  }
+  },
+  "rewritings": {
+        "/Home": "/index.html",
+        "/Yeah/%slug%": "index.html"
+    },
+    "redirects": {
+        "/redirect1": "index.html",
+        "/redirect2": "https://google.com/?param=1",
+    }
 }

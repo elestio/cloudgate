@@ -17,7 +17,7 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
 
     var params = queryStringParams;
 
-    var content = await gunzip(responseToProcess.content);
+    var content = await tools.gunzip(responseToProcess.content);
     var finalContent = content;
 
     //console.log(content);
@@ -56,11 +56,13 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
                     body: "",
                     query: reqInfos.query
                 };
-                //console.log(newReqInfos)
 
+                //console.log(newReqInfos)
                 var result = await apiFunctions.process(appConfig, newReqInfos, null, null, memory, serverConfig, app);
                 //console.log(result)
+
                 var rows = result.content.Table;
+                //console.log(rows)
                 //console.log(newReqInfos.url + "  -  " + rows.length);
                 //var rows = [];
                 //var rows = [{"name": "test 123", "shortDescription": "this is a sample description..."}, {"name": "test 456", "shortDescription": "this is a sample 2..."}, {"name": "test 789", "shortDescription": "this is a sample 6..."}];
@@ -68,14 +70,17 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
 
                 //check if it's a simple or repeated datasource
                 var isRepeated = $(".datasource-repeat[datasource-id='" + datasourceID + "']").length > 0;
-
+                //console.log(isRepeated)
                 if ( !isRepeated ){
                     
                     var curRow = rows[0];
+                    
+                    //console.log(curRow);
+
                     for (var key in curRow){
                         var varToReplace = "[DS" + datasourceID + "=" + key + "]";
                         var varValue = curRow[key];
-                        console.log(varToReplace + " - " + varValue);
+                        //console.log(varToReplace + " - " + varValue);
 
                         //should be replaced by a regex replace all, Last time I tried it was crashing!
                         finalContent = finalContent.replace(varToReplace, varValue);
@@ -171,19 +176,5 @@ function ExecuteQuery(db, connection, SQL)
 
         //resolve(db.prepare(SQL).all());
         
-    });
-}
-
-
-function gunzip(buff){
-    return new Promise( function(resolve , reject ){
-        zlib.gunzip(buff, function(err, dezipped) {
-                if ( err ) {
-                    reject(err);
-                }
-                else{
-                    resolve(dezipped.toString("utf-8"));
-                }
-        });
     });
 }

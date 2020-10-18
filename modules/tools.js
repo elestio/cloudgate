@@ -146,7 +146,22 @@ module.exports.toArrayBuffer = function (buf) {
 module.exports.GzipContent = function (content)
 {
     return zlib.gzipSync(content);
- }
+}
+
+module.exports.gunzip = gunzip;
+function gunzip(buff){
+    return new Promise( function(resolve , reject ){
+        zlib.gunzip(buff, function(err, dezipped) {
+                if ( err ) {
+                    reject(err);
+                }
+                else{
+                    resolve(dezipped.toString("utf-8"));
+                }
+        });
+    });
+}
+
 
  module.exports.safeJoinPath = function (...paths) {
    return path.join(...paths).replace(/\\/g, "/");

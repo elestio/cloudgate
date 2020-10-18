@@ -207,6 +207,85 @@ module.exports = {
                 }
                 */
 
+
+                //handle rewriting & redirects from appconfig
+                var isRewriten = false;
+                if ( appConfig.rewritings != null )
+                {
+
+                    var rewritingRules = appConfig.rewritings;
+                                        
+                    var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
+                    var matchingPrefix = "";
+                    var cleanPath = endpointTarget;
+                    var targetPath = rewritingRules[cleanPath];
+
+                    //console.log(reqInfos)
+
+                    //if not found, check if we have a rule with a wildcard (*) matching
+                    var paramInfos = {
+                        name: "",
+                        value: ""
+                    }
+                    if (targetPath == null) {
+                        var rulesList = Object.keys(rewritingRules);
+                        
+                        for (var i = 0; i < rulesList.length; i++) {
+                            var curRule = rulesList[i];
+                            if (curRule.indexOf('%') > -1) {
+                                var prefix = curRule.split('/')[1];
+                                var paramName = curRule.split('%')[1];
+                                if (endpointTarget.startsWith("/" + prefix + "/")) {
+
+                                    //console.log("match for: " + endpointTarget)
+                                    targetPath = rewritingRules[curRule];
+                                    if ( !targetPath.startsWith("/") ){
+                                        targetPath = "/" + targetPath;
+                                    }
+
+                                    matchingPrefix = "/" + prefix;
+                                    
+                                    paramInfos.name = paramName;
+                                    paramInfos.value = endpointTarget.replace(matchingPrefix + "/", "");
+                                    //console.log(paramInfos)
+                                    break;
+                                }
+                            }
+                        }
+                        
+                    }
+
+                    //TODO: Improvements needed!
+                    //change the reqInfos event to point to the real path
+                    //console.log(reqInfos)
+                    if ( targetPath != null && reqInfos.url.indexOf(".") == -1 ){
+                        reqInfos.url = targetPath;
+                        if ( reqInfos.query == ""){
+                            reqInfos.query = paramInfos.name + "=" + paramInfos.value;
+                        }
+                        else{
+                            reqInfos.query = "&" + paramInfos.name + "=" + paramInfos.value;
+                        }
+                        reqInfos.GET = paramInfos;
+
+                        //console.log(reqInfos)
+                        //console.log("processed file: " + reqInfos.url)
+                    }
+                    else{
+                        
+                        //should be doing nothing here, work must be done before in static file processing add a base href or rework all links to go 1 folder above
+                        //reqInfos.url = reqInfos.url.replace(matchingPrefix, "");
+                        //console.log("prefix: " + matchingPrefix + " - regular file: " + reqInfos.url + " > " + reqInfos.url )
+                    }
+
+
+                    //console.log(targetPath)
+                    //console.log(reqInfos)
+
+                    isRewriten = true;
+                                        
+                }
+
                 //console.log(appConfig);
                 //console.log(__dirname);
 
@@ -282,6 +361,11 @@ module.exports = {
                     if (modules[i].name == "static-files" && result.status == 200 && result.headers && result.headers["Content-Type"] && result.headers["Content-Type"].indexOf("text/html") > -1) {
                         //console.log("Processing Dynamic Datasource");
                         result = await dynamicDatasource(result, reqInfos.query, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB);
+
+                        //add base href if rewriten url
+                        var rawContent = await tools.gunzip(result.content);
+                        rawContent = rawContent.replace("<head>", "<head> <base href='/'>");
+                        result.content = tools.GzipContent(rawContent);
                     }
                     
                  

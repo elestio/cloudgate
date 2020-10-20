@@ -140,6 +140,17 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
             }
 
 
+            
+            //appdrag compat: replace appdrag cdn links returned by the db into local files
+            if ( appConfig != null && appConfig.globalEnv != null && appConfig.globalEnv.APPID != null){
+                var appId = appConfig.globalEnv.APPID;
+                let regexp1 = new RegExp(`//cf.appdrag.com/${appId}/`, "g");
+                let regexp2 = new RegExp(`https://cf.appdrag.com/${appId}/`, "g");
+                finalContent = finalContent.replace(regexp1, "./");
+                finalContent = finalContent.replace(regexp2, "./");
+            }
+            
+
             //console.log("before return")
             //finalContent = $.html();
             responseToProcess.content = tools.GzipContent(finalContent);

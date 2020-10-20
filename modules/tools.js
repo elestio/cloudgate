@@ -507,6 +507,29 @@ function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
 
+module.exports.getAllMatches = getAllMatches;
+function getAllMatches(regex, text) {
+    if (regex.constructor !== RegExp) {
+        throw new Error('not RegExp');
+    }
+
+    var res = [];
+    var match = null;
+
+    if (regex.global) {
+        while (match = regex.exec(text)) {
+            res.push(match);
+        }
+    }
+    else {
+        if (match = regex.exec(text)) {
+            res.push(match);
+        }
+    }
+
+    return res;
+}
+
 module.exports.ProcessCommandLine = ProcessCommandLine;
 function ProcessCommandLine(argv)
 {

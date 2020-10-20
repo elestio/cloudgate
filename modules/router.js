@@ -208,7 +208,31 @@ module.exports = {
                 */
 
 
-                //handle rewriting & redirects from appconfig
+                //handle redirects & rewriting from appconfig
+
+                if ( appConfig.redirects != null )
+                {
+                    var redirectRules = appConfig.redirects;
+                    var endpointTarget = decodeURIComponent(reqInfos.url.split('?')[0]);
+                    var matchingPrefix = "";
+                    var cleanPath = endpointTarget;
+                    var targetPath = redirectRules[cleanPath];
+
+                    if ( targetPath != null ){
+                        if ( targetPath.startsWith("http") ){
+                            res.writeStatus("301");
+                            res.writeHeader("location", targetPath);
+                            res.end("");
+                        }
+                        else{
+                            //redirect on the same site, we can just change the current event and continue execution
+                            reqInfos.url = targetPath;
+                        }
+                        
+                    }
+                }
+
+                //rewritings
                 var isRewriten = false;
                 if ( appConfig.rewritings != null )
                 {
@@ -233,22 +257,37 @@ module.exports = {
                         for (var i = 0; i < rulesList.length; i++) {
                             var curRule = rulesList[i];
                             if (curRule.indexOf('%') > -1) {
+
+                                //find all params in the rule with regex
+                                //TODO: finish regex implementation here!
+                                var ruleUrl = curRule + "/"; //final slash added to make working the regex rule below
+                                var allParams = tools.getAllMatches(/%(.*?)%/g, ruleUrl);
+
+                                var origUrl = endpointTarget;
+                                var newUrl = targetPath;
+                                var finalParams = {};
+
                                 var prefix = curRule.split('/')[1];
                                 var paramName = curRule.split('%')[1];
                                 if (endpointTarget.startsWith("/" + prefix + "/")) {
 
-                                    //console.log("match for: " + endpointTarget)
-                                    targetPath = rewritingRules[curRule];
-                                    if ( !targetPath.startsWith("/") ){
-                                        targetPath = "/" + targetPath;
+                                    //find values for the params
+                                    var tmpUrlParts = ruleUrl.split('/');
+                                    for(var part=0; part < tmpUrlParts.length ; part++ ){
+                                        var curPart =  tmpUrlParts[part];
+                                        for (var aparam = 0; aparam < allParams.length; aparam++){
+                                            if ( curPart == allParams[aparam][0] ) {
+                                                var value = endpointTarget.split("/")[part];
+                                                finalParams[allParams[aparam][1]] = value;
+                                            }
+                                        }
                                     }
 
-                                    matchingPrefix = "/" + prefix;
-                                    
-                                    paramInfos.name = paramName;
-                                    paramInfos.value = endpointTarget.replace(matchingPrefix + "/", "");
-                                    //console.log(paramInfos)
-                                    break;
+                                    //console.log(reqInfos)
+                                    //console.log(curRule)
+                                    //console.log(finalParams);
+                                    targetPath = rewritingRules[curRule];
+
                                 }
                             }
                         }
@@ -259,25 +298,44 @@ module.exports = {
                     //change the reqInfos event to point to the real path
                     //console.log(reqInfos)
                     if ( targetPath != null && reqInfos.url.indexOf(".") == -1 ){
+                        
                         reqInfos.url = targetPath;
+
+                        var paramsKeys = Object.keys(finalParams);
+                        var newQuery = "";
+
+                        
+                        for (var kparam = 0; kparam < paramsKeys.length; kparam++){
+                            var curKParam = paramsKeys[kparam];
+                            //console.log(curKParam);
+                            //console.log(finalParams[curKParam]);
+                            //newUrl = newUrl.replace("%" + curKParam + "%", finalParams[curKParam]);
+                            if ( newQuery == "" ){
+                                newQuery += curKParam + "=" + encodeURIComponent(finalParams[curKParam]);
+                            }
+                            else{
+                                newQuery += "&" + curKParam + "=" + encodeURIComponent(finalParams[curKParam]);
+                            }
+                        }
+                        
+
+                        
                         if ( reqInfos.query == ""){
-                            reqInfos.query = paramInfos.name + "=" + paramInfos.value;
+                            reqInfos.query = newQuery;
                         }
                         else{
-                            reqInfos.query = "&" + paramInfos.name + "=" + paramInfos.value;
+                            reqInfos.query += "&" + newQuery;
                         }
-                        reqInfos.GET = paramInfos;
+                        reqInfos.GET = finalParams;
+                        
+
 
                         //console.log(reqInfos)
                         //console.log("processed file: " + reqInfos.url)
                     }
-                    else{
-                        
-                        //should be doing nothing here, work must be done before in static file processing add a base href or rework all links to go 1 folder above
-                        //reqInfos.url = reqInfos.url.replace(matchingPrefix, "");
-                        //console.log("prefix: " + matchingPrefix + " - regular file: " + reqInfos.url + " > " + reqInfos.url )
-                    }
 
+                    //console.log(reqInfos)
+                 
 
                     //console.log(targetPath)
                     //console.log(reqInfos)

@@ -283,11 +283,19 @@ module.exports = {
                                         }
                                     }
 
+                                    targetPath = rewritingRules[curRule];
                                     //console.log(reqInfos)
                                     //console.log(curRule)
+                                    //console.log(targetPath)
                                     //console.log(finalParams);
-                                    targetPath = rewritingRules[curRule];
+                                    
+                                    break;
 
+                                }
+                                else{
+                                    //console.log(endpointTarget);
+                                    //console.log("/" + prefix + "/");
+                                    //console.log("nomatch");
                                 }
                             }
                         }
@@ -304,6 +312,7 @@ module.exports = {
                         var paramsKeys = Object.keys(finalParams);
                         var newQuery = "";
 
+                        //console.log(finalParams);
                         
                         for (var kparam = 0; kparam < paramsKeys.length; kparam++){
                             var curKParam = paramsKeys[kparam];

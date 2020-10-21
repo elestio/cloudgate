@@ -49,6 +49,6 @@
     },
     "redirects": {
         "/redirect1": "index.html",
-        "/redirect2": "https://google.com/?param=1",
+        "/redirect2": "https://google.com/?param=1"
     }
 }

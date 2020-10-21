@@ -178,7 +178,11 @@ function gunzip(buff){
         return buf
     }
     else{
-        return (new TextDecoder().decode(buf));
+        
+        //return (new TextDecoder().decode(buf));
+
+        //change to be compatible with node 10 and below
+        return String.fromCharCode.apply(null, new Uint8Array(buf));
     }
 }
 

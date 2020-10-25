@@ -820,6 +820,9 @@ function ProcessCommandLine(argv)
                             
                             await ExecuteQuery(cpool, `flush privileges;`);
 
+                            //set global settings for mysql to make it work as expected
+                            await ExecuteQuery(cpool, `SET sql_mode = ''; SET GLOBAL sql_mode = '';`);
+                            
                             //update appconfig.json
                             appconfigObj.db.MYSQL.host = sqlConfig.host;
                             appconfigObj.db.MYSQL.port = sqlConfig.port;

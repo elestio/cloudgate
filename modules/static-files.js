@@ -124,7 +124,7 @@ module.exports = {
                     //this will crash if no extension is provided in the url
                     //console.log(finalPath);
                     if ( result.headers["Content-Type"] == null || result.headers["Content-Type"] == "" ){
-                        var targetMime = mime.getType(finalPath);
+                        var targetMime = mime.getType(finalPath.split('?')[0]);
                         if ( targetMime != null ){
 
                             if (targetMime.indexOf("text") > -1 || targetMime.indexOf("json") > -1){
@@ -335,6 +335,11 @@ module.exports = {
                             var maxCachedSize = (1024*1024)*2; //2MB
                             if ( totalSize > maxCachedSize ) {
                                 //console.log("Piping file!");
+
+                                for (var key in result.headers) {
+                                    res.writeHeader(key, result.headers[key] + "");
+                                }
+
                                 const readStream = fs.createReadStream(fullPath, { highWaterMark: 1024*1024 });
                                 tools.pipeStreamOverResponse(res, readStream, totalSize, memory);
                                 //console.log("AFTER Piping file!");

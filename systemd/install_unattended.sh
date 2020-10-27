@@ -54,12 +54,12 @@ wget -O $APP_ROOT/default/API/tests/simple.js https://raw.githubusercontent.com/
 wget -O $APP_ROOT/default/API/tests/full.js https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/API/tests/full.js
 wget -O $APP_ROOT/default/API/websocket/Echo.js https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/API/websocket/Echo.js
 wget -O $APP_ROOT/default/API/websocket/Chat.js https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/API/websocket/Chat.js
-wget -O $APP_ROOT/default/index.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/index.html
-wget -O $APP_ROOT/default/css/main.css https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/css/main.css
-wget -O $APP_ROOT/default/wsChat.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsChat.html
-wget -O $APP_ROOT/default/wsDemo.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsDemo.html
-wget -O $APP_ROOT/default/wsAdmin.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsAdmin.html
-wget -O $APP_ROOT/default/wsEcho.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsEcho.html
+wget -O $APP_ROOT/default/public/index.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/index.html
+wget -O $APP_ROOT/default/public/css/main.css https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/css/main.css
+wget -O $APP_ROOT/default/public/wsChat.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsChat.html
+wget -O $APP_ROOT/default/public/wsDemo.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsDemo.html
+wget -O $APP_ROOT/default/public/wsAdmin.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsAdmin.html
+wget -O $APP_ROOT/default/public/wsEcho.html https://raw.githubusercontent.com/elestio/cloudgate/master/apps/CatchAll/public/wsEcho.html
 
 systemctl enable cloudgate
 systemctl daemon-reload

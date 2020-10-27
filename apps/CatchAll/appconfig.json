@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "title": "Catch All App",
   "description": "This is a sample app that catch all domains not configured",
-  "domains": ["*", "toto3.vms2.terasp.net", "toto4.vms2.terasp.net", "toto5.vms2.terasp.net", "*.vms2.terasp.net"], 
+  "domains": ["*"], 
   "publicFolder": "./public",
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
   "HSTS": false,
-  "maxRequestsPerMinutePerIP": 120,
+  "maxRequestsPerMinutePerIP": 1000,
   "CORS": {
       "access-control-allow-origin": "*"
   },

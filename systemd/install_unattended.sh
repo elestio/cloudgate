@@ -2,7 +2,7 @@ echo "";
 echo "Installing Cloudgate as a service with SystemD ..."
 
 ##TCP PORT (default to port 80)
-uPort=9000
+uPort=80
 
 ##Threads/Cores (default: all cores available)
 nbCores=$(grep -c processor /proc/cpuinfo)

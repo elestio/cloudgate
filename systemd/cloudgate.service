@@ -9,7 +9,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=root
-ExecStart=nodebin binpath --memstate /etc/cloudgate/memorystate.json
+ExecStart=binpath --memstate /etc/cloudgate/memorystate.json
 Environment="NODE_OPTIONS=--experimental-worker"
 
 [Install]

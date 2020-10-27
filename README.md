@@ -68,7 +68,8 @@ if you are on Node 10, you can activate multi-threading by executing this in you
 
 ### Linux: Install as a service with SystemD
     
-    ./systemd/install.sh
+    cd systemd
+    ./install.sh
 
 [Check here](#run-as-a-service) for more details about usage
 

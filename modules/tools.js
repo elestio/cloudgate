@@ -677,7 +677,7 @@ function ProcessCommandLine(argv)
         }
 
         if ( !argv.memstate ){
-            if (fs.existsSync(argv.memstate)) {
+            if (fs.existsSync("/etc/cloudgate/memorystate.json")) {
                 argv.memstate = "/etc/cloudgate/memorystate.json";    
             }
             else{
@@ -887,7 +887,7 @@ function ProcessCommandLine(argv)
     if (argv.unload) {
         
         if ( !argv.memstate ){
-            if (fs.existsSync(argv.memstate)) {
+            if (fs.existsSync("/etc/cloudgate/memorystate.json")) {
                 argv.memstate = "/etc/cloudgate/memorystate.json";    
             }
             else{
@@ -943,7 +943,7 @@ function ProcessCommandLine(argv)
     if (argv.list) {
         
         if ( !argv.memstate ){
-            if (fs.existsSync(argv.memstate)) {
+            if (fs.existsSync("/etc/cloudgate/memorystate.json")) {
                 argv.memstate = "/etc/cloudgate/memorystate.json";    
             }
             else{

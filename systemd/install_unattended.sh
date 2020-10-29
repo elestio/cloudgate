@@ -13,6 +13,31 @@ APP_ROOT=/var/www/cloudgate/
 #Run AS (default: the current user)
 userName=$USER;
 
+echo "";
+echo "Install dependencies: ...";
+echo "";
+
+## INSTALL NODE 14.X if needed
+if which node > /dev/null
+then
+    echo -e "\033[32mInstalled Node.js version: $(node -v)\033[m";
+else
+    echo -e "\033[1mInstalling Node.js 14.x ...\033[m";
+    sudo apt-get -qq -y install curl &> /dev/null;
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - &> /dev/null;
+    sudo apt install -qq -y nodejs &> /dev/null;
+    echo -e "\033[32mInstalled Node.js version: $(node -v)\033[m";
+fi
+
+## INSTALL NPM if needed
+if which npm > /dev/null
+then
+    echo -e "\033[32mInstalled NPM version: $(npm -v)\033[m";
+else
+    echo -e "\033[1mInstalling NPM ...\033[m";
+    sudo apt install -qq -y npm  &> /dev/null;
+    echo -e "\033[32mInstalled NPM version: $(npm -v)\033[m";
+fi
 
 echo "";
 echo "Download & Install cloudgate: ...";

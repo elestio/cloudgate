@@ -246,6 +246,7 @@ function Executor(appConfig, reqInfos, res, req, memory, subFunction, msgBody, i
                 ctx.sharedmem = sharedmem;
                 ctx.apiDB = apiDB;
                 ctx.appConfig = appConfig;
+                ctx.apiEndpoint = apiEndpoint;
 
                 var result = curFunction[functionHandlerFunction](event, ctx, callback);
                 if (result) {

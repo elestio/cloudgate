@@ -1,0 +1,41 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "ws-deploy",
+  "description": "This is a sample app that handle remote deployments",
+  "domains": ["*"], 
+  "publicFolder": "./public",
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "redirect404toIndex": false,
+  "HSTS": false,
+  "maxRequestsPerMinutePerIP": 100,
+  "CORS": {
+      "access-control-allow-origin": "*"
+  },
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "./API/tests/",
+      "handler": "simple.handler"
+    },
+    "/tests/full" : {
+      "src" : "./API/tests/",
+      "handler": "full.handler",
+      "maxRequestsPerMinutePerIP": 50
+    },
+    "/Deploy" : {
+      "src" : "./API/",
+      "handler": "Deploy.handler",
+      "token": "XXXXXXXXXXXXXXXXXXXXXXX"
+    }
+  },
+  "websocketEndpoints": {
+    "/deployments" : {
+      "src" : "./API/websocket/",
+      "open": "Deployments.open",
+      "message": "Deployments.message",
+      "close": "Deployments.close",
+      "token": "YYYYYYYYYYYYYYYYYYYYYY"
+    }
+  }
+}

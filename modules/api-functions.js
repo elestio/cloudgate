@@ -424,7 +424,7 @@ module.exports = {
                         resolve({
                             processed: true,
                             content: {"Table": rows},
-                            headers: {"content-type": "application/json; charset=utf-8", "durationMS": durationMS},
+                            headers: {"content-type": "application/json; charset=utf-8", "api": durationMS + "ms"},
                             status: 200
                         })
                         return;
@@ -709,13 +709,16 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         ctx.sharedmem = sharedmem;
         ctx.apiDB = apiDB;
         ctx.appConfig = appConfig;
+        ctx.apiEndpoint = apiEndpoint;
       
         //CAPTURE console.log()
+        
         fixture.capture( function onWrite (string, encoding, fd) {
             execLogs.push(JSON.parse(string));
             // If you return `false`, you'll prevent the write to the original stream (useful for preventing log output during tests.)
             return true;
         });
+        
 
         //DO EXECUTION
         result = await curFunction[functionHandlerFunction](event, ctx, callback);

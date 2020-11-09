@@ -647,6 +647,17 @@ function ProcessCommandLine(argv)
                 reverseURL = "https://www.google.com/";
             } 
         }
+
+        var securityToken = "";
+        if ( selectedTemplate == "Deployment" ){
+            promptMSG = "Token to secure your deployment pipeline (Leave empty to generate a random token)\n";
+            securityToken = await this.readLineAsync(promptMSG);
+            if ( securityToken == "" ){
+                securityToken = uuidv4();
+                console.log("Your deployment token is: " + securityToken);
+                console.log("You can change it in: " + targetPath + path.sep + "appconfig.json");
+            } 
+        }
         
         //copy template to target path
         shell.cp('-R', path.join(__dirname, "../", '/apps/' + selectedTemplate + "/") + "*", targetPath);
@@ -658,6 +669,11 @@ function ProcessCommandLine(argv)
         //if we are using the reverse proxy template, set the reverse url
         if ( reverseURL != "" ){
             this.ReplaceInFile('https://www.google.com/', reverseURL, targetPath + path.sep + "appconfig.json");
+        }
+
+        //if we are using the reverse proxy template, set the reverse url
+        if ( securityToken != "" ){
+            this.ReplaceInFile('XXXXXXXXXXXXXXXXXXXXXXXXXX', securityToken, targetPath + path.sep + "appconfig.json");
         }
         
         process.exit();

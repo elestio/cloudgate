@@ -20,7 +20,7 @@
     "aws-sdk": "^2.656.0",
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
-    "chokidar": "^3.3.1",
+    "chokidar": "^3.4.3",
     "clear-module": "^4.1.1",
     "colors": "^1.4.0",
     "hashlru": "^2.3.0",
@@ -33,7 +33,7 @@
     "optimist": "^0.6.1",
     "request": "^2.88.2",
     "shelljs": "^0.8.4",
-    "systeminformation": "^4.23.5",
+    "systeminformation": ">=4.27.11",
     "uuid": "^7.0.3",
     "ws": "^7.2.5"
   },

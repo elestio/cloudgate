@@ -26,7 +26,7 @@
     "/Deploy" : {
       "src" : "./API/",
       "handler": "Deploy.handler",
-      "token": "XXXXXXXXXXXXXXXXXXXXXXX"
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX"
     }
   },
   "websocketEndpoints": {
@@ -35,7 +35,7 @@
       "open": "Deployments.open",
       "message": "Deployments.message",
       "close": "Deployments.close",
-      "token": "YYYYYYYYYYYYYYYYYYYYYY"
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX"
     }
   }
 }

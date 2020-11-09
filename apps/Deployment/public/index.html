@@ -5,27 +5,39 @@
 	<meta charset="utf-8">
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
 	<title>
-		CloudGate Sample App
+		CloudGate Deploy
 	</title>
 	<meta name="description" content="Cloudgate server test page">
-    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <style>
+        body 
+        {
+            padding: 25px;
+        }
+    </style>
 </head>
 
 <body>
-    <H1>Welcome to CloudGate! Catch-All demo </H1>
+    <H1>Welcome to CloudGate Deploy</H1>
     <span>
-        If you see this page, CloudGate is working and running a sample App. Please check our documentation for more details:
-        <br/>
-        <a href='https://github.com/elestio/cloudgate'>https://github.com/elestio/cloudgate</a>
-        <br/><br/>
-        Thanks for using CloudGate
+        If you see this page, CloudGate Deploy is working.
     </span>
     <br/><br/>
-    <a href='cloudgate/debug/raw'>Minimum processing pipeline Demo</a>
+    Channel: <br/>
+    <input id='channel' type='text' value='deployments' style='width: 300px; height: 40px;'/>
     <br/><br/>
-    <a href='tests/full'>REST API Demo</a>
+    Token: <br/>
+    <input id='token' type='text' value='' placeholder="your API token ..." style='width: 300px; height: 40px;' />
     <br/><br/>
-    <a href='wsDemo.html'>Websocket Demos</a>
+    <button onclick='openChannel()'>Open Channel</button>
+
+    <script>
+        function openChannel(){
+            var channel = document.getElementById("channel").value;
+            var token = document.getElementById("token").value;
+            window.location.href = '/wsDeploy.html?token=' + token + '&channel=' + channel;
+        }
+        
+    </script>
 </body>
 
 </html>

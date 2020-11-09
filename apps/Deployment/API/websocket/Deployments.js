@@ -7,9 +7,15 @@ exports.open = (event, context, callback) => {
 
     //callback(null, "Message from cloudgate backend: Websocket is open, echo service is started");
     
+    if ( context.apiEndpoint.token == "XXXXXXXXXXXXXXXXXXXXXXXXXX" ){
+        event.ws.send("token have not been configured in appconfig.json! Fix this first!\nAccess not authorized");
+        return;
+    }
     
     var params = qs.parse(event.query);
     if (params.channel && params.token != null && params.token == context.apiEndpoint.token){           
+        
+        event.ws.token = params.token;
         event.ws.subscribe(params.channel);
         event.ws.channel = params.channel;
         callback(null, "Subscribed to channel: " + params.channel);
@@ -34,6 +40,17 @@ exports.open = (event, context, callback) => {
 
 var lastExecProcess = null;
 exports.message = async (event, context, callback) => {
+
+    if ( context.apiEndpoint.token == "XXXXXXXXXXXXXXXXXXXXXXXXXX" ){
+        event.ws.send("token have not been configured in appconfig.json! Fix this first!\nAccess not authorized");
+        return;
+    }
+    if ( event.ws.token != context.apiEndpoint.token ){
+        event.ws.send("Unauthorized");
+        return;
+    }
+
+
     //When we receive a message from the builder thread, we publish it to all subscribers
     if ( event.body != null && event.body != "" && event.body != "[HEARTBEAT]"){
         AddToChannelCache(event.ws.channel, event.body);
@@ -46,6 +63,8 @@ exports.message = async (event, context, callback) => {
         //exec
         var obj = JSON.parse(event.body);
         var cmd = obj.EXEC_CMD;
+
+        console.log("CMD: " + cmd + "\n----------------------------");
              
         //print back the command
         //AddToChannelCache(event.ws.channel, event.body);
@@ -57,6 +76,7 @@ exports.message = async (event, context, callback) => {
                 async:true,
             }, async function(code, stdout, stderr) {
             console.log('Exit code:', code);
+            console.log("----------------------------");
             logsError = stderr;
             if (code !== 0) {
                 status = "failed";

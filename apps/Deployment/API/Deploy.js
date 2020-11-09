@@ -2,6 +2,17 @@ exports.handler = async (event, context, callback) => {
 
     //console.log(context.apiEndpoint);
 
+    if ( context.apiEndpoint.token == "XXXXXXXXXXXXXXXXXXXXXXXXXX" ){
+        callback(null, {
+            status: 400,
+            content: "token have not been configured in appconfig.json! Fix this first!", 
+            headers:{
+                "Content-Type": "text/html"
+            }
+        });
+        return;
+    }
+    
     if ( event.POST == null || event.POST["token"] != context.apiEndpoint.token ){
         callback(null, {
             status: 400,

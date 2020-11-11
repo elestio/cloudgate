@@ -64,6 +64,10 @@ sed -i "s#12#${nbCores}#g" /etc/cloudgate/memorystate.json
 echo "OK";
 echo "";
 
+#MySQL Docker
+mkdir -p $APP_ROOT/DB/MYSQL
+wget -O $APP_ROOT/DB/MYSQL/startMYSQL.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL.sh
+
 #copy default files in approot
 mkdir -p $APP_ROOT/default
 #cp -r ../apps/CatchAll/*  $APP_ROOT/default

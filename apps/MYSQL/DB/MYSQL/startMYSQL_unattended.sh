@@ -4,8 +4,8 @@ main() {
     #UNATTENDED
     NETFACE=$1; #172.17.0.1
     NETPORT=$2; #3306
-    DBPATH=$PWD/data;
-    DBNAME=$3; #MyDB1
+    DBPATH=$3; #$PWD/data
+    DBNAME=$4; #MyDB1
 
     #IF the data folder is not empty, root password will be the old one ...
     if emptydir $DBPATH

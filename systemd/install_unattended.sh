@@ -68,6 +68,11 @@ echo "";
 mkdir -p $APP_ROOT/DB/MYSQL
 wget -O $APP_ROOT/DB/MYSQL/startMYSQL.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL.sh
 
+#SMTP Docker
+mkdir -p $APP_ROOT/SMTP
+wget -O $APP_ROOT/SMTP/startPostfix.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/SMTP/startPostfix.sh
+
+
 #copy default files in approot
 mkdir -p $APP_ROOT/default
 #cp -r ../apps/CatchAll/*  $APP_ROOT/default

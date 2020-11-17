@@ -858,7 +858,7 @@ function ProcessCommandLine(argv)
                             //restore DB dump
                             if ( appconfigObj.db.MYSQL.dump != null && appconfigObj.db.MYSQL.dump != "" ){
                                 console.log("Restoring DB dump");
-                                var responseExec = shell.exec("cat " + path.join(appPath, appconfigObj.db.MYSQL.dump) + " | docker exec -i mysql80 /usr/bin/mysql --user=" + appconfigObj.db.MYSQL.user + " --password=" + appconfigObj.db.MYSQL.password + " " + dbName);
+                                var responseExec = shell.exec("cat " + path.join(appPath, appconfigObj.db.MYSQL.dump) + " | docker exec -i mysql80_" + dbName + " /usr/bin/mysql --user=" + appconfigObj.db.MYSQL.user + " --password=" + appconfigObj.db.MYSQL.password + " " + dbName);
                                 //console.log(responseExec);
                                 console.log("Done");
                             }

@@ -72,11 +72,11 @@ echo "";
 
 #MySQL Docker
 mkdir -p $APP_ROOT/DB/MYSQL
-wget -O $APP_ROOT/DB/MYSQL/startMYSQL_unattended.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL_unattended.sh
+wget -O $APP_ROOT/DB/MYSQL/startMYSQL_unattended.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL_unattended.sh?v=2
 
 #SMTP Docker
 mkdir -p $APP_ROOT/SMTP
-wget -O $APP_ROOT/SMTP/startPostfix.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/SMTP/startPostfix.sh $domain
+wget -O $APP_ROOT/SMTP/startPostfix.sh https://raw.githubusercontent.com/elestio/cloudgate/master/SMTP/startPostfix.sh $domain
 
 
 #copy default files in approot

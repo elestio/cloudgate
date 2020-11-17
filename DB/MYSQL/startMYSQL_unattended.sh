@@ -5,7 +5,9 @@ main() {
     NETFACE=172.17.0.1; #172.17.0.1
     NETPORT=3306; #3306
     DBPATH=$PWD/data; #$PWD/data
-    DBNAME=Global; #MyDB1
+    DBNAME=$1; #MyDB1
+
+    DBNAME=(echo $DBNAME | tr '-' '_')
 
     #IF the data folder is not empty, root password will be the old one ...
     if emptydir $DBPATH

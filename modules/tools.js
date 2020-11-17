@@ -671,8 +671,11 @@ function ProcessCommandLine(argv)
             this.ReplaceInFile('https://www.google.com/', reverseURL, targetPath + path.sep + "appconfig.json");
         }
 
-        //if we are using the reverse proxy template, set the reverse url
+        //if we are using the Deployment template, set token
         if ( securityToken != "" ){
+            //replace first occurence
+            this.ReplaceInFile('XXXXXXXXXXXXXXXXXXXXXXXXXX', securityToken, targetPath + path.sep + "appconfig.json");
+            //replace second occurence
             this.ReplaceInFile('XXXXXXXXXXXXXXXXXXXXXXXXXX', securityToken, targetPath + path.sep + "appconfig.json");
         }
         

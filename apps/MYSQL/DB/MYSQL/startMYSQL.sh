@@ -74,8 +74,8 @@ function GenerateNewConfig {
     echo "echo # (optional) move to a new line" >> restoreDB-Dump.sh
     echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> restoreDB-Dump.sh
     echo "then" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
+    echo "  docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
+    echo "  docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
     echo "  cat ../db.sql | docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword $DBNAME" >> restoreDB-Dump.sh
     echo "fi" >> restoreDB-Dump.sh
     chmod +x restoreDB-Dump.sh;
@@ -86,8 +86,8 @@ function GenerateNewConfig {
     echo "echo # (optional) move to a new line" >> restoreDB-Backup.sh
     echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> restoreDB-Backup.sh
     echo "then" >> restoreDB-Backup.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
+    echo "  docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
+    echo "  docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
     echo "  cat backup.sql | docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword $DBNAME" >> restoreDB-Backup.sh
     echo "fi" >> restoreDB-Backup.sh
     chmod +x restoreDB-Backup.sh;

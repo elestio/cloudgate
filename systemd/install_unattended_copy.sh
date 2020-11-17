@@ -13,8 +13,6 @@ APP_ROOT=/var/www/cloudgate/
 #Run AS (default: the current user)
 userName=$USER;
 
-domain=$1; #first param is the domain name authorized as sender in postfix (generate the DKIM for the domain)
-
 echo "";
 echo "Install dependencies: ...";
 echo "";
@@ -41,6 +39,16 @@ else
     echo -e "\033[32mInstalled NPM version: $(npm -v)\033[m";
 fi
 
+## INSTALLGIT if needed
+if which npm > /dev/null
+then
+    echo -e "\033[32mInstalled GIT version: $(git --version)\033[m";
+else
+    echo -e "\033[1mInstalling GIT ...\033[m";
+    sudo apt install -qq -y git  &> /dev/null;
+    echo -e "\033[32mInstalled GIT version: $(git --version)\033[m";
+fi
+
 echo "";
 echo "Download & Install cloudgate: ...";
 echo "";
@@ -63,20 +71,16 @@ wget -O /etc/cloudgate/memorystate.json https://raw.githubusercontent.com/elesti
 sed -i "s#3000#${uPort}#g" /etc/cloudgate/memorystate.json
 sed -i "s#/var/www/cloudgate/#${APP_ROOT}#g" /etc/cloudgate/memorystate.json
 sed -i "s#12#${nbCores}#g" /etc/cloudgate/memorystate.json
-
-sed -i 's#"SSL": ""#"SSL": "1"#g' /etc/cloudgate/memorystate.json
-sed -i "s#\"SSL_DOMAIN\": \"\"#\"SSL_DOMAIN\": \"${domain}\"#g" /etc/cloudgate/memorystate.json
-
 echo "OK";
 echo "";
 
 #MySQL Docker
 mkdir -p $APP_ROOT/DB/MYSQL
-wget -O $APP_ROOT/DB/MYSQL/startMYSQL_unattended.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL_unattended.sh
+wget -O $APP_ROOT/DB/MYSQL/startMYSQL.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/MYSQL/startMYSQL.sh
 
 #SMTP Docker
 mkdir -p $APP_ROOT/SMTP
-wget -O $APP_ROOT/SMTP/startPostfix.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/SMTP/startPostfix.sh $domain
+wget -O $APP_ROOT/SMTP/startPostfix.sh https://raw.githubusercontent.com/elestio/cloudgate/master/DB/SMTP/startPostfix.sh
 
 
 #copy default files in approot

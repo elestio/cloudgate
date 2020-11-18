@@ -5,10 +5,7 @@ main() {
     NETFACE=172.17.0.1; #172.17.0.1
     NETPORT=3306; #3306
     DBPATH=$PWD/data; #$PWD/data
-    DBNAME=$1; #MyDB1
-
-    DBNAME=$(echo $DBNAME | tr '-' '_')
-
+    
     #IF the data folder is not empty, root password will be the old one ...
     if emptydir $DBPATH
     then
@@ -36,38 +33,24 @@ function GenerateNewConfig {
     echo "MYSQL_ROOT_PASSWORD=$rootPassword";
 
     #write json config
-    echo "{\"path\": \"$DBPATH\", \"host\": \"$NETFACE\", \"port\": \"$NETPORT\", \"dbName\": \"$DBNAME\", \"rootPassword\": \"$rootPassword\"}" > config.json;
+    echo "{\"path\": \"$DBPATH\", \"host\": \"$NETFACE\", \"port\": \"$NETPORT\", \"rootPassword\": \"$rootPassword\"}" > config.json;
 
     #write cli helper
-    echo "docker exec -it mysql80_$DBNAME mysql --host=$NETFACE --port=$NETPORT --user=root --password=$rootPassword" > mysql-docker-cli.sh;
+    echo "docker exec -it mysql80 mysql --host=$NETFACE --port=$NETPORT --user=root --password=$rootPassword" > mysql-docker-cli.sh;
     chmod +x mysql-docker-cli.sh;
 
     #write backup helper
-    echo "docker exec mysql80_$DBNAME /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword $DBNAME > backup.sql" > backupDB.sh;
+    echo "docker exec mysql80 /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword --all-databases > backup.sql" > backupDB.sh;
     chmod +x backupDB.sh;
 
     #write restore from dump helper
-    echo "read -p 'WARNING: Do you really want to overwrite the DB with the content of db.sql? (y/n)' -n 1 -r" > restoreDB-Dump.sh
+    echo "read -p 'WARNING: Do you really want to restore mysql from the backup.sql? (y/n)' -n 1 -r" > restoreDB-Dump.sh
     echo "echo # (optional) move to a new line" >> restoreDB-Dump.sh
     echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> restoreDB-Dump.sh
     echo "then" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  cat ../db.sql | docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword $DBNAME" >> restoreDB-Dump.sh
+    echo "  cat backup.sql | docker exec -i mysql80 /usr/bin/mysql --user=root --password=$rootPassword" >> restoreDB-Dump.sh
     echo "fi" >> restoreDB-Dump.sh
     chmod +x restoreDB-Dump.sh;
-
-    #write restore from backup helper
-    rm -rf restoreDB-Backup.sh
-    echo "read -p 'WARNING: Do you really want to overwrite the DB with the content of backup.sql? (y/n)' -n 1 -r" > restoreDB-Backup.sh
-    echo "echo # (optional) move to a new line" >> restoreDB-Backup.sh
-    echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> restoreDB-Backup.sh
-    echo "then" >> restoreDB-Backup.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"DROP DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  docker exec -i mysql80_mydb1 /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;\"" >> restoreDB-Dump.sh
-    echo "  cat backup.sql | docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword $DBNAME" >> restoreDB-Backup.sh
-    echo "fi" >> restoreDB-Backup.sh
-    chmod +x restoreDB-Backup.sh;
 
     #write remove db container
     rm -rf deleteDB-container.sh
@@ -75,8 +58,8 @@ function GenerateNewConfig {
     echo "echo # (optional) move to a new line" >> deleteDB-container.sh
     echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> deleteDB-container.sh
     echo "then" >> deleteDB-container.sh
-    echo "docker stop mysql80_$DBNAME" >> deleteDB-container.sh
-    echo "docker rm mysql80_$DBNAME" >> deleteDB-container.sh
+    echo "docker stop mysql80" >> deleteDB-container.sh
+    echo "docker rm mysql80" >> deleteDB-container.sh
     echo "rm backupDB.sh;" >> deleteDB-container.sh
     echo "rm restoreDB-Dump.sh;" >> deleteDB-container.sh
     echo "rm restoreDB-Backup.sh;" >> deleteDB-container.sh
@@ -88,9 +71,9 @@ function GenerateNewConfig {
 
 function startContainer {
     echo "";
-    echo "Starting new mysql80_$DBNAME container"
+    echo "Starting new mysql80 container"
 
-    docker run --name=mysql80_$DBNAME \
+    docker run --name=mysql80 \
     --publish $NETFACE:$NETPORT:3306 \
     -e MYSQL_ROOT_PASSWORD=$rootPassword \
     -e MYSQL_ROOT_HOST=172.17.0.1 \
@@ -98,10 +81,7 @@ function startContainer {
     -d mysql/mysql-server:8.0 --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
     sleep 5;
-    docker logs mysql80_$DBNAME;
-
-    ##Create the DB
-    docker exec -i mysql80_$DBNAME /usr/bin/mysql --user=root --password=$rootPassword -e \"CREATE DATABASE $DBNAME;
+    docker logs mysql80;
 }
 
 
@@ -115,8 +95,8 @@ function InstallOrCleanDocker {
     if [ -x "$(command -v docker)" ]; then
         echo "";
         echo "Cleaning previous mysql80 container ... Please wait ...";
-        docker stop mysql80_$DBNAME
-        docker rm mysql80_$DBNAME
+        docker stop mysql80
+        docker rm mysql80
     else
         echo "";
         echo "Installing docker ...";

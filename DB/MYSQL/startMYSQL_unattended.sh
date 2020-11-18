@@ -62,7 +62,6 @@ function GenerateNewConfig {
     echo "docker rm mysql80" >> deleteDB-container.sh
     echo "rm backupDB.sh;" >> deleteDB-container.sh
     echo "rm restoreDB-Dump.sh;" >> deleteDB-container.sh
-    echo "rm restoreDB-Backup.sh;" >> deleteDB-container.sh
     echo "rm deleteDB-container.sh;" >> deleteDB-container.sh
     echo "rm mysql-docker-cli.sh;" >> deleteDB-container.sh
     echo "fi" >> deleteDB-container.sh
@@ -73,7 +72,7 @@ function startContainer {
     echo "";
     echo "Starting new mysql80 container"
 
-    docker run --name=mysql80 \
+    docker run --ulimit nofile=65536:65536 --name=mysql80 \
     --publish $NETFACE:$NETPORT:3306 \
     -e MYSQL_ROOT_PASSWORD=$rootPassword \
     -e MYSQL_ROOT_HOST=172.17.0.1 \

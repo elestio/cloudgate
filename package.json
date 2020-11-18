@@ -41,7 +41,7 @@
     "scripts": "modules/*.js",
     "assets": [
       "apps/**/*",
-      "default/**/*",
+      "default/**/*"
     ]
   },
   "author": "elest.io",

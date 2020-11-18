@@ -1,7 +1,7 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.82",
+  "version": "1.0.83",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
@@ -38,9 +38,10 @@
     "ws": "^7.2.5"
   },
   "pkg": {
+    "scripts": "modules/*.js",
     "assets": [
       "apps/**/*",
-      "default/**/*"
+      "default/**/*",
     ]
   },
   "author": "elest.io",

@@ -7,7 +7,7 @@ main() {
     DBPATH=$PWD/data; #$PWD/data
     DBNAME=$1; #MyDB1
 
-    DBNAME=(echo $DBNAME | tr '-' '_')
+    DBNAME=$(echo $DBNAME | tr '-' '_')
 
     #IF the data folder is not empty, root password will be the old one ...
     if emptydir $DBPATH

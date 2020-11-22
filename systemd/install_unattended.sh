@@ -8,7 +8,7 @@ uPort=80
 nbCores=$(grep -c processor /proc/cpuinfo)
 
 ##APP_ROOT (default: /var/www/cloudgate/)
-APP_ROOT=/var/www/cloudgate/
+APP_ROOT=/var/www/cloudgate
 
 #Run AS (default: the current user)
 userName=$USER;
@@ -61,7 +61,7 @@ sed -i "s#binpath#${cgPath}#g" /etc/systemd/system/cloudgate.service
 #cp memorystate.template /etc/cloudgate/memorystate.json
 wget -O /etc/cloudgate/memorystate.json https://raw.githubusercontent.com/elestio/cloudgate/master/systemd/memorystate.template
 sed -i "s#3000#${uPort}#g" /etc/cloudgate/memorystate.json
-sed -i "s#/var/www/cloudgate/#${APP_ROOT}#g" /etc/cloudgate/memorystate.json
+sed -i "s#/var/www/cloudgate/#${APP_ROOT}/#g" /etc/cloudgate/memorystate.json
 sed -i "s#12#${nbCores}#g" /etc/cloudgate/memorystate.json
 
 sed -i 's#"SSL": ""#"SSL": "1"#g' /etc/cloudgate/memorystate.json
@@ -109,7 +109,7 @@ echo "You can edit cloudgate config here: /etc/cloudgate/memorystate.json";
 echo "To start/stop cloudgate service with: 'systemctl start cloudgate' and 'systemctl stop cloudgate'";
 echo "To check logs: journalctl -u cloudgate"
 echo "";
-echo "Your root app folder is: ${APP_ROOT}";
+echo "Your root app folder is: ${APP_ROOT}/";
 echo "";
 echo "You can now create apps with: cloudgate --create /path/of/your/app";
 echo "and then load the app with: cloudgate --load /path/of/your/app";

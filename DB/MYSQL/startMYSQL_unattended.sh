@@ -43,7 +43,7 @@ function GenerateNewConfig {
     mkdir -p backups
 
     #write backup helper
-    echo "docker exec mysql80 /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword --all-databases > backup.sql" > backups/DB_$(date +%Y-%m-%d-%H.%M.%S).sql;
+    echo "docker exec mysql80 /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword --all-databases > backups/DB_$(date +%Y-%m-%d-%H.%M.%S).sql" > backupDB.sh;
     chmod +x backupDB.sh;
 
 

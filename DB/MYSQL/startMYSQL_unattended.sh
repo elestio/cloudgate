@@ -39,16 +39,20 @@ function GenerateNewConfig {
     echo "docker exec -it mysql80 mysql --host=$NETFACE --port=$NETPORT --user=root --password=$rootPassword" > mysql-docker-cli.sh;
     chmod +x mysql-docker-cli.sh;
 
+    #create backup folder
+    mkdir -p backups
+
     #write backup helper
-    echo "docker exec mysql80 /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword --all-databases > backup.sql" > backupDB.sh;
+    echo "docker exec mysql80 /usr/bin/mysqldump --no-tablespaces --user=root --password=$rootPassword --all-databases > backup.sql" > backups/DB_$(date +%Y-%m-%d-%H.%M.%S).sql;
     chmod +x backupDB.sh;
 
+
     #write restore from dump helper
-    echo "read -p 'WARNING: Do you really want to restore mysql from the backup.sql? (y/n)' -n 1 -r" > restoreDB-Dump.sh
-    echo "echo # (optional) move to a new line" >> restoreDB-Dump.sh
-    echo "if [[ \$REPLY =~ ^[Yy]$ ]]" >> restoreDB-Dump.sh
+    echo 'if [ -z "$1" ]' > restoreDB-Dump.sh
     echo "then" >> restoreDB-Dump.sh
-    echo "  cat backup.sql | docker exec -i mysql80 /usr/bin/mysql --user=root --password=$rootPassword" >> restoreDB-Dump.sh
+    echo '  echo "You must pass 1 parameter: full path to your SQL backup to restore"' >> deleteDB-container.sh
+    echo "else" >> restoreDB-Dump.sh
+    echo "  cat $1 | docker exec -i mysql80 /usr/bin/mysql --user=root --password=$rootPassword" >> restoreDB-Dump.sh
     echo "fi" >> restoreDB-Dump.sh
     chmod +x restoreDB-Dump.sh;
 

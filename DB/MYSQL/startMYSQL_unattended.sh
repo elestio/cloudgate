@@ -52,7 +52,7 @@ function GenerateNewConfig {
     echo "then" >> restoreDB-Dump.sh
     echo '  echo "You must pass 1 parameter: full path to your SQL backup to restore"' >> restoreDB-Dump.sh
     echo "else" >> restoreDB-Dump.sh
-    echo "  cat $1 | docker exec -i mysql80 /usr/bin/mysql --user=root --password=$rootPassword" >> restoreDB-Dump.sh
+    echo "  cat \$1 | docker exec -i mysql80 /usr/bin/mysql --user=root --password=$rootPassword" >> restoreDB-Dump.sh
     echo "fi" >> restoreDB-Dump.sh
     chmod +x restoreDB-Dump.sh;
 

@@ -224,6 +224,33 @@ function Start(argv) {
             }   
         }
 
+        if ( process.env.SSL_CERT == null || process.env.SSL_CERT == "") {
+            var paramSSLCert = argv.sslcert;
+            if ( paramSSLCert == "" || paramSSLCert == null ) {
+                if ( memory.get("SSL_CERT", "SETTINGS") != null && memory.get("SSL_CERT", "SETTINGS") != "" ) {
+                    argv.sslcert = memory.get("SSL_CERT", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.SSL_KEY == null || process.env.SSL_KEY == "") {
+            var paramSSLKey = argv.sslkey;
+            if ( paramSSLKey == "" || paramSSLKey == null ) {
+                if ( memory.get("SSL_KEY", "SETTINGS") != null && memory.get("SSL_KEY", "SETTINGS") != "" ) {
+                    argv.sslkey = memory.get("SSL_KEY", "SETTINGS");
+                }
+            }   
+        }
+
+        if ( process.env.SSL_PORT == null || process.env.SSL_PORT == "") {
+            var paramSSLPort = argv.sslport;
+            if ( paramSSLPort == "" || paramSSLPort == null ) {
+                if ( memory.get("SSL_PORT", "SETTINGS") != null && memory.get("SSL_PORT", "SETTINGS") != "" ) {
+                    argv.sslport = memory.get("SSL_PORT", "SETTINGS");
+                }
+            }   
+        }
+
         if ( process.env.ADMIN == null || process.env.ADMIN == "") {
             var paramAdmin = argv.admin;
             if ( paramAdmin == "" || paramAdmin == null ) {

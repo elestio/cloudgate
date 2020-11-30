@@ -194,7 +194,7 @@ module.exports = {
                                     //console.log("response ctype: " + respContentType);
                                     
                                     //do rewriting (TODO: should call a backend function defined in appconfig.json)
-                                    if ( respContentType.indexOf("text/html") > -1 || respContentType.indexOf("text/css") > -1 || respContentType.indexOf("text/javascript") > -1 )
+                                    if ( respContentType != null && respContentType.indexOf("text/html") > -1 || respContentType.indexOf("text/css") > -1 || respContentType.indexOf("text/javascript") > -1 )
                                     {
                                         //text content, rewrite is possible
                                         var finalContent = await tools.streamToString(stream);

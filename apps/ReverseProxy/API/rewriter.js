@@ -19,6 +19,7 @@ exports.handler = async (event, context, callback) => {
     //response = response.replace(/<\/html>/g, "<script src='https://yourdomain.com/inject.js'></script></html>");
 
     //Advanced dom manipulations with cheerio
+    /*
     const cheerio = require('cheerio');
     const $ = cheerio.load(response);
 
@@ -34,8 +35,8 @@ exports.handler = async (event, context, callback) => {
     //remove confidentiality rules banner
     $("#taw").remove();
     $("#cnsh").remove();
-
     response = $.html();
+    */
        
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);

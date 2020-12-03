@@ -456,7 +456,7 @@ This setting allow 120 requests per minute per unique IP address
 
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
 
-**rewritings** and **redirects**: handle url rewriting
+**rewritings**: handle url rewriting
 
     "rewritings": {
         "/Home": "/index.html",
@@ -467,6 +467,7 @@ Here when we visit /Home we will be served content of index.html.
 If you visit /Yeah/test123 you will be served content of index.html?slug=test123
 You can combine this with Dynamic datasource to serve server side rendered pages
 
+**redirects**: handle url redirections
 
     "redirects": {
         "/redirect1": "index.html",

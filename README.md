@@ -455,6 +455,27 @@ Here is the full list of configuration options supported in appconfig.json:
 This setting allow 120 requests per minute per unique IP address
 
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
+
+**rewritings** and **redirects**: handle url rewriting
+
+    "rewritings": {
+        "/Home": "/index.html",
+        "/Yeah/%slug%": "index.html"
+    }
+
+Here when we visit /Home we will be served content of index.html. 
+If you visit /Yeah/test123 you will be served content of index.html?slug=test123
+You can combine this with Dynamic datasource to serve server side rendered pages
+
+
+    "redirects": {
+        "/redirect1": "index.html",
+        "/redirect2": "https://google.com/?param=1"
+    }
+
+Here when we visit /redirect1 we will be redirected to index.html. 
+If you visit /redirect2 you will be redirected to an external url: https://google.com/?param=1
+
   
 **apiEndpoints**: object containing list of defined endpoints.
 

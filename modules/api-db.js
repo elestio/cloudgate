@@ -1,5 +1,5 @@
 const tools = require('./tools.js');
-var mysql      = require('mysql');
+var mysql      = require('mysql2');
 const connections = {}; //cached connections
 
 function getConnection(appConfig) {

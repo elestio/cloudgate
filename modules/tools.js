@@ -772,7 +772,7 @@ function ProcessCommandLine(argv)
                         }
 
                         //check if db is already created
-                        var mysql = require('mysql');
+                        var mysql = require('mysql2');
                         var cpool = null;
 
                         if ( appconfigObj.db.MYSQL.host.toUpperCase() == "AUTO" ){

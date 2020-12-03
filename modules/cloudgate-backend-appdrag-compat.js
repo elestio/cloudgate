@@ -188,19 +188,22 @@ exports.sqlSelect = function (query) {
         if (data.Table[0].fieldCount != null && data.Table[0].serverStatus != null)
         {
             var newResp = {"Table": data.Table[1]};
-            resolve(JSON.stringify(newResp));
+            //resolve(JSON.stringify(newResp));
+            resolve(newResp);
             return;
         }
     }
 
-    resolve(JSON.stringify(data));
+    //resolve(JSON.stringify(data));
+    resolve(data);
     
   });
 }
 
 exports.sqlExecuteRawQuery = function (query) {
   return new Promise(async (resolve, reject) => {
-    resolve(JSON.stringify(await cloudgateBackend.sqlExecuteRawQuery(query)));
+    //resolve(JSON.stringify(await cloudgateBackend.sqlExecuteRawQuery(query)));
+    resolve(await cloudgateBackend.sqlExecuteRawQuery(query));
   });
 }
 

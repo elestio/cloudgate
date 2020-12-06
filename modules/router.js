@@ -1,4 +1,5 @@
 var fs = require('fs');
+const shell = require('shelljs');
 const memory = require('../modules/memory');
 const sharedmem = require('../modules/shared-memory');
 const staticFiles = require('../modules/static-files');
@@ -10,6 +11,7 @@ const apiDB = require('../modules/api-db.js');
 const dynamicDatasource = require('../modules/dynamic-datasource.js');
 const tools = require('../modules/tools.js');
 
+
 //In-memory cache
 var cache = {};
 
@@ -18,6 +20,78 @@ var lru = HLRU(500); //max 500 items in the LRU Cache. TODO: this should be conf
 
 var _serverConfig = null;
 
+var threadId = null;
+try{
+    threadId = require('worker_threads').threadId;
+}
+catch(ex){
+
+}
+
+var banDuration = 1000*60*1; //1 minute
+function UnbanIps(app){
+
+    //exit if we are not in the main thread
+    if ( threadId != null && threadId != 1 ){
+        return; //not the main thread
+    }
+
+    var ips = sharedmem.getStringKeys("bannedIPs");  
+
+    for(var i=0; i < ips.length; i++){
+        var curIP = ips[i] + "";
+        
+        var lastTimestamp = sharedmem.getString(curIP, "bannedIPs");
+        lastTimestamp = parseInt(lastTimestamp);
+        var expirationTS = lastTimestamp + banDuration;
+        var nowTS = (+new Date());
+        //console.log("lts: " + lastTimestamp + " - banDuration: " + banDuration + " - expirationTS: " + expirationTS + " - " + (+new Date()));
+
+        if ( curIP != null && curIP != undefined && curIP != "undefined" && lastTimestamp != 0){
+            if ( expirationTS < nowTS ){
+                //console.log("unbanned ip: " + curIP  + " - lts: " + lastTimestamp + " - banDuration: " + banDuration + " - expirationTS: " + expirationTS + " - " + (+new Date()));
+                console.log("[unbanned ip]: " + curIP);
+                var resp = shell.exec('iptables -D INPUT -s ' + curIP + ' -j DROP');
+                //remove from the list
+                sharedmem.deleteString(curIP, "bannedIPs");
+            }
+            
+        }
+
+    }
+}
+
+function BanIP(app, ip, appConfig) {
+
+    //skip ban for localhost
+    if ( ip == "127.0.0.1" || ip.startsWith('0.0.0.') || ip == null || ip == "" || ip == "undefined" || ip == undefined ) {
+        return;
+    }
+
+    if ( appConfig.banDurationSeconds != null && appConfig.banDurationSeconds > 0 ){
+        banDuration = appConfig.banDurationSeconds * 1000;
+    }
+    else{
+        banDuration = 1000*60*5; //5 minutes
+    }
+    
+    //check if not already banned
+    if ( sharedmem.getString(ip, "bannedIPs") == 0 ){
+
+        //set ban date for the ip
+        sharedmem.setString(ip, (+ new Date()) + "", "bannedIPs");
+
+        //ban the ip with iptables
+        var resp = shell.exec('iptables -A INPUT -s ' + ip + ' -j DROP');
+        
+        var nowTS = (+new Date());
+        var expirationTS = nowTS + banDuration;
+        //console.log("banned ip: " + ip + " lts: " + (+ new Date()) + " - banDuration: " + banDuration + " - expirationTS: " + expirationTS + " - " + (+new Date()));
+        console.log("[banned ip]: " + ip);
+    }
+    
+}
+
 module.exports = {
     start: (app, serverConfig) => {
 
@@ -25,7 +99,10 @@ module.exports = {
         app.rateLimiterMemory = {};
         setInterval(() => {
             app.rateLimiterMemory = {};
-        }, 60*1000);
+        }, 1000*1);
+
+        //timer for unbans
+        setInterval(() => { UnbanIps(app); }, 1000*1);
 
         var modules = [apiFunctions, apiDB, staticFiles];
 
@@ -176,8 +253,22 @@ module.exports = {
                     app.rateLimiterMemory[rateLimiterKey] = 0;
                     curRateLimitForIP = 0;
                 }
+
+                //check if whitelisted
+                var isWhitelisted = false;
+                var whitelistedIPs = [];
+                if ( appConfig.whitelistedIPs != null && appConfig.whitelistedIPs.length > 0 ){
+                    whitelistedIPs = appConfig.whitelistedIPs;
+                }
+                if ( whitelistedIPs.includes(reqInfos.ip) ){
+                    isWhitelisted = true;
+                }
+
+                
                 var maxRequestsPerMinutePerIP = appConfig.maxRequestsPerMinutePerIP;
-                if ( appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && appConfig.maxRequestsPerMinutePerIP > 0) {
+                if ( !isWhitelisted && appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && appConfig.maxRequestsPerMinutePerIP > 0) {
+
+                    BanIP(app, reqInfos.ip, appConfig);
 
                     //let's wait instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);

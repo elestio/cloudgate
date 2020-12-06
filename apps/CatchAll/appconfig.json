@@ -9,7 +9,9 @@
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
   "HSTS": false,
-  "maxRequestsPerMinutePerIP": 1000,
+  "maxRequestsPerMinutePerIP": 600,
+  "banDurationSeconds": 300,
+  "whitelistedIPs":["127.0.0.1", "1.2.3.4"],
   "CORS": {
       "access-control-allow-origin": "*"
   },

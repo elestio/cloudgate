@@ -82,11 +82,10 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
                         var varValue = curRow[key];
                         //console.log(varToReplace + " - " + varValue);
 
-                        //should be replaced by a regex replace all, Last time I tried it was crashing!
-                        finalContent = finalContent.replace(varToReplace, varValue);
-                        finalContent = finalContent.replace(varToReplace, varValue);
-                        finalContent = finalContent.replace(varToReplace, varValue);
-                        finalContent = finalContent.replace(varToReplace, varValue);
+                        //this for loop should be replaced by a regex replace all, Last time I tried it was crashing!
+                        for (var i = 0; i < 10; i++){
+                            finalContent = finalContent.replace(varToReplace, varValue);
+                        }
                     } 
 
                     //update the virtual dom

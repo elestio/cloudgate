@@ -101,8 +101,8 @@ module.exports = {
             app.rateLimiterMemory = {};
         }, 1000*1);
 
-        //timer for unbans
-        setInterval(() => { UnbanIps(app); }, 1000*1);
+        //check every 5 seconds if there is something to unban
+        setInterval(() => { UnbanIps(app); }, 1000*5);
 
         var modules = [apiFunctions, apiDB, staticFiles];
 
@@ -268,7 +268,11 @@ module.exports = {
                 var maxRequestsPerMinutePerIP = appConfig.maxRequestsPerMinutePerIP;
                 if ( !isWhitelisted && appConfig.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && appConfig.maxRequestsPerMinutePerIP > 0) {
 
-                    BanIP(app, reqInfos.ip, appConfig);
+                    //ban ip at network level is only supported on linux with iptables
+                    if ( os.platform() == "linux" ){
+                        BanIP(app, reqInfos.ip, appConfig);
+                    }
+                    
 
                     //let's wait instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);

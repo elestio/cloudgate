@@ -11,7 +11,6 @@ module.exports = (() => {
 				});
 			};
 		}
-		process.on('exit', cloudgate.free);
 		return cloudgate;
 	} catch (e) {
 		throw new Error('This version of cloudgate is not compatible with your Node.js build:\n\n' + e.toString());

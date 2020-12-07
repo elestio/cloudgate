@@ -454,6 +454,15 @@ Here is the full list of configuration options supported in appconfig.json:
 
 This setting allow 120 requests per minute per unique IP address
 
+**banDurationSeconds**: if an ip address go above the maxRequestsPerMinutePerIP it will then be banned for a duration in seconds defined by banDurationSeconds
+    
+    "banDurationSeconds": 300,
+
+
+**whitelistedIPs**: array of whitelisted IP addresses, they bypass the ratelimiter and can't be banned
+
+  "whitelistedIPs":["127.0.0.1", "1.2.3.4"],
+
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
 
 **rewritings**: handle url rewriting

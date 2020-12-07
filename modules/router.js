@@ -1,3 +1,4 @@
+var os = require("os");
 var fs = require('fs');
 const shell = require('shelljs');
 const memory = require('../modules/memory');

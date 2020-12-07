@@ -32,6 +32,7 @@ const os = require('os');
 const tools = require('./modules/tools.js');
 const memory = require('./modules/memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
+const sharedmem = require('./modules/shared-memory');
 var shell = require('shelljs');
 const { v4: uuidv4 } = require('uuid')
 
@@ -185,6 +186,18 @@ if (isMainThread) {
     process.argv.push("--nbThreads");
     process.argv.push(nbThreads);
 
+    process.on('SIGTERM', cleanup);
+    process.on('SIGINT', cleanup);
+    function cleanup() {
+        //myWorker.postMessage('cleanup');
+        console.log("Cleanup before exit ...");
+        SaveBeforeExit();
+
+        //unregister events to allow close
+        process.removeListener('SIGTERM', cleanup);
+        process.removeListener('SIGINT', cleanup);
+    }
+
     for ( var i = 0; i < nbThreads; i++ ){
         /* Spawn a new thread running this source file */
         var worker = new Worker(__filename);
@@ -210,6 +223,39 @@ else
 {
     //console.log(process.argv);
     const main = require('./main.js');
+}
+
+function SaveBeforeExit() {
+
+
+    //unban all banned ips before exit
+    var ips = sharedmem.getStringKeys("bannedIPs");  
+    for(var i=0; i < ips.length; i++){
+        var curIP = ips[i] + "";
+
+        if ( curIP != null && curIP != undefined && curIP != "undefined"){
+            console.log("[unbanned ip]: " + curIP);
+            var resp = shell.exec('iptables -D INPUT -s ' + curIP + ' -j DROP');
+        }
+    }
+
+
+    if ( memory.get("mustSaveConfig", "TEMP") == 1){
+        var fullMemory = memory.debug();
+    
+        //delete response cache because it's huge and temporary
+        delete fullMemory["ResponseCache"];
+        delete fullMemory["STATS"];
+        delete fullMemory["TEMP"];
+        delete fullMemory["undefined"];
+
+        //write the memory state (only the master thread should do that)
+        fs.writeFileSync(memoryPath, JSON.stringify(fullMemory, null, 4), 'utf-8'); 
+        
+        memory.set("mustSaveConfig", 0, "TEMP");
+        console.log("config auto saved on disk");
+    }
+
 }
 
 var globalStats = {};

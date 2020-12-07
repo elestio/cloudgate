@@ -830,6 +830,17 @@ const parseFormData = (body, contentType, event) => {
         //console.log(curPart.get("name"));
         //console.log(curPart);
 
+        if (curPart["filename"] != null){
+            files.push(curPart);
+            //console.log("file added for name: " + curPart.get("name"));
+        }
+        else{
+            //set key/values directly on the event.POST/PUT/PATCH
+            event[event.httpMethod][curPart["name"]] = Buffer.from( curPart["data"] ).toString();
+            //console.log("KV added for name: " + curPart.get("name"));
+        }
+
+        /*
         if (curPart.get("filename") != null){
             var newFile = {
                 "name": curPart.get("name"),
@@ -846,6 +857,7 @@ const parseFormData = (body, contentType, event) => {
             event[event.httpMethod][curPart.get("name")] = Buffer.from( curPart.get("data") ).toString();
             //console.log("KV added for name: " + curPart.get("name"));
         }
+        */
     }
     
 

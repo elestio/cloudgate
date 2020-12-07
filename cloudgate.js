@@ -186,6 +186,9 @@ if (isMainThread) {
     process.argv.push("--nbThreads");
     process.argv.push(nbThreads);
 
+
+    //this code has been disabled because it's preventing to stop cloudgate service with systemD
+    /*
     process.on('SIGTERM', cleanup);
     process.on('SIGINT', cleanup);
     function cleanup() {
@@ -196,7 +199,9 @@ if (isMainThread) {
         //unregister events to allow close
         process.removeListener('SIGTERM', cleanup);
         process.removeListener('SIGINT', cleanup);
+        
     }
+    */
 
     for ( var i = 0; i < nbThreads; i++ ){
         /* Spawn a new thread running this source file */
@@ -205,8 +210,13 @@ if (isMainThread) {
         worker.on('message', HandleMessage);
         worker.on('error', HandleError);
         worker.on('exit', (code) => {
-            if (code !== 0)
-            console.log(`Worker stopped with exit code ${code}`);
+            if (code !== 0){
+                console.log(`Worker stopped with exit code ${code}`);
+            }
+            else{
+                //console.log("worker normal exit");
+            }
+            
         });
        
 

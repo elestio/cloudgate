@@ -192,14 +192,25 @@ if (isMainThread) {
     process.on('SIGTERM', cleanup);
     process.on('SIGINT', cleanup);
     function cleanup() {
-        //myWorker.postMessage('cleanup');
         console.log("Cleanup before exit ...");
+        //myWorker.postMessage('cleanup');
+        
         SaveBeforeExit();
 
         //unregister events to allow close
-        process.removeListener('SIGTERM', cleanup);
-        process.removeListener('SIGINT', cleanup);
-        
+        //process.removeListener('SIGTERM', cleanup);
+        //process.removeListener('SIGINT', cleanup);
+
+        //shutdown all workers
+        for(var i = 0 ; i < workersList.length ; i++){
+            var worker = workersList[i];
+            var obj = { type: "CG_EXIT_WORKER" };
+            worker.postMessage(obj);
+        }
+
+        //process.exit(0);
+        //process.emit('SIGINT');
+        //process.emit('SIGTERM');
     }
     */
 

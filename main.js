@@ -65,7 +65,12 @@ if (parentPort != null) {
             return;
         }
 
-
+        if ( msg.type == "CG_EXIT_WORKER" ){
+            
+            //clean exit of the worker
+            console.log("Order to exit the worker")
+            process.exit(0);
+        }
         
         if ( msg.type == "CG_SSL_ADD" ){
             

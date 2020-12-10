@@ -570,12 +570,22 @@ function Start(argv) {
             //SSL Handling
 
             if ( options.https.sslcert != null ){
+
+                //generate dhparam for the server if not present
+                var dhParamsPath = path.join(options.root, "CERTS/letsencrypt/dhparams.pem");
+                if (!fs.existsSync(dhParamsPath)) {
+                    console.log("Generating dhParams.pem, this can take up to 1 minute, please wait ...");
+                    var dhContent = await GetDHParams(2048);
+                    fs.writeFileSync(dhParamsPath, dhContent);
+                }
+
                 //SSL Cert provided
                 //Start the SSL Server
                 var coregate = require('./coregate.js'); coregate._cfg("silent");
                 var sslApp = coregate.SSLApp({
                     key_file_name: options.https.sslkey,
-                    cert_file_name: options.https.sslcert
+                    cert_file_name: options.https.sslcert,
+                    dh_params_file_name: dhParamsPath
                 });
 
                 serverConfig.isSSL = true;
@@ -585,6 +595,10 @@ function Start(argv) {
                         console.log('Listening to port ' + options.https.sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                     }
                 });
+
+                var publicFolder = path.join(options.root, "/public/");
+                handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path, options, dhParamsPath);
+
             }
             else{
                 //Need to generate / renew the cert
@@ -666,84 +680,8 @@ function Start(argv) {
 
                         sharedmem.setString(options.https.ssldomain, "0", "SSLGeneration");
                     
-
-                        sslApp.missingServerName((hostname) => {
-                                                            
-                            //Check if domain is declared by an appconfig (loaded app)
-                            var appConfig = memory.getObject(hostname, "GLOBAL");
+                        handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path, options, dhParamsPath);
                         
-                            //handle *
-                            if (appConfig == null) {
-                                appConfig = memory.getObject("*", "GLOBAL");
-                            }
-
-                            //handle *.XXXXX.xxx
-                            var subDomain = hostname.split('.')[0];
-                            var domain = hostname.substring(hostname.indexOf('.') + 1);
-                            if (appConfig == null) {
-                                appConfig = memory.getObject("*." + domain, "GLOBAL"); //avoid constant call to redis
-                            }
-
-
-                            //generate a certificate ONLY if the domain was declared in an appconfig
-                            if (appConfig == null){
-                                console.log("Domain: " + hostname + " is not declared in appconfig.json, skipping SSL cert generation/loading");
-                                return;
-                            }
-                            
-                            //start generation process only if not already started
-                            if ( sharedmem.getString(hostname, "SSLGeneration") != "1" )
-                            {
-                                sharedmem.setString(hostname, "1", "SSLGeneration");
-
-                                //console.log("Hello! We are missing server name <" + hostname + ">");
-
-                                //TODO: add new domain routing in memstate, to which app should it point?
-                                //console.log('Generating a new cert for: ' + hostname);
-                                certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
-                                //console.log(certPath);
-
-                                var certInfos = null;
-                                //todo: use user email
-                                Letsencrypt.GenerateCert(isProd, hostname, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
-                                    certInfos = resp;
-                                    
-                                    var sslOpts = {
-                                        key_file_name: certInfos.privateKeyPath,
-                                        cert_file_name: certInfos.fullchain,
-                                        passphrase: '', 
-                                        dh_params_file_name: dhParamsPath
-                                    };
-
-                                    sslApp.addServerName(hostname, sslOpts);
-
-
-            
-                                    //send a copy to other threads
-                                    //in fact not needed at all ...
-                                    /*
-                                    if ( parentPort != null ){
-
-                                        setTimeout(function(){
-                                            var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
-                                            var obj = { type: "CG_SSL_ADD", hostname: hostname, sslOpts: sslOpts, source: clusteredProcessIdentifier };
-                                            parentPort.postMessage(obj);
-                                        }, 1*1000);
-                                        
-                                    }
-                                    */
-
-                                    sharedmem.setString(hostname, "0", "SSLGeneration");
-
-                                });
-                            }
-                            else{
-                                //retry in 15 sec
-                                
-                                
-                            }
-                            
-                        })
                         
                     });
                 }
@@ -855,6 +793,96 @@ function Start(argv) {
 }
 
 
+
+function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path, options, dhParamsPath){
+
+    sslApp.missingServerName((hostname) => {
+                                                            
+        //Check if domain is declared by an appconfig (loaded app)
+        var appConfig = memory.getObject(hostname, "GLOBAL");
+    
+        //handle *
+        if (appConfig == null) {
+            appConfig = memory.getObject("*", "GLOBAL");
+        }
+
+        //handle *.XXXXX.xxx
+        var subDomain = hostname.split('.')[0];
+        var domain = hostname.substring(hostname.indexOf('.') + 1);
+        if (appConfig == null) {
+            appConfig = memory.getObject("*." + domain, "GLOBAL"); //avoid constant call to redis
+        }
+
+
+        //generate a certificate ONLY if the domain was declared in an appconfig
+        if (appConfig == null){
+            console.log("Domain: " + hostname + " is not declared in appconfig.json, skipping SSL cert generation/loading");
+            return;
+        }
+        
+        //start generation process only if not already started
+        if ( sharedmem.getString(hostname, "SSLGeneration") != "1" )
+        {
+            sharedmem.setString(hostname, "1", "SSLGeneration");
+
+
+            var Letsencrypt = require('./modules/letsencrypt');
+            var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
+            var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
+            var isProd = true;
+
+            fs.mkdirSync(certPath, { recursive: true });
+            fs.mkdirSync(LEAccountPath.replace("account.key", ""), { recursive: true });
+
+            //console.log("Hello! We are missing server name <" + hostname + ">");
+
+            //TODO: add new domain routing in memstate, to which app should it point?
+            //console.log('Generating a new cert for: ' + hostname);
+            certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
+            //console.log(certPath);
+
+            var certInfos = null;
+            //todo: use user email
+            Letsencrypt.GenerateCert(isProd, hostname, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
+                certInfos = resp;
+                
+                var sslOpts = {
+                    key_file_name: certInfos.privateKeyPath,
+                    cert_file_name: certInfos.fullchain,
+                    passphrase: '', 
+                    dh_params_file_name: dhParamsPath
+                };
+
+                sslApp.addServerName(hostname, sslOpts);
+
+
+
+                //send a copy to other threads
+                //in fact not needed at all ...
+                /*
+                if ( parentPort != null ){
+
+                    setTimeout(function(){
+                        var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
+                        var obj = { type: "CG_SSL_ADD", hostname: hostname, sslOpts: sslOpts, source: clusteredProcessIdentifier };
+                        parentPort.postMessage(obj);
+                    }, 1*1000);
+                    
+                }
+                */
+
+                sharedmem.setString(hostname, "0", "SSLGeneration");
+
+            });
+        }
+        else{
+            //retry in 15 sec
+            
+            
+        }
+        
+    })
+}
 
 function SaveBeforeExit() {
 

@@ -72,9 +72,6 @@ function BanIP(app, ip, appConfig) {
     if ( appConfig.banDurationSeconds != null && appConfig.banDurationSeconds > 0 ){
         banDuration = appConfig.banDurationSeconds * 1000;
     }
-    else{
-        banDuration = 1000*60*5; //5 minutes
-    }
     
     //check if not already banned
     if ( sharedmem.getString(ip, "bannedIPs") == 0 ){

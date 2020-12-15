@@ -792,11 +792,25 @@ function Start(argv) {
     }
 }
 
-
+function ValidateIPaddress(ipaddress) 
+{
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress))
+    {
+        return (true)
+    }
+    else{
+        return (false)
+    }
+}
 
 function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path, options, dhParamsPath){
 
     sslApp.missingServerName((hostname) => {
+
+        if ( ValidateIPaddress(hostname) == true ){
+            //this is an ip address and not an hostname, letsencrypt do not allow to gen cert for an ip
+            return;
+        }
                                                             
         //Check if domain is declared by an appconfig (loaded app)
         var appConfig = memory.getObject(hostname, "GLOBAL");

@@ -3,11 +3,70 @@ const cheerio = require('cheerio');
 const apiFunctions = require('./api-functions.js');
 const tools = require('./tools.js');
 const zlib = require('zlib');
+const sharedmem = require('../modules/shared-memory');
 
 var open = false;
 
+const os = require('os')
+const cpuCount = os.cpus().length;
+var maxConcurrency = cpuCount;
+if (maxConcurrency < 1){
+    maxConcurrency = 1;
+}
+
+var maxCachedResults = 100; //TODO: should be configurable in server config
+
 module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB) => {
     
+    var cacheKey = reqInfos.host + "/" + reqInfos.url;
+    if (reqInfos.url.startsWith("/")){
+        cacheKey = reqInfos.host + reqInfos.url;
+    }
+    if ( reqInfos.query != "" && reqInfos.query != null ){
+        cacheKey += "?" + reqInfos.query;
+    }
+
+    var cacheString = sharedmem.getStringKeys("DSOutputCache") + "";
+    if ( cacheString == null ) {
+        cacheString = "";
+    }
+
+    var allCacheKeys = cacheString.split(',');
+    //console.log("nbKeys: " + allCacheKeys.length)
+    if ( allCacheKeys.length > maxCachedResults ){
+        var oldestKey = allCacheKeys[allCacheKeys.length-1];
+        sharedmem.deleteString(oldestKey, "DSOutputCache");
+        //console.log("One old entry deleted from the cache: " + oldestKey);
+    }
+    
+    var curCache = sharedmem.getString( cacheKey, "DSOutputCache");
+    if ( curCache != null && curCache != "" ){
+        responseToProcess.content = tools.GzipContent(curCache);
+        return responseToProcess;
+    }
+    
+    var waitCounter = 0;
+    while ( sharedmem.getInteger("nbDynamicDatasourceProcess") >= maxConcurrency ){
+        waitCounter += 1;
+        //TODO: should be configurable
+        if (waitCounter > 20){
+            console.log("Unable to process after 5000ms")
+            responseToProcess.status = 500;
+            responseToProcess.content = "Unable to process after 5000ms"; //returning an error to prevent crashing the server
+            return responseToProcess;
+        }
+        await tools.sleep(250); //wait until a slot is available
+    }
+
+    //check the cache again (processed by another thread)
+    curCache = sharedmem.getString(cacheKey, "DSOutputCache");
+    if ( curCache != null && curCache != "" ){
+        responseToProcess.content = tools.GzipContent(curCache);
+        return responseToProcess;
+    }
+
+    sharedmem.incInteger("nbDynamicDatasourceProcess", 1);
+
     //console.log(responseToProcess);
     //console.log(queryStringParams);
 
@@ -154,16 +213,23 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
             //finalContent = $.html();
             responseToProcess.content = tools.GzipContent(finalContent);
             //console.log(finalContent)
+
+            sharedmem.incInteger("nbDynamicDatasourceProcess", -1);    
+
+            sharedmem.setString(cacheKey, finalContent, "DSOutputCache");    
+
             return responseToProcess;
          
         }
         else
         {
+            sharedmem.incInteger("nbDynamicDatasourceProcess", -1);    
             return responseToProcess;
         }
     } catch(ex){
         console.log("Error in Dynamic Datasource:");
         console.log(ex);
+        sharedmem.incInteger("nbDynamicDatasourceProcess", -1);    
     }
 
     

@@ -62,7 +62,8 @@ sed -i "s#binpath#${cgPath}#g" /etc/systemd/system/cloudgate.service
 wget -O /etc/cloudgate/memorystate.json https://raw.githubusercontent.com/elestio/cloudgate/master/systemd/memorystate.template
 sed -i "s#3000#${uPort}#g" /etc/cloudgate/memorystate.json
 sed -i "s#/var/www/cloudgate/#${APP_ROOT}/#g" /etc/cloudgate/memorystate.json
-sed -i "s#12#${nbCores}#g" /etc/cloudgate/memorystate.json
+sed -i "s#12##g" /etc/cloudgate/memorystate.json #fill with empty, so it's dynamic
+
 
 sed -i 's#"SSL": ""#"SSL": "1"#g' /etc/cloudgate/memorystate.json
 sed -i "s#\"SSL_DOMAIN\": \"\"#\"SSL_DOMAIN\": \"${domain}\"#g" /etc/cloudgate/memorystate.json

@@ -46,16 +46,18 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
     }
     
     var waitCounter = 0;
+    var sleepTimeMS = 250;
+    var maxWaitTime = 30000;
     while ( sharedmem.getInteger("nbDynamicDatasourceProcess") >= maxConcurrency ){
         waitCounter += 1;
         //TODO: should be configurable
-        if (waitCounter > 20){
-            console.log("Unable to process after 5000ms")
+        if (waitCounter > (maxWaitTime/sleepTimeMS)){
+            console.log("Unable to process after " + maxWaitTime + "ms")
             responseToProcess.status = 500;
-            responseToProcess.content = "Unable to process after 5000ms"; //returning an error to prevent crashing the server
+            responseToProcess.content = "Unable to process after " + maxWaitTime + "ms"; //returning an error to prevent crashing the server
             return responseToProcess;
         }
-        await tools.sleep(250); //wait until a slot is available
+        await tools.sleep(sleepTimeMS); //wait until a slot is available
     }
 
     //check the cache again (processed by another thread)

@@ -55,7 +55,7 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
     }
     
     var waitCounter = 0;
-    var sleepTimeMS = 250;
+    var sleepTimeMS = 25;
     var maxWaitTime = 30000;
     while ( sharedmem.getInteger("nbDynamicDatasourceProcess") >= maxConcurrency ){
         waitCounter += 1;

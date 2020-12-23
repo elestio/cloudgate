@@ -412,9 +412,9 @@ function Start(argv) {
         setTimeout(async function(){
 
             console.log("");
-            console.log("======================================================");    
+            console.log("============================================================");    
             console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);
-            console.log("======================================================");
+            console.log("============================================================");
             console.log("Root App Folder: " + argv.r);   
             console.log("MemoryState: " + resolve(memoryPath));
 
@@ -431,9 +431,13 @@ function Start(argv) {
                 multiThreading = "Yes";
             }
             console.log("CPU: " + cpuData.manufacturer + " | " + cpuData.brand );
-            console.log("Multithreading: "+ multiThreading +" | Threads: " + argv.nbThreads );
+            var outputCacheSetting = "Disabled";
+            if ( argv.oc != null ){
+                outputCacheSetting = "Enabled"
+            }
+            console.log("Multithreading: "+ multiThreading +" | Output Cache: " + outputCacheSetting + " | Threads: " + argv.nbThreads );
 
-            console.log("======================================================");
+            console.log("============================================================");
 
             var port = argv.p || argv.port || parseInt(process.env.PORT, 3000) || 3000;
 
@@ -456,7 +460,7 @@ function Start(argv) {
                 console.log("Listening on: https://" + ssldomain + ":" + 443 );
             }
 
-            console.log("======================================================");
+            console.log("============================================================");
             
         }, 200);
     }
@@ -755,11 +759,12 @@ function Start(argv) {
         app.listen(host, port, (listenSocket) => {
             if (listenSocket) {
                 
-                console.log('Listening to port ' + port + " - Host: " + host + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
+                //console.log('Listening to port ' + port + " - Host: " + host + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
 
                 if ( isMainThread )
                 {
                     console.log("\nCloudGate V" + require('./package.json').version + " started");
+
                     console.log('Listening to port ' + port + " - Host: " + host + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
 
                     var canonicalHost = host === '0.0.0.0' ? '127.0.0.1' : host,

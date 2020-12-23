@@ -33,7 +33,7 @@
     "optimist": "^0.6.1",
     "request": "^2.88.2",
     "shelljs": "^0.8.4",
-    "systeminformation": ">=4.27.11",
+    "systeminformation": "^4.33.1",
     "uuid": "^7.0.3",
     "ws": "^7.2.5"
   },

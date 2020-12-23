@@ -25,6 +25,8 @@ var sharedmem = require("./shared-memory");
 const apiDB = require('./api-db');
 var coregate = require('../coregate.js');
 
+var cacheSQLFunctionsSource = {}; //TODO: cache invalidation should be handled (api, fs events)
+
 module.exports = {
     name: "api-functions",
     process: (appConfig, reqInfos, res, req, memory, serverConfig, app, event) => {
@@ -375,7 +377,17 @@ module.exports = {
                     if (!apiEndpoint.type.includes('nodejs')) {
                         
                         //SQL Source
-                        let sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
+                        var cacheSQLKey = `${apiEndpoint.src}${functionIndexFile}.sql`;
+                        var sqlRequest = "";
+                        //sqlRequest = fs.readFileSync(`${apiEndpoint.src}${functionIndexFile}.sql`, 'utf-8');
+                        
+                        if ( cacheSQLFunctionsSource[cacheSQLKey] == null ){
+                            sqlRequest = fs.readFileSync(cacheSQLKey, 'utf-8');
+                            cacheSQLFunctionsSource[cacheSQLKey] = sqlRequest;
+                        }
+                        else{
+                            sqlRequest = cacheSQLFunctionsSource[cacheSQLKey];
+                        }
                         
                         //VisualSQL + RAW SQL support
                         if (apiEndpoint.type.slice(0,3) === 'SQL' || apiEndpoint.type == 'SELECT' || apiEndpoint.type == 'INSERT' || apiEndpoint.type == 'UPDATE' || apiEndpoint.type == 'DELETE') {

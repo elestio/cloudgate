@@ -522,10 +522,13 @@ module.exports = {
                         //console.log("Processing Dynamic Datasource");
                         result = await dynamicDatasource(result, reqInfos.query, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB);
 
-                        //add base href if rewriten url
-                        var rawContent = await tools.gunzip(result.content);
-                        rawContent = rawContent.replace("<head>", "<head> <base href='/'>");
-                        result.content = tools.GzipContent(rawContent);
+                        //check new status after dynamic datasource
+                        if ( result.status != 500 ){
+                            //add base href if rewriten url
+                            var rawContent = await tools.gunzip(result.content);
+                            rawContent = rawContent.replace("<head>", "<head> <base href='/'>");
+                            result.content = tools.GzipContent(rawContent);
+                        }
                     }
                     
                  
@@ -569,7 +572,10 @@ module.exports = {
                                     
                                     //memory.set(cacheKey, processResult, "ResponseCache");
                                     //sharedmem.setString(cacheKey, JSON.stringify(processResult), "RESPONSECACHE");;
-                                    lru.set(cacheKey, processResult);
+                                    
+                                    if (processResult.doNotCache != 1){
+                                        lru.set(cacheKey, processResult);
+                                    }
                                     
                                 }
                                 else{

@@ -39,9 +39,18 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
         //console.log("One old entry deleted from the cache: " + oldestKey);
     }
     
+    //serve from cache
     var curCache = sharedmem.getString( cacheKey, "DSOutputCache");
     if ( curCache != null && curCache != "" ){
         responseToProcess.content = tools.GzipContent(curCache);
+        return responseToProcess;
+    }
+
+    //exit if no datasource
+    var content = await tools.gunzip(responseToProcess.content);
+    if ( content.indexOf('meta name="datasource"') == -1 )
+    {
+        //no datasource, return directly
         return responseToProcess;
     }
     
@@ -52,9 +61,11 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
         waitCounter += 1;
         //TODO: should be configurable
         if (waitCounter > (maxWaitTime/sleepTimeMS)){
-            console.log("Unable to process after " + maxWaitTime + "ms")
+            var errDetails = "Unable to process [" + cacheKey + "] after " + maxWaitTime + "ms";
+            console.log(errDetails)
             responseToProcess.status = 500;
-            responseToProcess.content = "Unable to process after " + maxWaitTime + "ms"; //returning an error to prevent crashing the server
+            responseToProcess.content = errDetails; //returning an error to prevent crashing the server
+            responseToProcess.error = errDetails;
             return responseToProcess;
         }
         await tools.sleep(sleepTimeMS); //wait until a slot is available
@@ -78,7 +89,6 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
 
     var params = queryStringParams;
 
-    var content = await tools.gunzip(responseToProcess.content);
     var finalContent = content;
 
     //console.log(content);
@@ -121,6 +131,13 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
                 //console.log(newReqInfos)
                 var result = await apiFunctions.process(appConfig, newReqInfos, null, null, memory, serverConfig, app);
                 //console.log(result)
+
+                //do not cache errors
+                if ( (result.content.Table + "").startsWith("Error: ") ){
+                    sharedmem.incInteger("nbDynamicDatasourceProcess", -1);   
+                    responseToProcess.doNotCache = 1;
+                    return responseToProcess;
+                }
 
                 var rows = result.content.Table;
                 //console.log(rows)

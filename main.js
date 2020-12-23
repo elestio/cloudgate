@@ -435,7 +435,7 @@ function Start(argv) {
             if ( argv.oc != null ){
                 outputCacheSetting = "Enabled"
             }
-            console.log("Multithreading: "+ multiThreading +" | Output Cache: " + outputCacheSetting + " | Threads: " + argv.nbThreads );
+            console.log("Multithreading: "+ multiThreading +" | Threads: " + argv.nbThreads + " | Output Cache: " + outputCacheSetting );
 
             console.log("============================================================");
 

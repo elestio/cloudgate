@@ -233,9 +233,8 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
             responseToProcess.content = tools.GzipContent(finalContent);
             //console.log(finalContent)
 
-            sharedmem.incInteger("nbDynamicDatasourceProcess", -1);    
-
-            sharedmem.setString(cacheKey, finalContent, "DSOutputCache");    
+            sharedmem.setString(cacheKey, finalContent, "DSOutputCache");
+            sharedmem.incInteger("nbDynamicDatasourceProcess", -1);      
 
             return responseToProcess;
          

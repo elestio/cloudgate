@@ -19,6 +19,8 @@ var maxCachedResults = 100; //TODO: should be configurable in server config
 module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB) => {
     
     var cacheKey = reqInfos.host + "/" + reqInfos.url;
+    //disabled because useless
+    /*
     if (reqInfos.url.startsWith("/")){
         cacheKey = reqInfos.host + reqInfos.url;
     }
@@ -45,6 +47,7 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
         responseToProcess.content = tools.GzipContent(curCache);
         return responseToProcess;
     }
+    */
 
     //exit if no datasource
     var content = await tools.gunzip(responseToProcess.content);
@@ -71,12 +74,14 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
         await tools.sleep(sleepTimeMS); //wait until a slot is available
     }
 
+    /*
     //check the cache again (processed by another thread)
     curCache = sharedmem.getString(cacheKey, "DSOutputCache");
     if ( curCache != null && curCache != "" ){
         responseToProcess.content = tools.GzipContent(curCache);
         return responseToProcess;
     }
+    */
 
     sharedmem.incInteger("nbDynamicDatasourceProcess", 1);
 
@@ -229,11 +234,9 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
             
 
             //console.log("before return")
-            //finalContent = $.html();
             responseToProcess.content = tools.GzipContent(finalContent);
-            //console.log(finalContent)
-
-            sharedmem.setString(cacheKey, finalContent, "DSOutputCache");
+            
+            //sharedmem.setString(cacheKey, finalContent, "DSOutputCache");
             sharedmem.incInteger("nbDynamicDatasourceProcess", -1);      
 
             return responseToProcess;
@@ -247,7 +250,9 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
     } catch(ex){
         console.log("Error in Dynamic Datasource:");
         console.log(ex);
-        sharedmem.incInteger("nbDynamicDatasourceProcess", -1);    
+        sharedmem.incInteger("nbDynamicDatasourceProcess", -1);  
+        responseToProcess.doNotCache = 1;
+        return responseToProcess;  
     }
 
     

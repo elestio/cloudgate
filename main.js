@@ -38,6 +38,7 @@ const memory = require('./modules/memory');
 const sharedmem = require('./modules/shared-memory');
 const cloudgatePubSub = require('./modules/cloudgate-pubsub.js');
 const tools = require('./modules/tools.js');
+const axios = require('axios');
 
 var globalSSLApp = null;
 
@@ -816,6 +817,11 @@ function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path
             //this is an ip address and not an hostname, letsencrypt do not allow to gen cert for an ip
             return;
         }
+
+        if ( hostname == "localhost" ){
+            //this is a spoofed hostname
+            return;
+        }
                                                             
         //Check if domain is declared by an appconfig (loaded app)
         var appConfig = memory.getObject(hostname, "GLOBAL");
@@ -834,71 +840,89 @@ function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path
 
 
         //generate a certificate ONLY if the domain was declared in an appconfig
+        //TODO: not yet fully implemented, for now we get appconfig of *
         if (appConfig == null){
             console.log("Domain: " + hostname + " is not declared in appconfig.json, skipping SSL cert generation/loading");
             return;
         }
-        
-        //start generation process only if not already started
-        if ( sharedmem.getString(hostname, "SSLGeneration") != "1" )
-        {
-            sharedmem.setString(hostname, "1", "SSLGeneration");
 
+        //TODO: check if the domain is allowed in the appconfig settings, or if appconfig allow any domain (usefull for saas)
 
-            var Letsencrypt = require('./modules/letsencrypt');
-            var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
-            var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
-            var isProd = true;
+        //TODO: check if the domain is pointing to this server!
+        var checkURL = "http://" + hostname + "/cloudgate/debug/raw";
+        (async () => {
+            try {
+                const response = await axios.get(checkURL)
+                //console.log(response.data);
 
-            fs.mkdirSync(certPath, { recursive: true });
-            fs.mkdirSync(LEAccountPath.replace("account.key", ""), { recursive: true });
-
-            //console.log("Hello! We are missing server name <" + hostname + ">");
-
-            //TODO: add new domain routing in memstate, to which app should it point?
-            //console.log('Generating a new cert for: ' + hostname);
-            certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
-            //console.log(certPath);
-
-            var certInfos = null;
-            //todo: use user email
-            Letsencrypt.GenerateCert(isProd, hostname, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
-                certInfos = resp;
-                
-                var sslOpts = {
-                    key_file_name: certInfos.privateKeyPath,
-                    cert_file_name: certInfos.fullchain,
-                    passphrase: '', 
-                    dh_params_file_name: dhParamsPath
-                };
-
-                sslApp.addServerName(hostname, sslOpts);
-
-
-
-                //send a copy to other threads
-                //in fact not needed at all ...
-                /*
-                if ( parentPort != null ){
-
-                    setTimeout(function(){
-                        var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
-                        var obj = { type: "CG_SSL_ADD", hostname: hostname, sslOpts: sslOpts, source: clusteredProcessIdentifier };
-                        parentPort.postMessage(obj);
-                    }, 1*1000);
-                    
+                if (response.data != "Hello World!"){
+                    console.log("Domain: " + hostname + " is not pointing to cloudgate, this is probably a spoofed host header, skipping SSL cert generation/loading");
+                    return;
                 }
-                */
-
-                sharedmem.setString(hostname, "0", "SSLGeneration");
-
-            });
-        }
-        else{
-            //retry in 15 sec
-            
-            
-        }
+                
+                //start generation process only if not already started
+                if ( sharedmem.getString(hostname, "SSLGeneration") != "1" )
+                {
+                    sharedmem.setString(hostname, "1", "SSLGeneration");
+        
+        
+                    var Letsencrypt = require('./modules/letsencrypt');
+                    var certPath = path.join(options.root, "CERTS/" + options.https.ssldomain + "/");
+                    var LEAccountPath = path.join(options.root, "CERTS/letsencrypt/account.key");
+                    var isProd = true;
+        
+                    fs.mkdirSync(certPath, { recursive: true });
+                    fs.mkdirSync(LEAccountPath.replace("account.key", ""), { recursive: true });
+        
+                    //console.log("Hello! We are missing server name <" + hostname + ">");
+        
+                    //TODO: add new domain routing in memstate, to which app should it point?
+                    //console.log('Generating a new cert for: ' + hostname);
+                    certPath = path.join(appConfig.root, "CERTS/" + hostname + "/");
+                    //console.log(certPath);
+        
+                    var certInfos = null;
+                    //todo: use user email
+                    Letsencrypt.GenerateCert(isProd, hostname, "TODO-replace@mailinator.com", certPath, publicFolder, LEAccountPath).then(function(resp) {
+                        certInfos = resp;
+                        
+                        var sslOpts = {
+                            key_file_name: certInfos.privateKeyPath,
+                            cert_file_name: certInfos.fullchain,
+                            passphrase: '', 
+                            dh_params_file_name: dhParamsPath
+                        };
+        
+                        sslApp.addServerName(hostname, sslOpts);
+        
+        
+        
+                        //send a copy to other threads
+                        //in fact not needed at all ...
+                        /*
+                        if ( parentPort != null ){
+        
+                            setTimeout(function(){
+                                var clusteredProcessIdentifier = require('os').hostname() + "_" + require('worker_threads').threadId;
+                                var obj = { type: "CG_SSL_ADD", hostname: hostname, sslOpts: sslOpts, source: clusteredProcessIdentifier };
+                                parentPort.postMessage(obj);
+                            }, 1*1000);
+                            
+                        }
+                        */
+        
+                        sharedmem.setString(hostname, "0", "SSLGeneration");
+        
+                    });
+                }
+                else{
+                    //retry in 15 sec
+                }
+               
+            } catch (error) {
+                console.log(error.res);
+            }
+        })();
         
     })
 }

@@ -18,7 +18,7 @@ var maxCachedResults = 100; //TODO: should be configurable in server config
 
 module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB) => {
     
-    var cacheKey = reqInfos.host + "/" + reqInfos.url;
+    var cacheKey = appConfig.root + reqInfos.url + reqInfos.query;
     //disabled because useless
     /*
     if (reqInfos.url.startsWith("/")){
@@ -57,14 +57,15 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
         return responseToProcess;
     }
     
+    //TODO: Improve, potential DOS if a dynamic datasource page is taking very long to render!
     var waitCounter = 0;
     var sleepTimeMS = 25;
     var maxWaitTime = 30000;
     while ( sharedmem.getInteger("nbDynamicDatasourceProcess") >= maxConcurrency ){
         waitCounter += 1;
         //TODO: should be configurable
-        if (waitCounter > (maxWaitTime/sleepTimeMS)){
-            var errDetails = "Unable to process [" + cacheKey + "] after " + maxWaitTime + "ms";
+        if (waitCounter >= (maxWaitTime/sleepTimeMS)){
+            var errDetails = "Unable to process [" + cacheKey + "] after " + (waitCounter*sleepTimeMS) + "ms";
             console.log(errDetails)
             responseToProcess.status = 500;
             responseToProcess.content = errDetails; //returning an error to prevent crashing the server

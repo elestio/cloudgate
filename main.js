@@ -855,6 +855,7 @@ function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path
                 const response = await axios.get(checkURL)
                 //console.log(response.data);
 
+                //TODO: improve check, is it really targeting this instance of cloudgate and not another server trying to spoof
                 if (response.data != "Hello World!"){
                     console.log("Domain: " + hostname + " is not pointing to cloudgate, this is probably a spoofed host header, skipping SSL cert generation/loading");
                     return;
@@ -920,7 +921,8 @@ function handleMissingCertificates(sslApp, memory, sharedmem, publicFolder, path
                 }
                
             } catch (error) {
-                console.log(error.res);
+                //console.log("Error while checking domain, this is normal to crash here for a spoofing attempt")
+                //console.log(error);
             }
         })();
         

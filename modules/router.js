@@ -452,7 +452,8 @@ module.exports = {
                 //Caching: think about caching of GET only!
                 var cacheKey = null;
                 if (reqInfos.method == "get") {
-                    cacheKey = host + reqInfos.url + reqInfos.query;
+                    //cacheKey = host + reqInfos.url + reqInfos.query;
+                    cacheKey = appConfig.root + reqInfos.url + reqInfos.query;
                     
                     //if ( serverConfig.outputcache )
                     {
@@ -573,7 +574,7 @@ module.exports = {
                                     //memory.set(cacheKey, processResult, "ResponseCache");
                                     //sharedmem.setString(cacheKey, JSON.stringify(processResult), "RESPONSECACHE");;
                                     
-                                    if (processResult.doNotCache != 1){
+                                    if (processResult.doNotCache != 1 && cacheKey != null){
                                         lru.set(cacheKey, processResult);
                                     }
                                     

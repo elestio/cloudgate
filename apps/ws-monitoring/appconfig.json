@@ -1,0 +1,41 @@
+{
+  "env": "PROD",
+  "version": "1.0.0",
+  "title": "ws-monitoring",
+  "description": "This is a sample app that handle server monitoring",
+  "domains": ["*"], 
+  "publicFolder": "./public",
+  "TypeAPI": "LOCAL",
+  "TypeFS": "LOCAL",
+  "redirect404toIndex": false,
+  "HSTS": false,
+  "maxRequestsPerMinutePerIP": 100,
+  "CORS": {
+      "access-control-allow-origin": "*"
+  },
+  "apiEndpoints": {
+    "/tests/simple" : {
+      "src": "./API/tests/",
+      "handler": "simple.handler"
+    },
+    "/tests/full" : {
+      "src" : "./API/tests/",
+      "handler": "full.handler",
+      "maxRequestsPerMinutePerIP": 50
+    },
+    "/Deploy" : {
+      "src" : "./API/",
+      "handler": "Deploy.handler",
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX"
+    }
+  },
+  "websocketEndpoints": {
+    "/monitoring" : {
+      "src" : "./API/websocket/",
+      "open": "Monitoring.open",
+      "message": "Monitoring.message",
+      "close": "Monitoring.close",
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX1"
+    }
+  }
+}

@@ -1,0 +1,311 @@
+<html>
+    <head>
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+        <style>
+            .line{
+                float: left;
+                width: 100%;
+            }
+            .bloc{
+                float: left;
+                width: 220px;
+                padding: 8px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                background: #f1f1f1;
+                border-radius: 8px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                padding-left: 15px;
+            }
+            .bloc p{
+                margin: 0;
+                font-size: 26px;
+                float: left;
+                width: 100%;
+            }
+            .bloc span{
+                margin: 0;
+                font-size: 16px;
+                float: left;
+                width: 100%;
+            }
+
+            .inputsBox{
+                float: left;
+                width: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div id='inputsBox'>
+            <input id='txtInput' type='text' placeholder='Type a command ...'/> 
+            <button onclick='SendMessage()'>SEND</button>
+        </div>
+
+        <div id='global' style='margin-top: 10px; width: 95%; color: black; padding: 15px;'> 
+            
+            <div class='line'>
+                <div class='bloc'>
+                    <p id='currentload'>... %</p>
+                    <span>CPU Usage</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='mem'>... GB</p>
+                    <span>RAM Usage</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='swap'>... GB</p>
+                    <span>SWAP Usage</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='uptime'>... Days</p>
+                    <span>Server uptime in days</span>
+                </div>
+
+            </div>
+
+            <div class="line">
+                <div class='bloc'>
+                    <p id='networkStats_totalRX'>...</p>
+                    <span>Total Network inbound</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='networkStats_totalTX'>...</p>
+                    <span>Total Network outbound</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='networkStats_RXSpeed'>...</p>
+                    <span>Network inbound speed</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='networkStats_TXSpeed'>...</p>
+                    <span>Network outbound speed</span>
+                </div>
+            </div>
+
+
+            <div class="line">
+                <div class='bloc' title="Bytes read since startup">
+                    <p id='diskRX'>...</p>
+                    <span>Total FS reads</span>
+                </div>
+
+                <div class='bloc' title="Bytes written since startup">
+                    <p id='diskWX'>...</p>
+                    <span>Total FS writes</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='diskRXSpeed'>...</p>
+                    <span>FS Bytes read/second</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='diskWXSpeed'>...</p>
+                    <span>FS Bytes write/second</span>
+                </div>
+            </div>
+
+            <div class="line">
+                <div class='bloc' title="Bytes read since startup">
+                    <p id='diskIORX'>...</p>
+                    <span>Total IO Reads</span>
+                </div>
+
+                <div class='bloc' title="Bytes written since startup">
+                    <p id='diskIOWX'>...</p>
+                    <span>Total IO Writes</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='diskIORXSpeed'>...</p>
+                    <span>IO reads/second</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='diskIOWXSpeed'>...</p>
+                    <span>IO writes/second</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div id='content' style='margin-top: 10px; height:  width: 95%; color: black; padding: 15px;'> </div>
+        
+        <script src='js/pretty-bytes.js?v=2'></script>
+        <script>
+
+                var input = document.getElementById("txtInput");
+                // Execute a function when the user releases a key on the keyboard
+                input.addEventListener("keyup", function(event) {
+                    if (event.keyCode === 13) {
+                        // Cancel the default action, if needed
+                        event.preventDefault();
+                        SendMessage()
+                    }
+                });
+
+                var shouldReconnect = true;
+                function connect() {
+
+                    var channel = getParamFromUrl("channel");
+                    if ( channel == null ) {
+                        channel = "global";
+                    }
+
+                    
+
+                    var protocolPrefix = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
+                    var rootURL = protocolPrefix + '//' + location.host;
+                    var ws = new WebSocket(rootURL + '/monitoring?channel=' + channel + "&token=" + getParamFromUrl("token"));
+                    var nbConnectRetry = 5;
+                    globalWS = ws;
+                    ws.onopen = function() {
+                        nbConnectRetry = 0;
+                    };
+
+                    ws.onmessage = function(e) {
+                        //console.log('Message:', e.data);
+
+                        /*
+                        var new_html = '<span class="line">' +  sanitizeHTML(e.data)  + '</span>';
+                        var new_elem = document.createElement('div');
+                        new_elem.innerHTML = new_html;
+
+                        var content = document.getElementById('content');
+                        content.appendChild(new_elem);
+                        */
+
+                        if ( e.data == "Unauthorized"){
+                            shouldReconnect = false;
+                            ws.close();
+                        }
+                        else{
+                            var msg = JSON.parse(e.data);
+                            if ( msg.type == "global" ){
+
+                            }
+                            else if ( msg.type == "dynamic" ){
+                                document.getElementById('currentload').innerHTML = msg.currentLoad.currentload.toFixed(2) + " %";
+                                document.getElementById('uptime').innerHTML = (msg.time.uptime*1000/8.64e+7).toFixed(5) + " Days";
+                                
+                                document.getElementById('mem').innerHTML = prettyBytes(msg.mem.active) + " / " + prettyBytes(msg.mem.total);
+                                document.getElementById('swap').innerHTML = prettyBytes(msg.mem.swapused) + " / " + prettyBytes(msg.mem.swaptotal);
+
+                                document.getElementById('networkStats_totalRX').innerHTML = prettyBytes(msg.networkStats[0].rx_bytes);
+                                document.getElementById('networkStats_totalTX').innerHTML = prettyBytes(msg.networkStats[0].tx_bytes);
+                                document.getElementById('networkStats_RXSpeed').innerHTML = prettyBytes(msg.networkStats[0].rx_sec) + "/s";
+                                document.getElementById('networkStats_TXSpeed').innerHTML = prettyBytes(msg.networkStats[0].tx_sec) + "/s";
+
+                                /*
+                                document.getElementById('diskRX').innerHTML = prettyBytes(msg.fsStats.rx);
+                                document.getElementById('diskWX').innerHTML = prettyBytes(msg.fsStats.tx);
+                                document.getElementById('diskRXSpeed').innerHTML = prettyBytes(msg.fsStats.rx_sec) + "/s";
+                                document.getElementById('diskWXSpeed').innerHTML = prettyBytes(msg.fsStats.wx_sec) + "/s";
+                                */
+
+                                document.getElementById('diskIORX').innerHTML = (msg.disksIO.rIO/1000/1000).toFixed(5) + " M";
+                                document.getElementById('diskIOWX').innerHTML = (msg.disksIO.wIO/1000/1000).toFixed(5) + " M";
+                                document.getElementById('diskIORXSpeed').innerHTML = (msg.disksIO.rIO_sec).toFixed(0) + "/s";
+                                document.getElementById('diskIOWXSpeed').innerHTML = (msg.disksIO.wIO_sec).toFixed(0) + "/s";
+                                
+                                
+                            }
+                            else if ( msg.type == "processes" ){
+
+                            }
+                            else if ( msg.type == "services" ){
+
+                            }
+
+
+                        }
+                    };
+
+                    ws.onclose = function(e) {
+                        console.log('Socket is closed. Reconnect will be attempted in ' + nbConnectRetry + ' seconds.', e.reason);
+                        if (shouldReconnect){
+                            setTimeout(function() {
+                                connect();
+                            }, 1000*nbConnectRetry); //backoff mechanism
+                        }
+                    };
+
+                    ws.onerror = function(err) {
+                        console.error('Socket encountered error: ', err.message, 'Closing socket');
+                        ws.close();
+
+                        nbConnectRetry += 1;
+                    };
+                }
+
+                connect();
+
+
+                function SendMessage(){
+                    var txt = document.getElementById('txtInput').value;
+                    Send(txt);
+                    document.getElementById('txtInput').value = "";
+                }
+
+                
+                function Send(txt) {
+                    
+                    if ( globalWS.readyState != 1 ){
+                        //websocket is closed, skip it ... (or queue it?)
+                        return;
+                    }
+
+                    txt = JSON.stringify({
+                        EXEC_CMD: txt
+                    });
+
+                    globalWS.send( encodeURIComponent(txt) );
+                }
+
+                var sanitizeHTML = function (str) {
+
+                    return str;
+
+                    var temp = document.createElement('div');
+                    temp.textContent = str;
+                    return temp.innerHTML;
+                };
+
+                function getParamFromUrl(n){var t=new RegExp("[?&]"+n+"=([^&#]*)").exec(window.location.href);return t==null?null:t[1]||0}
+
+                //Heartbeat system to avoid cloudflare and other CDNs to close the channel
+                setInterval(function(){
+                    if ( globalWS.readyState != 1 ){
+                        return;
+                    }
+                    globalWS.send( "[HEARTBEAT]" );
+                }, 60*1000);
+
+
+
+                function formatGB(val){
+                    return val/1024/1024/1024;
+                }
+
+                function formatMB(val){
+                    return val/1024/1024;
+                }
+
+                function formatKB(val){
+                    return val/1024;
+                }
+
+            </script>
+
+    </body>
+</html>

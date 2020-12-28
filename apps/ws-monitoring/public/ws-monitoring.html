@@ -310,6 +310,8 @@
                                 
                                 var allHTML = "";
                                 var procList = msg.processes.list;
+                                procList = procList.sort((a,b) => (a.pcpu < b.pcpu) ? 1 : ((b.pcpu < a.pcpu) ? -1 : 0));
+
                                 allHTML += json2Table(procList, "");
                                 document.getElementById('processes').innerHTML = allHTML;
                             }
@@ -425,6 +427,9 @@
                         for (key in data[i]) {
                             if ( key == "size" || key == "used" ){
                                 result +='<td>' + prettyBytes(parseInt(data[i][key])) + '</td>';
+                            }
+                            else if( key == "pcpu" || key == "pcpuu" || key == "pcpus" ){
+                                result +='<td>' + parseFloat(data[i][key]).toFixed(2) + '</td>';
                             }
                             else{
                                 var val = data[i][key];

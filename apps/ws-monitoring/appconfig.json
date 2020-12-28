@@ -35,7 +35,7 @@
       "open": "Monitoring.open",
       "message": "Monitoring.message",
       "close": "Monitoring.close",
-      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX1"
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXX"
     }
   }
 }

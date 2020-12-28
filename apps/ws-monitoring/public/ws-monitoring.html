@@ -35,6 +35,44 @@
                 float: left;
                 width: 100%;
             }
+
+
+            h2{
+                color: gray;
+                margin: 0;
+                margin-top: 20px;
+                float: left;
+                width: 100%;
+            }
+
+            h3{
+                color: #959595;
+            }
+
+            .processItem{
+                background: #f1f1f1;
+                margin-bottom: 2px;
+            }
+
+            .systemTable{
+                max-width: 100%;
+                overflow: auto;
+                max-height: 615px;
+            }
+
+            #global{
+                margin-top: 10px; width: 99%; color: black; padding: 0.5%;float: left;
+            }
+
+            #system{
+                float: left;
+                width: 100%;
+            }
+
+            .tableHeader{
+                background: #dbdbdb;
+                font-weight: bold;
+            }
         </style>
     </head>
 
@@ -45,9 +83,11 @@
             <button onclick='SendMessage()'>SEND</button>
         </div>
 
-        <div id='global' style='margin-top: 10px; width: 95%; color: black; padding: 15px;'> 
+        <div id='global'> 
+            
             
             <div class='line'>
+                <h2>Global</h2>
                 <div class='bloc'>
                     <p id='currentload'>... %</p>
                     <span>CPU Usage</span>
@@ -70,38 +110,42 @@
 
             </div>
 
+            
             <div class="line">
+                <h2>Network</h2>
                 <div class='bloc'>
                     <p id='networkStats_totalRX'>...</p>
-                    <span>Total Network inbound</span>
+                    <span>Total Net inbound since boot</span>
                 </div>
 
                 <div class='bloc'>
                     <p id='networkStats_totalTX'>...</p>
-                    <span>Total Network outbound</span>
+                    <span>Total Net outbound since boot</span>
                 </div>
 
                 <div class='bloc'>
                     <p id='networkStats_RXSpeed'>...</p>
-                    <span>Network inbound speed</span>
+                    <span>Net inbound speed</span>
                 </div>
 
                 <div class='bloc'>
                     <p id='networkStats_TXSpeed'>...</p>
-                    <span>Network outbound speed</span>
+                    <span>Net outbound speed</span>
                 </div>
             </div>
 
 
+            
             <div class="line">
+                <h2>Filesystem</h2>
                 <div class='bloc' title="Bytes read since startup">
                     <p id='diskRX'>...</p>
-                    <span>Total FS reads</span>
+                    <span>Total FS reads since boot</span>
                 </div>
 
                 <div class='bloc' title="Bytes written since startup">
                     <p id='diskWX'>...</p>
-                    <span>Total FS writes</span>
+                    <span>Total FS writes since boot</span>
                 </div>
 
                 <div class='bloc'>
@@ -115,15 +159,17 @@
                 </div>
             </div>
 
+            
             <div class="line">
+                <h2>Disk IO</h2>
                 <div class='bloc' title="Bytes read since startup">
                     <p id='diskIORX'>...</p>
-                    <span>Total IO Reads</span>
+                    <span>Total IO Reads since boot</span>
                 </div>
 
                 <div class='bloc' title="Bytes written since startup">
                     <p id='diskIOWX'>...</p>
-                    <span>Total IO Writes</span>
+                    <span>Total IO Writes since boot</span>
                 </div>
 
                 <div class='bloc'>
@@ -137,9 +183,33 @@
                 </div>
             </div>
 
+            
+            <div class="line">
+                <h2>Processes</h2> <button onclick="Send('/processes')" style='float: left; margin-top: 24px; margin-bottom: 15px;'>Refresh</button>
+              
+                <div id='processes' style='width: 100%; float: left;'>
+                    
+                </div>
+            </div>
+
+            
+            <div class="line">
+                <h2>Connections</h2> <button onclick="Send('/connections')" style='float: left; margin-top: 24px; margin-bottom: 15px;'>Refresh</button>
+              
+                <div id='connections' style='width: 100%; float: left;'>
+                    
+                </div>
+            </div>
+
+            
+            <div class='line' id='systemContainer'>
+                <h2>System</h2>    
+                <div id='system'></div>
+            </div>
+
         </div>
 
-        <div id='content' style='margin-top: 10px; height:  width: 95%; color: black; padding: 15px;'> </div>
+        <div id='content' style='margin-top: 10px; width: 95%; color: black; padding: 15px;'> </div>
         
         <script src='js/pretty-bytes.js?v=2'></script>
         <script>
@@ -192,36 +262,63 @@
                         else{
                             var msg = JSON.parse(e.data);
                             if ( msg.type == "global" ){
-
+                                //json2Table
+                                var result = "";
+                                result += json2Table([msg.cpu], "CPU");
+                                result += json2Table(msg.blockDevices, "Block Devices");
+                                result += json2Table(msg.diskLayout, "Disk Layout");
+                                result += json2Table(msg.fsSize, "FS Size");
+                                result += json2Table(msg.networkInterfaces, "Network Interfaces");
+                                result += json2Table(msg.dockerContainers, "Docker Containers");
+                                result += json2Table([msg.dockerInfo], "DockerInfo");
+                                document.getElementById('system').innerHTML = result;
                             }
                             else if ( msg.type == "dynamic" ){
                                 document.getElementById('currentload').innerHTML = msg.currentLoad.currentload.toFixed(2) + " %";
                                 document.getElementById('uptime').innerHTML = (msg.time.uptime*1000/8.64e+7).toFixed(5) + " Days";
                                 
-                                document.getElementById('mem').innerHTML = prettyBytes(msg.mem.active) + " / " + prettyBytes(msg.mem.total);
-                                document.getElementById('swap').innerHTML = prettyBytes(msg.mem.swapused) + " / " + prettyBytes(msg.mem.swaptotal);
+                                //var totalMemUsed = (msg.mem.total/1024/1024) - (msg.mem.free/1024/1024) - (msg.mem.available/1024/1024);
+                                //used_mem = total_mem - (free_mem + buffers_mem + cached_mem)
+                                var totalMemUsed = (msg.mem.total - (msg.mem.free + msg.mem.buffers + msg.mem.cached))/1024/1024;
+                                
+
+                                document.getElementById('mem').innerHTML = totalMemUsed.toFixed(0) + " / " + (msg.mem.total/1024/1024).toFixed(0) + "MB";
+                                document.getElementById('swap').innerHTML = (msg.mem.swapused/1024/1024).toFixed(0) + " / " + (msg.mem.swaptotal/1024/1024).toFixed(0) + "MB";
+                                
 
                                 document.getElementById('networkStats_totalRX').innerHTML = prettyBytes(msg.networkStats[0].rx_bytes);
                                 document.getElementById('networkStats_totalTX').innerHTML = prettyBytes(msg.networkStats[0].tx_bytes);
                                 document.getElementById('networkStats_RXSpeed').innerHTML = prettyBytes(msg.networkStats[0].rx_sec) + "/s";
                                 document.getElementById('networkStats_TXSpeed').innerHTML = prettyBytes(msg.networkStats[0].tx_sec) + "/s";
 
-                                /*
-                                document.getElementById('diskRX').innerHTML = prettyBytes(msg.fsStats.rx);
-                                document.getElementById('diskWX').innerHTML = prettyBytes(msg.fsStats.tx);
-                                document.getElementById('diskRXSpeed').innerHTML = prettyBytes(msg.fsStats.rx_sec) + "/s";
-                                document.getElementById('diskWXSpeed').innerHTML = prettyBytes(msg.fsStats.wx_sec) + "/s";
-                                */
-
-                                document.getElementById('diskIORX').innerHTML = (msg.disksIO.rIO/1000/1000).toFixed(5) + " M";
-                                document.getElementById('diskIOWX').innerHTML = (msg.disksIO.wIO/1000/1000).toFixed(5) + " M";
-                                document.getElementById('diskIORXSpeed').innerHTML = (msg.disksIO.rIO_sec).toFixed(0) + "/s";
-                                document.getElementById('diskIOWXSpeed').innerHTML = (msg.disksIO.wIO_sec).toFixed(0) + "/s";
+                                if ( msg.disksIO != null ){
+                                    document.getElementById('diskIORX').innerHTML = (msg.disksIO.rIO/1000/1000).toFixed(5) + " M";
+                                    document.getElementById('diskIOWX').innerHTML = (msg.disksIO.wIO/1000/1000).toFixed(5) + " M";
+                                    document.getElementById('diskIORXSpeed').innerHTML = (msg.disksIO.rIO_sec).toFixed(0) + "/s";
+                                    document.getElementById('diskIOWXSpeed').innerHTML = (msg.disksIO.wIO_sec).toFixed(0) + "/s";
+                                }
                                 
+                                if ( msg.fsStats != null ){
+                                    document.getElementById('diskRX').innerHTML = prettyBytes(msg.fsStats.rx);
+                                    document.getElementById('diskWX').innerHTML = prettyBytes(msg.fsStats.tx);
+                                    document.getElementById('diskRXSpeed').innerHTML = prettyBytes(msg.fsStats.rx_sec) + "/s";
+                                    document.getElementById('diskWXSpeed').innerHTML = prettyBytes(msg.fsStats.wx_sec) + "/s";
+                                }                      
                                 
                             }
                             else if ( msg.type == "processes" ){
-
+                                
+                                var allHTML = "";
+                                var procList = msg.processes.list;
+                                allHTML += json2Table(procList, "");
+                                document.getElementById('processes').innerHTML = allHTML;
+                            }
+                            else if ( msg.type == "networkConnections" ){
+                                
+                                var allHTML = "";
+                                var conList = msg.networkConnections;
+                                allHTML += json2Table(conList, "");
+                                document.getElementById('connections').innerHTML = allHTML;
                             }
                             else if ( msg.type == "services" ){
 
@@ -303,6 +400,51 @@
 
                 function formatKB(val){
                     return val/1024;
+                }
+
+
+                function json2Table(data, title){
+                    
+                    var result = "<div class='systemTable'>"; 
+
+                    if ( title != "" && title != null ){
+                        result += "<h3>" + title + "</h3>";
+                    }
+
+                    result += "<table style='width: 100%;' border=\"1\"> <tr class='tableHeader'>";
+
+                    //header line
+                    for (key in data[0]) {
+                        result +='<td>' + key + '</td>';
+                    }
+                    result += "</tr>";
+
+                    //rows
+                    for (var i = 0; i < data.length; i++) {
+                        result +='<tr>';
+                        for (key in data[i]) {
+                            if ( key == "size" || key == "used" ){
+                                result +='<td>' + prettyBytes(parseInt(data[i][key])) + '</td>';
+                            }
+                            else{
+                                var val = data[i][key];
+                                if ( Array.isArray(val) ){
+                                    result +='<td>' + "<div style='padding: 8px;'>" + json2Table(val, "") + "</div>" + '</td>';
+                                }
+                                else if (typeof val === 'object'){
+                                    result +='<td>' + "<div style='padding: 8px;'>" + json2Table([val], "") + "</div>"  + '</td>';
+                                }
+                                else{
+                                    result +='<td>' + data[i][key] + '</td>';
+                                }
+                                
+                            }
+                        }
+                        result +='</tr>';
+                    }
+
+                    result +="</table><br/></div>";
+                    return result;
                 }
 
             </script>

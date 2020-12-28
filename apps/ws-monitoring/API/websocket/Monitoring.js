@@ -91,7 +91,10 @@ exports.message = async (event, context, callback) => {
         }
         else if ( cmd == "/docker" ) {
             SendDockerAllInformations(event.ws);
-        }        
+        }       
+        else if ( cmd == "/connections" ) {
+            SendConnectionsInformations(event.ws);
+        }       
                 
     }
 };
@@ -210,6 +213,27 @@ async function SendDockerAllInformations(ws){
 
 }
 
+async function SendConnectionsInformations(ws){
+    
+    var newEvent = { 
+        "type": "networkConnections"
+    };
+    
+    var begin = process.hrtime();
+   
+    newEvent.networkConnections = await si.networkConnections(); //20ms
+    
+    const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
+    newEvent.processing = (nanoSeconds/1000000) + "ms";
+    
+    try{
+        ws.send(JSON.stringify(newEvent));
+    } catch(ex){}
+
+}
+
+
+
 async function publishStats(){
 
     if ( sharedmem.getInteger("IntervalStarted", "ws-monitoring") != 1 ){
@@ -233,9 +257,9 @@ async function publishStats(){
 
     //semi expensive, take more time, do it less often 
     newEvent.disksIO = await si.disksIO(); //20ms
-    //newEvent.fsStats = await si.fsStats(); //20ms
+    newEvent.fsStats = await si.fsStats(); //20ms
     newEvent.networkStats = await si.networkStats(); //35ms
-    newEvent.networkConnections = await si.networkConnections(); //20ms
+    //newEvent.networkConnections = await si.networkConnections(); //20ms
     
     //should be used only when you are inside a sub about docker and without auto refresh
     //newEvent.processes = await si.processes(); //170ms

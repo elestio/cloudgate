@@ -66,7 +66,10 @@
             }
 
             #global{
-                margin-top: 10px; width: 99%; color: black; padding: 0.5%;float: left;
+                width: 99%; 
+                color: black; 
+                padding: 0.5%;
+                float: left;
             }
 
             #system{
@@ -125,18 +128,43 @@
                 }
             }
 
+
+
+            
+                *[hidden] {
+                display: none;
+                }
+
+                .tooltip {
+                position: absolute;
+                background: rgba(0, 0, 0, .7);
+                color: #fff;
+                padding: 2px 5px;
+                font-size: 12px;
+                white-space: nowrap;
+                z-index: 9999;
+                }
+
+                .sparkline--cursor {
+                stroke: orange;
+                }
+
+                .sparkline--spot {
+                fill: red;
+                stroke: red;
+                }
             
         </style>
     </head>
 
     <body>
 
-        <div id='inputsBox'>
+        <div id='inputsBox' style='display:none;'>
             <input id='txtInput' type='text' placeholder='Type a command ...'/> 
             <button onclick='SendMessage()'>SEND</button>
         </div>
 
-        <div id='div_g' style='float:left; width: 99%; height: 300px;'></div>
+        
 
         <div id='global'> 
 
@@ -151,6 +179,10 @@
                 <h2>Global</h2>
                 <div class='bloc'>
                     <p id='currentload'>... %</p>
+                    <div style='position: absolute;margin-top: 10px; width: 100%;'>
+                        <svg class="sparkline" id='sparklineCPU' width="450" height="50" stroke-width="2" stroke="blue" fill="rgba(0, 0, 255, .2)"></svg>
+                        <span class="tooltip" hidden="true"></span>
+                    </div>
                     <span>CPU Usage</span>
                 </div>
 
@@ -396,10 +428,12 @@
                                         color = "red";
                                     }
 
-                                    //allCores += "<div class='core' style='width: 100%; float:left;'> <div id='core" + i + "' style='background: " + color + "; width:" + curCore.load.toFixed(2) + "%; height: 10px; float: left;'></div> </div>";
-                                    document.getElementById('core' + i).style.width = curCore.load.toFixed(2) + "%";
-                                    document.getElementById('core' + i).style.background = color;
-                                    document.getElementById('coreDetails' + i).innerHTML = "C" + (i+1) + ": " + curCore.load.toFixed(2) + "%";
+                                    if ( document.getElementById('core' + i) != null ){
+                                        document.getElementById('core' + i).style.width = curCore.load.toFixed(2) + "%";
+                                        document.getElementById('core' + i).style.background = color;
+                                        document.getElementById('coreDetails' + i).innerHTML = "C" + (i+1) + ": " + curCore.load.toFixed(2) + "%";
+                                    }
+                                    
                                     
                                 }
                                 //document.getElementById('vcores').innerHTML = allCores
@@ -415,19 +449,18 @@
                                 document.getElementById('swap').innerHTML = (msg.mem.swapused/1024/1024).toFixed(0) + " / " + (msg.mem.swaptotal/1024/1024).toFixed(0) + "MB";
                                 
                                 /*
-                                let data = [
-                                    [(+new Date())],
-                                    [parseFloat(msg.currentLoad.currentload)],
-                                    [parseFloat(totalMemUsed)],
-                                    [msg.networkStats[0].tx_sec],
-                                ];      
-                                uplot2.setData(data);
-                                */
-
                                 var x = new Date();  // current time
                                 var y = parseFloat(msg.currentLoad.currentload);
                                 globalGraphData.push([x, y]);
                                 globalGraph.updateOptions( { 'file': globalGraphData } );
+                                */
+
+                                //remove oldest element
+                                cpuData.shift();
+                                //add new element
+                                cpuData.push({name: "cpu", date: (+new Date()), value: msg.currentLoad.currentload});
+                                //refresh display
+                                LoadSparkline("#sparklineCPU", cpuData);
 
                                 document.getElementById('networkStats_totalRX').innerHTML = prettyBytes(msg.networkStats[0].rx_bytes);
                                 document.getElementById('networkStats_totalTX').innerHTML = prettyBytes(msg.networkStats[0].tx_bytes);
@@ -606,21 +639,79 @@
         </script>
 
         
-        <script src="https://dygraphs.com/dygraph.js"></script>
-        <script>
-			var globalGraphData = [];
-            var t = new Date();
-            globalGraphData.push([t, 0]);
-        
-            var globalGraph = new Dygraph(document.getElementById("div_g"), globalGraphData,
-            {
-                drawPoints: true,
-                showRoller: true,
-                labels: ['Time', 'CPU']
-            });
-            
-		</script>
-        
+       <script src="https://cdn.rawgit.com/fnando/sparkline/master/dist/sparkline.js"></script>
+       <script>
+           function findClosest(target, tagName) {
+                if (target.tagName === tagName) {
+                    return target;
+                }
+
+                while ((target = target.parentNode)) {
+                    if (target.tagName === tagName) {
+                    break;
+                    }
+                }
+
+                return target;
+            }
+
+            function LoadSparkline(selector, data){
+                
+                /*
+                var btc = [
+                {name: "Bitcoin", date: "2017-01-01", value: 967.6},
+                {name: "Bitcoin", date: "2017-02-01", value: 957.02},
+                {name: "Bitcoin", date: "2017-03-01", value: 1190.78},
+                {name: "Bitcoin", date: "2017-04-01", value: 1071.48},
+                {name: "Bitcoin", date: "2017-05-01", value: 1354.21},
+                {name: "Bitcoin", date: "2017-06-01", value: 2308.08},
+                {name: "Bitcoin", date: "2017-07-01", value: 2483.5},
+                {name: "Bitcoin", date: "2017-08-01", value: 2839.18},
+                {name: "Bitcoin", date: "2017-09-01", value: 4744.69},
+                {name: "Bitcoin", date: "2017-10-01", value: 4348.09},
+                {name: "Bitcoin", date: "2017-11-01", value: 6404.92},
+                ];
+                */
+               
+                var options = {
+                onmousemove(event, datapoint) {
+                    var svg = findClosest(event.target, "svg");
+                    var tooltip = svg.nextElementSibling;
+                    var date = (new Date(datapoint.date)).toUTCString();
+
+
+                    tooltip.hidden = false;
+                    tooltip.textContent = `${date}: ${datapoint.value.toFixed(2)} %`;
+                    tooltip.style.top = `${event.offsetY}px`;
+                    tooltip.style.left = `${event.offsetX + 20}px`;
+                },
+
+                onmouseout() {
+                    var svg = findClosest(event.target, "svg");
+                    var tooltip = svg.nextElementSibling;
+
+                    tooltip.hidden = true;
+                }
+                };
+
+                //document.querySelector("#sparklineCPU").style.width = document.querySelector(".bloc").style.width - 20;
+                sparkline.sparkline(document.querySelector(selector), data, options);
+                
+                
+                var container = document.querySelector(selector).parentElement.parentElement;
+                var svg = document.querySelector("svg");
+                var svgText = (new XMLSerializer()).serializeToString(svg);
+                container.style.backgroundImage = `url(data:image/svg+xml;utf8,${encodeURIComponent(svgText)})`;
+                
+            }
+
+            var cpuData = [];
+            for (var i = 0; i <30; i++){
+                cpuData.push({name: "cpu", date: (+new Date()), value: 0});
+            }
+            LoadSparkline("#sparklineCPU", cpuData);
+
+       </script>
 
     </body>
 </html>

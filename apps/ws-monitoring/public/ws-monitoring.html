@@ -4,11 +4,15 @@
         <style>
             .line{
                 float: left;
+                width: 33%;
+            }
+            .fullLine{
+                float: left;
                 width: 100%;
             }
             .bloc{
                 float: left;
-                width: 220px;
+                width: 92%;
                 padding: 8px;
                 margin-right: 10px;
                 margin-bottom: 10px;
@@ -43,6 +47,7 @@
                 margin-top: 20px;
                 float: left;
                 width: 100%;
+                margin-bottom: 8px;
             }
 
             h3{
@@ -73,6 +78,54 @@
                 background: #dbdbdb;
                 font-weight: bold;
             }
+
+            #vcores {
+                float: left;
+                width: 96%;
+                height: 321px;
+                background: #f1f1f1;
+                border-radius: 8px;
+                overflow: auto;
+                padding-top: 20px;
+            }
+
+            .core {
+                width: 40%;
+                float: left;
+                border: 1px solid gray;
+                margin: 10px;
+                padding: 10px;
+            }
+
+            @media only screen and (max-width: 1366px) {
+                .core {
+                    width: 38%;
+                }
+            }
+
+            @media only screen and (max-width: 1024px) {
+                .core {
+                    width: 30%;
+                }
+            }
+
+            @media only screen and (max-width: 768px) {
+                .line{
+                    float: left;
+                    width: 100%;
+                }
+                #vcores{
+                    width: 100%;
+                }
+                .core {
+                    width: 36%;
+                }
+                .bloc{
+                    width: 93%;
+                }
+            }
+
+            
         </style>
     </head>
 
@@ -83,8 +136,16 @@
             <button onclick='SendMessage()'>SEND</button>
         </div>
 
+        <div id='div_g' style='float:left; width: 99%; height: 300px;'></div>
+
         <div id='global'> 
-            
+
+            <div class="line">
+                <h2>CPU</h2>
+                <div id='vcores'>
+                    
+                </div>
+            </div>
             
             <div class='line'>
                 <h2>Global</h2>
@@ -110,7 +171,6 @@
 
             </div>
 
-            
             <div class="line">
                 <h2>Network</h2>
                 <div class='bloc'>
@@ -183,8 +243,31 @@
                 </div>
             </div>
 
-            
             <div class="line">
+                <h2>Docker</h2>
+                <div class='bloc'>
+                    <p id='dockerRunning'>...</p>
+                    <span>Running containers</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='dockerStopped'>...</p>
+                    <span>Stopped containers</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='dockerPaused'>...</p>
+                    <span>Paused containers</span>
+                </div>
+
+                <div class='bloc'>
+                    <p id='dockerImages'>...</p>
+                    <span>Docker images</span>
+                </div>
+            </div>
+
+
+            <div class="fullLine">
                 <h2>Processes</h2> <button onclick="Send('/processes')" style='float: left; margin-top: 24px; margin-bottom: 15px;'>Refresh</button>
               
                 <div id='processes' style='width: 100%; float: left;'>
@@ -193,7 +276,7 @@
             </div>
 
             
-            <div class="line">
+            <div class="fullLine">
                 <h2>Connections</h2> <button onclick="Send('/connections')" style='float: left; margin-top: 24px; margin-bottom: 15px;'>Refresh</button>
               
                 <div id='connections' style='width: 100%; float: left;'>
@@ -202,7 +285,7 @@
             </div>
 
             
-            <div class='line' id='systemContainer'>
+            <div class='fullLine' id='systemContainer'>
                 <h2>System</h2>    
                 <div id='system'></div>
             </div>
@@ -210,6 +293,7 @@
         </div>
 
         <div id='content' style='margin-top: 10px; width: 95%; color: black; padding: 15px;'> </div>
+        
         
         <script src='js/pretty-bytes.js?v=2'></script>
         <script>
@@ -272,9 +356,54 @@
                                 result += json2Table(msg.dockerContainers, "Docker Containers");
                                 result += json2Table([msg.dockerInfo], "DockerInfo");
                                 document.getElementById('system').innerHTML = result;
+
+                                //build vcores
+                                var cpus = msg.currentLoad.cpus;
+                                var allCores = "";
+                                for (var i = 0; i < cpus.length; i++){
+                                    var curCore = cpus[i];
+                                    var color = "";
+                                    if ( curCore.load < 20 ) {
+                                        color = "green";
+                                    }
+                                    else if ( curCore.load < 60 ) {
+                                        color = "orange";
+                                    }
+                                    else {
+                                        color = "red";
+                                    }
+
+                                    allCores += "<div class='core'> <div id='core" + i + "' style='background: " + color + "; width:" + curCore.load.toFixed(2) + "%; height: 10px; float: left;'> <span id='coreDetails" + i + "' style='font-size: 9px; font-weight: bold; margin-top: -22px;float: left;width: 60px;margin-left: -10px;'>C" + (i+1) +  ": " + curCore.load.toFixed(2) +  "%</span> </div> </div>";
+                                }
+                                document.getElementById('vcores').innerHTML = allCores
                             }
                             else if ( msg.type == "dynamic" ){
+                                
                                 document.getElementById('currentload').innerHTML = msg.currentLoad.currentload.toFixed(2) + " %";
+                                //vcores
+                                var cpus = msg.currentLoad.cpus;
+                                var allCores = "";
+                                for (var i = 0; i < cpus.length; i++){
+                                    var curCore = cpus[i];
+                                    var color = "";
+                                    if ( curCore.load < 20 ) {
+                                        color = "green";
+                                    }
+                                    else if ( curCore.load < 60 ) {
+                                        color = "orange";
+                                    }
+                                    else {
+                                        color = "red";
+                                    }
+
+                                    //allCores += "<div class='core' style='width: 100%; float:left;'> <div id='core" + i + "' style='background: " + color + "; width:" + curCore.load.toFixed(2) + "%; height: 10px; float: left;'></div> </div>";
+                                    document.getElementById('core' + i).style.width = curCore.load.toFixed(2) + "%";
+                                    document.getElementById('core' + i).style.background = color;
+                                    document.getElementById('coreDetails' + i).innerHTML = "C" + (i+1) + ": " + curCore.load.toFixed(2) + "%";
+                                    
+                                }
+                                //document.getElementById('vcores').innerHTML = allCores
+
                                 document.getElementById('uptime').innerHTML = (msg.time.uptime*1000/8.64e+7).toFixed(5) + " Days";
                                 
                                 //var totalMemUsed = (msg.mem.total/1024/1024) - (msg.mem.free/1024/1024) - (msg.mem.available/1024/1024);
@@ -285,6 +414,20 @@
                                 document.getElementById('mem').innerHTML = totalMemUsed.toFixed(0) + " / " + (msg.mem.total/1024/1024).toFixed(0) + "MB";
                                 document.getElementById('swap').innerHTML = (msg.mem.swapused/1024/1024).toFixed(0) + " / " + (msg.mem.swaptotal/1024/1024).toFixed(0) + "MB";
                                 
+                                /*
+                                let data = [
+                                    [(+new Date())],
+                                    [parseFloat(msg.currentLoad.currentload)],
+                                    [parseFloat(totalMemUsed)],
+                                    [msg.networkStats[0].tx_sec],
+                                ];      
+                                uplot2.setData(data);
+                                */
+
+                                var x = new Date();  // current time
+                                var y = parseFloat(msg.currentLoad.currentload);
+                                globalGraphData.push([x, y]);
+                                globalGraph.updateOptions( { 'file': globalGraphData } );
 
                                 document.getElementById('networkStats_totalRX').innerHTML = prettyBytes(msg.networkStats[0].rx_bytes);
                                 document.getElementById('networkStats_totalTX').innerHTML = prettyBytes(msg.networkStats[0].tx_bytes);
@@ -303,7 +446,15 @@
                                     document.getElementById('diskWX').innerHTML = prettyBytes(msg.fsStats.tx);
                                     document.getElementById('diskRXSpeed').innerHTML = prettyBytes(msg.fsStats.rx_sec) + "/s";
                                     document.getElementById('diskWXSpeed').innerHTML = prettyBytes(msg.fsStats.wx_sec) + "/s";
-                                }                      
+                                }           
+
+                                //DockerInfos
+                                if ( msg.dockerInfo != null ){
+                                    document.getElementById('dockerRunning').innerHTML = msg.dockerInfo.containersRunning;
+                                    document.getElementById('dockerStopped').innerHTML = msg.dockerInfo.containersStopped;
+                                    document.getElementById('dockerPaused').innerHTML = msg.dockerInfo.containersPaused;
+                                    document.getElementById('dockerImages').innerHTML = msg.dockerInfo.images;
+                                }   
                                 
                             }
                             else if ( msg.type == "processes" ){
@@ -452,7 +603,24 @@
                     return result;
                 }
 
-            </script>
+        </script>
+
+        
+        <script src="https://dygraphs.com/dygraph.js"></script>
+        <script>
+			var globalGraphData = [];
+            var t = new Date();
+            globalGraphData.push([t, 0]);
+        
+            var globalGraph = new Dygraph(document.getElementById("div_g"), globalGraphData,
+            {
+                drawPoints: true,
+                showRoller: true,
+                labels: ['Time', 'CPU']
+            });
+            
+		</script>
+        
 
     </body>
 </html>

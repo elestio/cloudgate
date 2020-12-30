@@ -535,9 +535,6 @@ Please notice that some apiEndpoints and websocketEndpoints can have a custom ra
   
   &nbsp;
   ## TODO
- 
- - [ ] Handle uploads correctly in cloud functions (through api-functions.js)
- - [ ] Add a rate limiter (REST+WS)
  - [ ] Add job queue (certificates renewal)
  - [ ] Shared storage for certificates (S3 or NFS)
  - [ ] Improve installation as a global service + add/remove apps
@@ -550,3 +547,14 @@ Please notice that some apiEndpoints and websocketEndpoints can have a custom ra
  - [ ] Managed PostgreSQL
  - [ ] Managed Redis
  - [ ] Managed MongoDB
+
+ ## cloudbackend compat missing features
+ - [ ] redirects/rewrites (done but not synced from cloudbackend)
+ - [ ] server side translation in Cloud CMS format
+ - [ ] main domain, force redirect, force HTTPS
+ - [ ] global http headers
+ - [ ] global optimizations (minify, remove .html ext, lazy load, cache duration)
+ - [ ] global password
+ - [ ] insert in HTML Head tag
+ - [ ] insert in HTML before end of body tag
+

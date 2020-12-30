@@ -252,7 +252,7 @@ async function publishStats(){
     newEvent.time = si.time();
     newEvent.mem = await si.mem();
     newEvent.currentLoad = await si.currentLoad();
-    //newEvent.dockerInfo = await si.dockerInfo(); //5ms
+    newEvent.dockerInfo = await si.dockerInfo(); //5ms
     //newEvent.dockerContainers = await si.dockerContainers(); //3ms
 
     //semi expensive, take more time, do it less often 

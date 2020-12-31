@@ -146,7 +146,8 @@ async function SendGlobalInformations(ws){
     newEvent.blockDevices = await si.blockDevices(); //20ms
     newEvent.dockerInfo = await si.dockerInfo(); //5ms
     newEvent.dockerContainers = await si.dockerContainers(); //3ms
-    
+    newEvent.osInfo = await si.osInfo(); //3ms
+       
     const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
     newEvent.processing = (nanoSeconds/1000000) + "ms";
 

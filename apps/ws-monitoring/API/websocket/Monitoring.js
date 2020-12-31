@@ -28,7 +28,7 @@ exports.open = (event, context, callback) => {
         curChannel = params.channel;
         sharedmem.incInteger("connectedUsers", 1, "ws-monitoring");
         publishStats(); //force send updated stats immediately
-        SendGlobalInformations(event.ws) //send to the user details about never changing data (os, disk, cpu, ...)
+        SendGlobalInformations(event.ws, sharedmem) //send to the user details about never changing data (os, disk, cpu, ...)
 
         callback(null, JSON.stringify({ "type": "subscription", "channel": params.channel, "status": "subscribed" }));
         
@@ -84,16 +84,16 @@ exports.message = async (event, context, callback) => {
         //console.log("CMD: " + cmd + "\n----------------------------");
 
         if ( cmd == "/services" ) {
-            SendServicesInformations(event.ws);
+            //SendServicesInformations(event.ws);
         }
         else if ( cmd == "/processes" ) {
-            SendProcessesInformations(event.ws);
+            //SendProcessesInformations(event.ws);
         }
         else if ( cmd == "/docker" ) {
-            SendDockerAllInformations(event.ws);
+            //SendDockerAllInformations(event.ws);
         }       
         else if ( cmd == "/connections" ) {
-            SendConnectionsInformations(event.ws);
+            //SendConnectionsInformations(event.ws);
         }       
                 
     }
@@ -125,28 +125,13 @@ function StartStats(){
 
 
 //400ms in total
-async function SendGlobalInformations(ws){
+async function SendGlobalInformations(ws, sharedmem){
     
-    var newEvent = { 
-        "type": "global"
-    };
+    
     
     var begin = process.hrtime();
     
-    //nearly free (<1ms)
-    newEvent.time = si.time();
-    newEvent.mem = await si.mem();
-    newEvent.currentLoad = await si.currentLoad();
-
-    //never changing data, should be sent only once
-    newEvent.cpu = await si.cpu();
-    newEvent.networkInterfaces = await si.networkInterfaces();
-    newEvent.fsSize = await si.fsSize();
-    newEvent.diskLayout = await si.diskLayout();
-    newEvent.blockDevices = await si.blockDevices(); //20ms
-    newEvent.dockerInfo = await si.dockerInfo(); //5ms
-    newEvent.dockerContainers = await si.dockerContainers(); //3ms
-    newEvent.osInfo = await si.osInfo(); //3ms
+    var newEvent = await getCachedGlobalInfos(sharedmem);
        
     const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano);
     newEvent.processing = (nanoSeconds/1000000) + "ms";
@@ -155,6 +140,48 @@ async function SendGlobalInformations(ws){
         ws.send(JSON.stringify(newEvent));
     } catch(ex){}
     
+}
+
+var cacheGlobalContent = null;
+var cacheGlobalDate = null;
+async function getCachedGlobalInfos(sharedmem){
+
+    var cachedContent = sharedmem.getString("cachedGlobalContent", "ws-monitoring");
+    //if ( cacheGlobalContent != null && (cacheGlobalDate + 60000) > (+new Date()) ){
+    if ( cachedContent != null && cachedContent != "" ){
+        //console.log("global cached");
+        return JSON.parse(cachedContent);
+    }
+    else
+    {
+        //console.log("global NOT cached");
+
+        var newEvent = { 
+            "type": "global"
+        };
+        
+        //nearly free (<1ms)
+        newEvent.time = si.time();
+        newEvent.mem = await si.mem();
+        newEvent.currentLoad = await si.currentLoad();
+
+        //never changing data, should be sent only once
+        newEvent.cpu = await si.cpu();
+        newEvent.networkInterfaces = await si.networkInterfaces();
+        newEvent.fsSize = await si.fsSize();
+        newEvent.diskLayout = await si.diskLayout();
+        newEvent.blockDevices = await si.blockDevices(); //20ms
+        newEvent.dockerInfo = await si.dockerInfo(); //5ms
+        newEvent.dockerContainers = await si.dockerContainers(); //3ms
+        newEvent.osInfo = await si.osInfo(); //3ms
+
+        cacheGlobalDate = (+new Date());
+        //cacheGlobalContent = newEvent;
+        sharedmem.setString("cachedGlobalContent", JSON.stringify(newEvent), "ws-monitoring");
+
+        return newEvent;
+    }
+
 }
 
 async function SendServicesInformations(ws){

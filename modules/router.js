@@ -909,7 +909,7 @@ module.exports = {
  
             },
             drain: (ws) => {
-                console.log("Warning: Router DRAIN! We should slow down");
+                //console.log("Warning: Router DRAIN! We should slow down");
             },
             close: async (ws, code, message) => {
                 /* The library guarantees proper unsubscription at close */

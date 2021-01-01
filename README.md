@@ -411,10 +411,12 @@ To create a new App you can clone one of the samples in /apps folder of this rep
 
 Another option is to create a new empty folder, and create a file named "appconfig.json", inside paste this:
 
-    {
-	    "domains": ["*"],
-	    "publicFolder": "./public"
-    }
+```json
+{
+    "domains": ["*"],
+    "publicFolder": "./public"
+}
+```
 
 This is the bare minimum configuration required to define an application
 
@@ -444,33 +446,42 @@ Here is the full list of configuration options supported in appconfig.json:
 
 **CORS**: Define if the server should add CORS headers to allow an origin, usage example:
 
-    "CORS": {
-        "access-control-allow-origin": "*"
-    },
+```json
+"CORS": {
+  "access-control-allow-origin": "*"
+},
+```
 
 **maxRequestsPerMinutePerIP**: Define max number of request allowed per minute per IP address, the goal is to protect from DOS attacks. You should define it to a sane value for your use case.
 
-    "maxRequestsPerMinutePerIP": 120
+```json
+"maxRequestsPerMinutePerIP": 120
+```
 
 This setting allow 120 requests per minute per unique IP address
 
 **banDurationSeconds**: if an ip address go above the maxRequestsPerMinutePerIP it will then be banned for a duration in seconds defined by banDurationSeconds
     
-    "banDurationSeconds": 300,
-
+```json
+"banDurationSeconds": 300,
+```
 
 **whitelistedIPs**: array of whitelisted IP addresses, they bypass the ratelimiter and can't be banned
 
-  "whitelistedIPs":["127.0.0.1", "1.2.3.4"],
+```json
+"whitelistedIPs":["127.0.0.1", "1.2.3.4"],
+```
 
 **redirect404toIndex**: Indicate if all 404 should be redirected to index.html, this is usefull for SPA, default is false, set it to true to activate it
 
 **rewritings**: handle url rewriting
 
-    "rewritings": {
-        "/Home": "/index.html",
-        "/Yeah/%slug%": "index.html"
-    }
+```json
+"rewritings": {
+  "/Home": "/index.html",
+  "/Yeah/%slug%": "index.html"
+}
+```
 
 Here when we visit /Home we will be served content of index.html. 
 If you visit /Yeah/test123 you will be served content of index.html?slug=test123
@@ -478,10 +489,12 @@ You can combine this with Dynamic datasource to serve server side rendered pages
 
 **redirects**: handle url redirections
 
-    "redirects": {
-        "/redirect1": "index.html",
-        "/redirect2": "https://google.com/?param=1"
-    }
+```json
+"redirects": {
+  "/redirect1": "index.html",
+  "/redirect2": "https://google.com/?param=1"
+}
+```
 
 Here when we visit /redirect1 we will be redirected to index.html. 
 If you visit /redirect2 you will be redirected to an external url: https://google.com/?param=1
@@ -489,21 +502,23 @@ If you visit /redirect2 you will be redirected to an external url: https://googl
   
 **apiEndpoints**: object containing list of defined endpoints.
 
-    {
-    	"/tests/simple": {
-    		"src": "./API/tests/",
-    		"handler": "simple.handler"
-    	},
-    	"/tests/full": {
-    		"src": "./API/tests/",
-    		"handler": "full.handler",
-            "maxRequestsPerMinutePerIP": 30
-    	},
-        "/wildcardtest/*" : {
-            "src" : "./API/tests/",
-            "handler": "full.handler"
-        }
-    }
+```json
+{
+  "/tests/simple": {
+    "src": "./API/tests/",
+    "handler": "simple.handler"
+  },
+  "/tests/full": {
+    "src": "./API/tests/",
+    "handler": "full.handler",
+    "maxRequestsPerMinutePerIP": 30
+  },
+  "/wildcardtest/*" : {
+    "src" : "./API/tests/",
+    "handler": "full.handler"
+  }
+}
+```
 
 
 Here we are defining 2 API endpoints,
@@ -517,21 +532,22 @@ Please notice that some apiEndpoints and websocketEndpoints can have a custom ra
 
 **websocketEndpoints**: this works exactly like apiEndpoints, but instead of declaring an handler we have to declare several events: open, message, close
 
-     {
-     	"/echo": {
-     		"src": "./API/websocket/",
-     		"open": "Echo.open",
-     		"message": "Echo.message",
-     		"close": "Echo.close"
-     	},
-     	"/chat": {
-     		"src": "./API/websocket/",
-     		"open": "Chat.open",
-     		"message": "Chat.message",
-     		"close": "Chat.close"
-     	}
-     }
-
+```json
+{
+  "/echo": {
+    "src": "./API/websocket/",
+    "open": "Echo.open",
+    "message": "Echo.message",
+    "close": "Echo.close"
+  },
+  "/chat": {
+    "src": "./API/websocket/",
+    "open": "Chat.open",
+    "message": "Chat.message",
+    "close": "Chat.close"
+  }
+}
+```
   
   &nbsp;
   ## TODO

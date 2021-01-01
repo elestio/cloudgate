@@ -178,11 +178,11 @@ Of course you should replace CatchAll by your own app folder.
 &nbsp;
  ## Reverse Proxy
 
-Check our Reverse proxy example, this will proxy the web trafic from port 80 to the target configured in ./ReverseProxy/appconfig.json
+Check our Reverse proxy example, this will proxy the web traffic from port 80 to the target configured in ./ReverseProxy/appconfig.json
     
     sudo cloudgate ./apps/ReverseProxy -p80
 
-Here is ther relevant part of the appconfig.json
+Here is the relevant part of the appconfig.json
 
         ...
         "apiEndpoints": {

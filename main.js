@@ -121,10 +121,7 @@ function Start(argv) {
     var colors = require('colors/safe'),
         os = require('os'),
         path = require('path'),
-        argv = require('optimist')(argv)
-            .boolean('cors')
-            .boolean('log-ip')
-            .argv;
+        argv = require('minimist')(argv);
 
     
     const router = require('./modules/router');

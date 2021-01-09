@@ -36,10 +36,7 @@ const sharedmem = require('./modules/shared-memory');
 var shell = require('shelljs');
 const { v4: uuidv4 } = require('uuid')
 
-var argv = require('optimist')(process.argv)
-.boolean('cors')
-.boolean('log-ip')
-.argv;
+var argv = require('minimist')(process.argv);
 
 
 tools.ProcessCommandLine(argv);

@@ -191,6 +191,15 @@ function Start(argv) {
             }   
         }
 
+        //support for binary snapshot
+        //console.log(argv);
+        if (( argv.r == null || argv.r == "" ) && argv._ != null && argv._[1] != null && argv._[1].indexOf("/snapshot/") > -1 ){
+            var snapshotPath = argv._[1].replace("index.js", "");
+            argv.r = snapshotPath;
+
+            process.title = snapshotPath.split('/')[1];
+        }
+
         if ( process.env.OUTPUT_CACHE == null || process.env.OUTPUT_CACHE == "") {
             var paramOutputCache = argv.oc || argv.outputcache;
             if ( paramOutputCache == "" || paramOutputCache == null ) {

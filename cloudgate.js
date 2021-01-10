@@ -106,6 +106,14 @@ if (isMainThread) {
             }
         }   
     }
+
+    //support for binary snapshot
+    //console.log(argv);
+    if (( argv.r == null || argv.r == "" ) && argv._ != null && argv._[1] != null && argv._[1].indexOf("/snapshot/") > -1 ){
+        var snapshotPath = argv._[1].replace("index.js", "");
+        argv.r = snapshotPath;
+    }
+    
 }
 
 

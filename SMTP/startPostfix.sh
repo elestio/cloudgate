@@ -30,7 +30,7 @@ else
 
         ##Allow only permitted sender + DKIM
         echo "Starting new cloudgate-postfix instance..."
-        docker run -d --name cloudgate-postfix -e "ALLOWED_SENDER_DOMAINS=${domain}" -e "DKIM_AUTOGENERATE=1" -v ${PWD}/dkim:/etc/opendkim/keys -p 172.17.0.1:25:587 -e POSTFIX_myhostname=${domain} boky/postfix
+        docker run --restart unless-stopped -d --name cloudgate-postfix -e "ALLOWED_SENDER_DOMAINS=${domain}" -e "DKIM_AUTOGENERATE=1" -v ${PWD}/dkim:/etc/opendkim/keys -p 172.17.0.1:25:587 -e POSTFIX_myhostname=${domain} boky/postfix
 
         sleep 5;
 

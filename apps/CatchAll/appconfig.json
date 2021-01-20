@@ -9,7 +9,7 @@
   "TypeFS": "LOCAL",
   "redirect404toIndex": false,
   "HSTS": false,
-  "maxRequestsPerMinutePerIP": 240,
+  "maxRequestsPerMinutePerIP": -1,
   "banDurationSeconds": 60,
   "whitelistedIPs":["127.0.0.1", "1.2.3.4"],
   "CORS": {
@@ -24,6 +24,10 @@
       "src" : "./API/tests/",
       "handler": "full.handler",
       "maxRequestsPerMinutePerIP": 50
+    },
+    "/tests/add" : {
+      "src": "./API/tests/",
+      "handler": "add.handler"
     },
     "/wildcardtest/*" : {
       "src" : "./API/tests/",

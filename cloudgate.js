@@ -213,7 +213,7 @@ if (isMainThread) {
             worker.postMessage(obj);
         }
 
-        //process.exit(0);
+        Sprocess.exit(0);
         //process.emit('SIGINT');
         //process.emit('SIGTERM');
     }

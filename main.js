@@ -41,6 +41,8 @@ const tools = require('./modules/tools.js');
 const axios = require('axios');
 
 var globalSSLApp = null;
+var globalAppToken = null;
+var globalSSLAppToken = null;
 
 //Load memory from dump if present
 var memoryPath = "./memorystate.json";
@@ -69,6 +71,14 @@ if (parentPort != null) {
         if ( msg.type == "CG_EXIT_WORKER" ){
             
             //clean exit of the worker
+            if ( globalSSLAppToken != null ){
+                coregate.us_listen_socket_close(globalSSLAppToken);
+            }
+            if ( globalAppToken != null ){
+                coregate.us_listen_socket_close(globalAppToken);
+            }
+            
+
             console.log("Order to exit the worker")
             process.exit(0);
         }
@@ -603,6 +613,9 @@ function Start(argv) {
                 router.start(sslApp, serverConfig);
                 sslApp.listen(host, options.https.sslport, (listenSocket) => {
                     if (listenSocket) {
+
+                        globalSSLAppToken = listenSocket; //todo handle them in a array
+
                         console.log('Listening to port ' + options.https.sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                     }
                 });
@@ -684,6 +697,7 @@ function Start(argv) {
                         router.start(sslApp, serverConfig);
                         sslApp.listen(host, options.https.sslport, (listenSocket) => {
                             if (listenSocket) {
+                                globalSSLAppToken = listenSocket;
                                 //console.log('Listening to https://' + options.https.ssldomain + ":" + sslport + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
                             }
                         });
@@ -766,6 +780,8 @@ function Start(argv) {
         app.listen(host, port, (listenSocket) => {
             if (listenSocket) {
                 
+                globalAppToken = listenSocket;
+
                 //console.log('Listening to port ' + port + " - Host: " + host + " - ProcessID: " + process.pid + " - ThreadID: " + threadId);
 
                 if ( isMainThread )

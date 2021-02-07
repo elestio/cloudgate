@@ -9,15 +9,13 @@ It can be used for several use cases:
 - Static file web server with local file system and AWS S3 support
 - API Gateway with local microservices and AWS lambda support
 - Serve multiple web applications in a single process and sharing the same ports (80, 443)
-- Reverse proxy / Websocket server
+- Websocket / pubsub real time communication support
 - SSL termination (with Letsencrypt automatic certs)
 - REST & Websocket API to reconfigure the cloudgate without downtime
-- Crazy high performances (up to 185K RPS per core)
-- Crazy low latencies (less than 30us, that's 0.03ms!)
-- Multi-threading with websockets sync between threads
-- Multi nodes cluster suppot (Alpha)
+- Crazy high performances (up to 125K RPS per CPU core)
+- Multi-threading with Shared memory between threads
+- Multi nodes cluster suppot (Coming soon)
 - Firewall / Rate limiter / DDOS protection (Coming soon)
-- Replicated in-memory datastore (Coming soon)
 
 Motivations:
 - Multi-tenant clustering able to handle thousands of applications per node 

@@ -146,6 +146,10 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
                 }
 
                 var rows = result.content.Table;
+                if ( typeof result.content == "string" ){
+                    rows = JSON.parse(result.content).Table;
+                }
+                
                 //console.log(rows)
                 //console.log(newReqInfos.url + "  -  " + rows.length);
                 //var rows = [];

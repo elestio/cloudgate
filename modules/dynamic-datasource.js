@@ -157,6 +157,11 @@ module.exports = async (responseToProcess, queryStringParams, appConfig, reqInfo
                 //console.log(isRepeated)
                 if ( !isRepeated ){
                     
+                    //avoid a crash if datasource is null
+                    if ( rows == null ){
+                        rows = [{}];
+                    }
+
                     var curRow = rows[0];
                     
                     //console.log(curRow);

@@ -229,6 +229,7 @@ exports.downloadRemoteFile = function (url, filekey) {
 exports.sqlSelect = function (query) {
  return new Promise(async (resolve, reject) => {
     var rows =  { "Table": await apiDB.ExecuteQuery(appConfig, query) }
+    //resolve(JSON.stringify(rows));
     resolve((rows));
   });
 }

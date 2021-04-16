@@ -175,11 +175,16 @@ exports.downloadRemoteFile = function (url, filekey) {
   });
 }
 
+//compatibility (avoid crash if payload is already a json)
+var oldParse = JSON.parse;
+JSON.parse = function(n){try{return typeof n=="string"?oldParse(n):n}catch(t){return n}}
+
 exports.sqlSelect = function (query) {
  return new Promise(async (resolve, reject) => {
     
-    //ensure we don't pass update result if there is a select to emulare appdrag-cloudbackend response mode (update ...; SELECT; should return only the select)
+    //ensure we don't pass update result if there is a select to emulate appdrag-cloudbackend response mode (update ...; SELECT; should return only the select)
     var data = await cloudgateBackend.sqlSelect(query);
+    data = JSON.parse(data);
     //resolve(JSON.stringify(data));
     //console.log(data);
     

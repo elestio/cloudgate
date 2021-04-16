@@ -253,7 +253,6 @@ exports.sqlSelect = function (query) {
     var rows =  { "Table": await apiDB.ExecuteQuery(appConfig, query) }
     const nanoSeconds = process.hrtime(beginPipeline).reduce((sec, nano) => sec * 1e9 + nano);
     var durationMS = (nanoSeconds/1000000);
-
     resolve(JSON.stringify(rows));
   });
 }

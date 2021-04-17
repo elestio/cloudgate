@@ -99,7 +99,7 @@ function startContainer {
     -e MYSQL_ROOT_PASSWORD=$rootPassword \
     -e MYSQL_ROOT_HOST=172.17.0.1 \
     -v $DBPATH:/var/lib/mysql \
-    -d mysql/mysql-server:8.0 --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    -d mysql/mysql-server:8.0 --sql_mode='' --max-connections=500 --sql_select_limit=100000 --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
     sleep 5;
     docker logs mysql80;

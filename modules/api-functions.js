@@ -655,11 +655,11 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             try{
                 //response.content = {"payload": response};
                 var newResp = {
-                    statusCode: response.statusCode,
-                    headers: response.headers,
-                    content: {"payload": response}
+                    output: "GATEWAY",
+                    statusCode: response.content.statusCode,
+                    headers: response.content.headers,
+                    content: response.content.body
                 }
-
                 response = newResp;
             }
             catch(ex){
@@ -690,16 +690,34 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         headers["durationMS"] = durationMS;
         */
 
-        if (typeof response == "object") {
+        if ( response != null && response.output == "GATEWAY"){
+            //console.log("here1: ", response)
+            resolve({
+                status: (response.status || response.statusCode || 200),
+                processed: true,
+                headers: response.headers,
+                content: response.content || response.body || response
+            });
+        }
+        else if (typeof response == "object") {
+            //console.log("here2: ", response)
+            //console.log("here2: ", headers)
+
+            if ( headers["Content-Encoding"] == null){
+                headers["Content-Encoding"] = "gzip";
+                var tmpContent = response.content || response.body || response;
+                tmpContent = tools.GzipContent(JSON.stringify(tmpContent));
+            }
+            
             resolve({
                 status: (response.status || response.statusCode || 200),
                 processed: true,
                 headers: headers,
-                content: response.content || response.body || response
+                content: tmpContent
             });
         }
         else {
-
+            //console.log("here3: ", response)
             if ( !isTypedArray(response) && !isString(response) && !isArrayBuffer(response) ){
                 response = response + ""; //cast to string
             }

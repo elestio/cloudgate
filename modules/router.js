@@ -524,7 +524,10 @@ module.exports = {
                         result = await dynamicDatasource(result, reqInfos.query, appConfig, reqInfos, res, req, memory, serverConfig, app, apiDB);
 
                         //check new status after dynamic datasource
-                        if ( result.status != 500 ){
+                        var nbSlashs = reqInfos.url.split('/').length;
+                        //console.log("nbSlashs: " + nbSlashs + " in: " + reqInfos.url)
+
+                        if ( result.status != 500 && nbSlashs > 2 ){
                             //add base href if rewriten url
                             var rawContent = await tools.gunzip(result.content);
                             rawContent = rawContent.replace("<head>", "<head> <base href='/'>");

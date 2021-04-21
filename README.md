@@ -50,11 +50,7 @@ and run your app with
 
 - Linux, Windows or Mac OS
 - git
-- Node versions 10.x / 12.x / 14.x
-
-if you are on Node 10, you can activate multi-threading by executing this in your terminal:
-
-    export NODE_OPTIONS=--experimental-worker
+- Node versions 12 / 14 / 15 / 16
 
 &nbsp;
 

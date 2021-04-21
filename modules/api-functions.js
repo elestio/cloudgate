@@ -706,7 +706,14 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             if ( headers["Content-Encoding"] == null){
                 headers["Content-Encoding"] = "gzip";
                 var tmpContent = response.content || response.body || response;
-                tmpContent = tools.GzipContent(JSON.stringify(tmpContent));
+
+                if ( isString(tmpContent) ){
+                    tmpContent = tools.GzipContent(tmpContent);
+                }
+                else{
+                    tmpContent = tools.GzipContent(JSON.stringify(tmpContent));
+                }
+                
             }
             
             resolve({
@@ -814,6 +821,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
 
 }
 
+function isString(x) {
+  return Object.prototype.toString.call(x) === "[object String]"
+}
 
 function isTypedArray(a) { return !!(a.buffer instanceof ArrayBuffer && a.BYTES_PER_ELEMENT); }
 

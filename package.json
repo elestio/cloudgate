@@ -1,7 +1,7 @@
 {
   "name": "@elestio/cloudgate",
   "bin": "cloudgate.js",
-  "version": "1.0.104",
+  "version": "1.0.105",
   "description": "CloudGate is a fast web application server for Node.js",
   "main": "cloudgate.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "asn1.js": "^5.4.1",
     "aws-sdk": "^2.656.0",
     "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.3",
+    "cheerio": "^1.0.0-rc.10",
     "chokidar": "^3.4.3",
     "clear-module": "^4.1.1",
     "colors": "^1.4.0",

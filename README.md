@@ -31,7 +31,7 @@ Motivations:
 
     wget -O - https://cloudgate.terasp.net/CDN/cloudgate.sh | bash
 
-**This version includes Node.js V14 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
+**This version includes Node.js V16 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
 &nbsp;
 &nbsp;
 

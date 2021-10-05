@@ -700,12 +700,17 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
             });
         }
         else if (typeof response == "object") {
-            //console.log("here2: ", response)
-            //console.log("here2: ", headers)
+       
+            var isCompressible = false;
+            if (headers["Content-Type"] == "application/json" || headers["Content-Type"].indexOf("text") > -1 || headers["Content-Type"].indexOf("xml") > -1 || headers["Content-Type"].indexOf("csv") > -1 || headers["Content-Type"].indexOf("utf8") > -1 ){
+                isCompressible = true;
+            }
+            
+            var tmpContent = null;
 
-            if ( headers["Content-Encoding"] == null){
+            if ( headers["Content-Encoding"] == null && isCompressible){
                 headers["Content-Encoding"] = "gzip";
-                var tmpContent = response.content || response.body || response;
+                tmpContent = response.content || response.body || response;
 
                 if ( isString(tmpContent) ){
                     tmpContent = tools.GzipContent(tmpContent);
@@ -714,6 +719,9 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
                     tmpContent = tools.GzipContent(JSON.stringify(tmpContent));
                 }
                 
+            }
+            else{
+                tmpContent = response.content || response.body || response;
             }
             
             resolve({

@@ -702,9 +702,22 @@ async function ExecuteFunction(apiEndpoint, curFunction, functionHandlerFunction
         else if (typeof response == "object") {
        
             var isCompressible = false;
-            if (headers["Content-Type"] == "application/json" || headers["Content-Type"].indexOf("text") > -1 || headers["Content-Type"].indexOf("xml") > -1 || headers["Content-Type"].indexOf("csv") > -1 || headers["Content-Type"].indexOf("utf8") > -1 ){
-                isCompressible = true;
+            try{
+                if ( headers["Content-Type"] != null ){
+                    if (headers["Content-Type"] == "application/json" || headers["Content-Type"].indexOf("text") > -1 || headers["Content-Type"].indexOf("xml") > -1 || headers["Content-Type"].indexOf("csv") > -1 || headers["Content-Type"].indexOf("utf8") > -1 ){
+                        isCompressible = true;
+                    }
+                }
+                if ( headers["content-type"] != null ){
+                    if (headers["content-type"] == "application/json" || headers["content-type"].indexOf("text") > -1 || headers["content-type"].indexOf("xml") > -1 || headers["content-type"].indexOf("csv") > -1 || headers["content-type"].indexOf("utf8") > -1 ){
+                        isCompressible = true;
+                    }
+                }
             }
+            catch(exCompressible){
+
+            }
+            
             
             var tmpContent = null;
 

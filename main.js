@@ -429,9 +429,9 @@ function Start(argv) {
         setTimeout(async function(){
 
             console.log("");
-            console.log("============================================================");    
+            console.log("================================================================");    
             console.log("CloudGate V" + require('./package.json').version + " - " + new Date().toString().split('(')[0]);
-            console.log("============================================================");
+            console.log("================================================================");
             console.log("Root App Folder: " + argv.r);   
             console.log("MemoryState: " + resolve(memoryPath));
 
@@ -439,7 +439,7 @@ function Start(argv) {
             var osInfo = await si.osInfo();
             var memoryInfo = await si.mem();
 
-            console.log("Platform: " + os.platform() + " | " + osInfo.arch + " | " + osInfo.distro + " | " + osInfo.release);
+            console.log("Platform: " + os.platform() + " | " + osInfo.arch + " | " + osInfo.distro + " | " + osInfo.release + " | Node.js " + process.version);
             console.log("Total Mem: " + (memoryInfo.total/1024/1024/1024).toFixed(2) + "GB | Available: " + (memoryInfo.available/1024/1024/1024).toFixed(2) + "GB");
             
 
@@ -454,7 +454,7 @@ function Start(argv) {
             }
             console.log("Multithreading: "+ multiThreading +" | Threads: " + argv.nbThreads + " | Output Cache: " + outputCacheSetting );
 
-            console.log("============================================================");
+            console.log("================================================================");
 
             var port = argv.p || argv.port || parseInt(process.env.PORT, 3000) || 3000;
 
@@ -477,7 +477,7 @@ function Start(argv) {
                 console.log("Listening on: https://" + ssldomain + ":" + 443 );
             }
 
-            console.log("============================================================");
+            console.log("================================================================");
             
         }, 200);
     }

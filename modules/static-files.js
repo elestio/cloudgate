@@ -309,6 +309,23 @@ module.exports = {
                         }
                     }
 
+                    //handle path without .html but still pointing to .html files (useful for nice urls)
+                    if (!fileExist){
+                        fullPath = fullPath + ".html";
+                        try{
+                            fstats = fs.statSync(fullPath);
+                        }
+                        catch(ex){
+                            fileExist = false;
+                        }
+
+                        if (fstats) {
+                            fileExist = true;
+                            fileSize = fstats.size;
+                            fileExistCache[fullPath] = fstats;
+                        }
+                    }
+
                     if (fileExist) {
                         //file exists
                         //console.log("served from disk: " + fullPath);

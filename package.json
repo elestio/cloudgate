@@ -35,7 +35,7 @@
     "shelljs": "^0.8.4",
     "systeminformation": "^5.7.7",
     "uuid": "^7.0.3",
-    "ws": "^7.2.5"
+    "ws": "^7.5.7"
   },
   "pkg": {
     "scripts": "modules/*.js",

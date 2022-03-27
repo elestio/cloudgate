@@ -3,7 +3,6 @@ core
 compose/data/
 benchmarks/wrk
 memorystate.json
-binaries/
 dkim/
 DB/MYSQL/data
 DB/MYSQL/mysql-docker-cli.sh

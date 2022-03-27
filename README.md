@@ -29,7 +29,7 @@ Motivations:
 ## Quickstart for Linux (Binary version)
 ### Linux one line installer: stable binary (no requirements, recommended)
 
-    wget -O - https://cloudgate.terasp.net/CDN/cloudgate.sh | bash
+    wget -O - https://raw.githubusercontent.com/elestio/cloudgate/master/installBin.sh | bash
 
 **This version includes Node.js V16 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
 &nbsp;

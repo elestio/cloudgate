@@ -50,7 +50,7 @@ and run your app with
 
 - Linux, Windows or Mac OS
 - git
-- Node versions 12 / 14 / 15 / 16
+- Node LTS (versions 12 / 14 / 16 / 18)
 
 &nbsp;
 

@@ -22,6 +22,10 @@
     },
     "/tests/full" : {
       "src" : "./API/tests/",
+      "handler": "full.handler"
+    },
+    "/tests/full-ratelimited" : {
+      "src" : "./API/tests/",
       "handler": "full.handler",
       "maxRequestsPerMinutePerIP": 50
     },

@@ -31,7 +31,7 @@ Motivations:
 
     wget -O - https://raw.githubusercontent.com/elestio/cloudgate/master/installBin.sh | bash
 
-**This version includes Node.js V16 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
+**This version includes Node.js V18 and all the dependencies in the binary, so it can run on any linux x64 without requirements**
 &nbsp;
 &nbsp;
 
@@ -50,7 +50,7 @@ and run your app with
 
 - Linux, Windows or Mac OS
 - git
-- Node LTS (versions 12 / 14 / 16 / 18)
+- Node LTS (versions 16 / 18)
 
 &nbsp;
 

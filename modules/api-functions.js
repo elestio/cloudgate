@@ -74,6 +74,9 @@ module.exports = {
 
                 if ( apiEndpoint.maxRequestsPerMinutePerIP != null && curRateLimitForIP >= maxRequestsPerMinutePerIP && apiEndpoint.maxRequestsPerMinutePerIP > 0) {
 
+                    //console.log("apiEndpoint.maxRequestsPerMinutePerIP: ", apiEndpoint.maxRequestsPerMinutePerIP)
+                    //console.log("API RATE LIMITED!")
+                    
                     //let's wait 1 second instead of answering immediately to prevent DOS attacks
                     await tools.sleep(1000*serverConfig.nbThreads);
                     //await tools.sleep(1000);

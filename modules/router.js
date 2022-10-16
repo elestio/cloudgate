@@ -270,6 +270,8 @@ module.exports = {
                     if ( os.platform() == "linux" ){
                         BanIP(app, reqInfos.ip, appConfig);
                     }
+
+                    //console.log("ratelimited: ", reqInfos.ip)
                     
 
                     //let's wait instead of answering immediately to prevent DOS attacks

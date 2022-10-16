@@ -26,10 +26,10 @@ cd ./binaries;
 
 #package cloudgate as binaries for win/osx/linux
 #pkg /tmp/cloudgate/ --options max_old_space_size=4096 --targets node14-linux-x64,node14-win-x64,node14-macos-x64;
-pkg /tmp/cloudgate/ --options max_old_space_size=4096 --targets node16-linux-x64;
+pkg /tmp/cloudgate/ --options max_old_space_size=4096 --targets node18-linux-x64;
 
-#Copy cloudgate binaries for Node 16
-cp ../bin/cloudgate_linux_x64_93.node .
+#Copy cloudgate binaries for Node 18
+cp ../bin/cloudgate_linux_x64_108.node .
 
 #create tar.gz
-tar -czvf cloudgate-linux.tar.gz cloudgate cloudgate_linux_x64_93.node
+tar -czvf cloudgate-linux.tar.gz cloudgate cloudgate_linux_x64_108.node

@@ -244,6 +244,7 @@ ENV Variables:
 | APP_ROOT    |               | folder containing your app (and appconfig.json)     |
 | NODE_ROOT   |               | path to folder containing node_modules              |
 | OUTPUT_CACHE| 0             | Enable Caching of GET requests with 1               |
+| IS_SPA      |               | Enable SPA mode (redirect 404 to index.html) with 1 |
 | SSL         | 0             | Enable SSL with 1                                   |
 | SSL_CERT    |               | optional path to your SSL cert fullchain            |
 | SSL_KEY     |               | optional path to your SSL private key               |

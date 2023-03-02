@@ -56,6 +56,12 @@ module.exports = {
                     publicFolder: './',
                     root: './'
                 }
+
+                if (process.env.IS_SPA == "1"){
+                    defaultApp.redirect404toIndex = true;
+                }
+                
+
                 memory.setObject("*", defaultApp, "GLOBAL");
 
                 memory.set("mustSaveConfig", 1, "TEMP");

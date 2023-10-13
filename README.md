@@ -2,32 +2,38 @@
 # cloudgate
 
 ![Cloudgate logo](default/cloudgate128.png)
+# ☁️ Cloudgate
 
-***Cloudgate is a fast multi-threaded web application server for Node.js***
+Cloudgate is a lightning-fast, multi-threaded web application server for Node.js.
 
-It can be used for several use cases:
-- Static file web server with local file system and AWS S3 support
-- API Gateway with local microservices and AWS lambda support
-- Serve multiple web applications in a single process and sharing the same ports (80, 443)
-- Websocket / pubsub real time communication support
-- SSL termination (with Letsencrypt automatic certs)
-- REST & Websocket API to reconfigure the cloudgate without downtime
-- Crazy high performances (up to 125K RPS per CPU core)
-- Multi-threading with Shared memory between threads
-- Multi nodes cluster suppot (Coming soon)
-- Firewall / Rate limiter / DDOS protection (Coming soon)
+## 🚀 Key Features
 
-Motivations:
-- Multi-tenant clustering able to handle thousands of applications per node 
-- High availability & scalability without Docker/Kubernetes overhead
-- Less moving parts, simplify infrastructure
-- Extreme performances exploration
+Cloudgate is a versatile server that serves multiple purposes:
 
-&nbsp;
+- 📦 Static file web server with local file system and AWS S3 support
+- ⚙️ API Gateway with local microservices and AWS Lambda support
+- 🏢 Serve multiple web applications in a single process and share the same ports (80, 443)
+- 🌐 Websocket and pubsub real-time communication support
+- 🔒 SSL termination (with automatic Let's Encrypt certificates)
+- 🔄 REST and Websocket APIs for reconfiguring Cloudgate without downtime
+- 💪 Unmatched high performance (up to 125K requests per second per CPU core)
+- 🧵 Multi-threading with shared memory between threads
+- 🔗 Multi-node cluster support (Coming soon)
+- 🛡️ Firewall, rate limiter, and DDOS protection (Coming soon)
 
+## 🌟 Motivations
 
-## Quickstart for Linux (Binary version)
-### Linux one line installer: stable binary (no requirements, recommended)
+Cloudgate was built with specific motivations:
+
+- 🏢 Multi-tenant clustering capable of handling thousands of applications per node
+- 💪 High availability and scalability without Docker/Kubernetes overhead
+- 🚚 Fewer moving parts to simplify infrastructure
+- 🚀 Exploring extreme performance possibilities
+
+## ⚡ Quickstart for Linux (Binary version)
+
+### Linux one-line installer: stable binary (no requirements, recommended)
+
 
     wget -O - https://raw.githubusercontent.com/elestio/cloudgate/master/installBin.sh | bash
 

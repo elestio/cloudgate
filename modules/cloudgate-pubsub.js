@@ -27,7 +27,7 @@ module.exports = {
         cloudgateMaster.ws('/*', {
             compression: 0,
             maxPayloadLength: 16 * 1024 * 1024,
-            idleTimeout: 60 * 60 * 24 * 1, //1 day
+            idleTimeout: 900, //900 seconds
 
             open: async (ws, req) => {
                 ws.subscribe('CloudgateCluster');

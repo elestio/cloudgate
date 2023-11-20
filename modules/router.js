@@ -715,7 +715,7 @@ module.exports = {
             /* Options */
             compression: 0,
             maxPayloadLength: 16 * 1024 * 1024,
-            idleTimeout: 60*60*24*1, //1 day
+            idleTimeout: 900, //900 seconds
 
             /* Handlers */
             upgrade: async (res, req, context) => {

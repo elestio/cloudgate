@@ -18,7 +18,7 @@
     "acme-http-01-webroot": "^3.0.0",
     "asn1.js": "^5.4.1",
     "aws-sdk": "^2.656.0",
-    "axios": "^0.21.1",
+    "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.10",
     "chokidar": "^3.4.3",
     "clear-module": "^4.1.1",

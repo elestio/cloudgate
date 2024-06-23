@@ -862,11 +862,13 @@ function isArrayBuffer(value) {
 
 
 const parseURLEncParams = (body)  => {
-    body = body.toString('utf8');
-    body = new URLSearchParams(body);
     let finalBody = {};
-    for (const[key, value] of body) {
-        finalBody[key] = value;
+    if ( body != null ){
+        body = body.toString('utf8');
+        body = new URLSearchParams(body);
+        for (const[key, value] of body) {
+            finalBody[key] = value;
+        }
     }
     return finalBody;
 };

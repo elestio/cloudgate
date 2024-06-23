@@ -430,7 +430,7 @@ function Start(argv) {
 
             console.log("");
             console.log("================================================================");    
-            console.log("CloudGate V" + require('./package.json').version + " / v20.22.0 - " + new Date().toString().split('(')[0]);
+            console.log("CloudGate V" + require('./package.json').version + " / v20.62.0 - " + new Date().toString().split('(')[0]);
             console.log("================================================================");
             console.log("Root App Folder: " + argv.r);   
             console.log("MemoryState: " + resolve(memoryPath));

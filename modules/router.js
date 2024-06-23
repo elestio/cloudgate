@@ -133,7 +133,11 @@ module.exports = {
             //test raw performance without any processing pipeline
             var tmpUrl = req.getUrl();
             if ( tmpUrl == "/cloudgate/debug/raw") {
-                res.end("Hello World!");
+
+                res.cork(() => {
+                  res.end("Hello World!");
+                });
+                
                 return;
             }
 
@@ -627,67 +631,72 @@ module.exports = {
                         processResult.status = 200;
                     }
 
-                    res.writeStatus("" + (processResult.status || 200));
-                    for (var key in processResult.headers) {
-                        if ( key.toLowerCase() != "content-length" ){
-                            res.writeHeader(key, processResult.headers[key] + ""); //force casting the header value to string, other data types are not allowed in headers
+                    res.cork(() => {
+                  
+                
+                        res.writeStatus("" + (processResult.status || 200));
+                        for (var key in processResult.headers) {
+                            if ( key.toLowerCase() != "content-length" ){
+                                res.writeHeader(key, processResult.headers[key] + ""); //force casting the header value to string, other data types are not allowed in headers
+                            }
+                            totalBytesSent += key.length + processResult.headers[key].length;
                         }
-                        totalBytesSent += key.length + processResult.headers[key].length;
-                    }
 
-                    //add processingTime header
-                    res.writeHeader("processing", (nanoSecondsPipeline/1000000).toFixed(2) + "ms");
-                     
-                    //Add HSTS to reach A+ on SSL Labs test
-                    if ( appConfig.HSTS == true ){
-                        res.writeHeader("strict-transport-security", "max-age=31536000; includeSubDomains;");
-                    }
-
-                    //CORS
-                    if ( appConfig.CORS != null && appConfig.CORS["access-control-allow-origin"] != null) {
-                        res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
-                        res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
-                        res.writeHeader("access-control-allow-origin", appConfig.CORS["access-control-allow-origin"] );
-                    }
-                    
-                    if (processResult.content != null && processResult.content != "") {
-                        if (typeof processResult.content === 'object') {
-                            //res.write(processResult.content);
-                            if ( Buffer.isBuffer(processResult.content) ){
-                                res.write(processResult.content);
-                                //console.log("not stringify");
-                            }
-                            else{
-                                res.write(JSON.stringify(processResult.content));
-                                //console.log("stringify");
-                            }
+                        //add processingTime header
+                        res.writeHeader("processing", (nanoSecondsPipeline/1000000).toFixed(2) + "ms");
+                        
+                        //Add HSTS to reach A+ on SSL Labs test
+                        if ( appConfig.HSTS == true ){
+                            res.writeHeader("strict-transport-security", "max-age=31536000; includeSubDomains;");
                         }
-                        else {
 
-                            //check if the response is in JSON
-                            processResult.origContent = processResult.content;
-                            try{
-                                processResult.content = JSON.parse(processResult.content);
-                            }
-                            catch(ex){
-
-                            }
-                            
-                            //console.log(processResult.content.isBase64);
-
-                            if ( processResult.content != null && processResult.content.isBase64 ){
-                                //if content is encoded in B64
-                                var buffer = tools.decodeB64(processResult.content.data);
-                                res.write(buffer);
-                            }
-                            else{
-                                res.write(processResult.origContent);
-                            }
-
+                        //CORS
+                        if ( appConfig.CORS != null && appConfig.CORS["access-control-allow-origin"] != null) {
+                            res.writeHeader("access-control-allow-headers", "Content-Type, Authorization, X-Requested-With, Cache-Control, Accept, Origin, X-Session-ID" );
+                            res.writeHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS" );
+                            res.writeHeader("access-control-allow-origin", appConfig.CORS["access-control-allow-origin"] );
                         }
-                        totalBytesSent += processResult.content.length;
-                    }
-                    res.end();
+                        
+                        if (processResult.content != null && processResult.content != "") {
+                            if (typeof processResult.content === 'object') {
+                                //res.write(processResult.content);
+                                if ( Buffer.isBuffer(processResult.content) ){
+                                    res.write(processResult.content);
+                                    //console.log("not stringify");
+                                }
+                                else{
+                                    res.write(JSON.stringify(processResult.content));
+                                    //console.log("stringify");
+                                }
+                            }
+                            else {
+
+                                //check if the response is in JSON
+                                processResult.origContent = processResult.content;
+                                try{
+                                    processResult.content = JSON.parse(processResult.content);
+                                }
+                                catch(ex){
+
+                                }
+                                
+                                //console.log(processResult.content.isBase64);
+
+                                if ( processResult.content != null && processResult.content.isBase64 ){
+                                    //if content is encoded in B64
+                                    var buffer = tools.decodeB64(processResult.content.data);
+                                    res.write(buffer);
+                                }
+                                else{
+                                    res.write(processResult.origContent);
+                                }
+
+                            }
+                            totalBytesSent += processResult.content.length;
+                        }
+                        res.end();
+
+                    });
 
                     memory.incr("http.data.out", totalBytesSent, "STATS");
                     tools.debugLog("HTTP", (processResult.status || 200), totalBytesSent, reqInfos, serverConfig);
